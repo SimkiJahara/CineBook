@@ -1,0 +1,250 @@
+/* ========== MOVIES PAGE LAYOUT ========== */
+.movies-page {
+    min-height: calc(100vh - 200px);
+    padding: 40px 0;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.page-header h1 {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--text-dark);
+}
+
+.page-header p {
+    font-size: 18px;
+    color: var(--text-secondary);
+}
+
+.movies-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 40px;
+}
+
+/* ========== FILTERS SIDEBAR ========== */
+.filters-sidebar {
+    background-color: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    height: fit-content;
+    position: sticky;
+    top: 90px;
+}
+
+.filter-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--bg-light);
+}
+
+.filter-section h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.filter-group {
+    margin-bottom: 25px;
+}
+
+.filter-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text-dark);
+}
+
+.filter-group input[type="text"],
+.filter-group input[type="number"],
+.filter-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+    border-color: var(--primary-color);
+}
+
+/* ========== CHECKBOX GROUP ========== */
+.checkbox-group {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.checkbox-item input[type="checkbox"] {
+    margin-right: 10px;
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+}
+
+.checkbox-item label {
+    cursor: pointer;
+    font-weight: normal;
+    margin: 0;
+}
+
+/* ========== DURATION INPUTS ========== */
+.duration-inputs {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.duration-inputs input {
+    flex: 1;
+}
+
+.duration-inputs span {
+    color: var(--text-secondary);
+}
+
+/* ========== MOVIES CONTENT ========== */
+.movies-content {
+    min-height: 500px;
+}
+
+.content-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding: 15px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+}
+
+.results-info {
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.sort-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sort-controls label {
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.sort-controls select {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+}
+
+/* ========== PAGINATION ========== */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 40px;
+}
+
+.pagination button {
+    padding: 10px 18px;
+    border: 1px solid var(--border-color);
+    background-color: white;
+    color: var(--text-dark);
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.pagination button:hover:not(:disabled) {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination button.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.pagination .page-info {
+    padding: 10px 20px;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+@media (max-width: 968px) {
+    .movies-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .filters-sidebar {
+        position: static;
+    }
+
+    .content-controls {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .sort-controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header h1 {
+        font-size: 28px;
+    }
+
+    .filters-sidebar {
+        padding: 20px 15px;
+    }
+
+    .sort-controls {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .sort-controls select {
+        width: 100%;
+    }
+
+    .pagination {
+        flex-wrap: wrap;
+    }
+}

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineBook - Book Your Movie Tickets</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/home.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <img src="images/logo.png" alt="CineBook Logo" class="logo">
+                <h1>CineBook</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="movies.html">Movies</a></li>
+                <li><a href="theatres.html">Theatres</a></li>
+                <li><a href="screenings.html">Screenings</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="btn btn-outline" onclick="location.href='login.html'">Login</button>
+                <button class="btn btn-primary" onclick="location.href='register.html'">Sign Up</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content container">
+            <h1 class="hero-title">Book Your Movie Tickets Seamlessly</h1>
+            <p class="hero-subtitle">Experience cinema like never before with CineBook</p>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search for movies, theatres, or shows...">
+                <button class="btn btn-primary" onclick="searchMovies()">
+                    <span>Search</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Now Showing Section -->
+    <section class="movies-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Now Showing</h2>
+                <a href="movies.html?filter=now-showing" class="view-all">View All →</a>
+            </div>
+            <div class="movies-grid" id="nowShowingGrid">
+                <!-- Movies will be loaded dynamically -->
+                <div class="loading">Loading movies...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- This Week Section -->
+    <section class="movies-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>This Week</h2>
+                <a href="movies.html?filter=this-week" class="view-all">View All →</a>
+            </div>
+            <div class="movies-grid" id="thisWeekGrid">
+                <div class="loading">Loading movies...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Coming Soon Section -->
+    <section class="movies-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Coming Soon</h2>
+                <a href="movies.html?filter=coming-soon" class="view-all">View All →</a>
+            </div>
+            <div class="movies-grid" id="comingSoonGrid">
+                <div class="loading">Loading movies...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>CineBook</h3>
+                    <p>Your ultimate movie booking platform</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="movies.html">Movies</a></li>
+                        <li><a href="theatres.html">Theatres</a></li>
+                        <li><a href="screenings.html">Screenings</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Account</h4>
+                    <ul>
+                        <li><a href="login.html">Login</a></li>
+                        <li><a href="register.html">Sign Up</a></li>
+                        <li><a href="profile.html">My Profile</a></li>
+                        <li><a href="bookings.html">My Bookings</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 CineBook. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script src="js/home.js"></script>
+</body>
+</html>
