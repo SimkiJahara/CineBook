@@ -1,13 +1,13 @@
 """
-Movie Management Schemas
-Pydantic models for request/response validation
+Movie Schemas - Pydantic validation models
+Request/Response validation for API
 """
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import date, datetime
 
 
-# ========== Genre Schemas ==========
+# ==================== Genre Schemas ====================
 class GenreBase(BaseModel):
     name: str = Field(..., max_length=50)
     description: Optional[str] = None
@@ -19,23 +19,23 @@ class GenreCreate(GenreBase):
 
 class GenreResponse(GenreBase):
     id: int
-    created_at: datetime
+    created_at: Optional[datetime] = None
     
     class Config:
         from_attributes = True
 
 
-# ========== Movie Schemas ==========
+# ==================== Movie Schemas ====================
 class MovieBase(BaseModel):
-    title: str = Field(..., max_length=200)
-    poster_url: Optional[str] = Field(None, max_length=500)
-    language: str = Field(..., max_length=50)
-    duration_min: int = Field(..., gt=0, lt=500)
+    title: str = Field(..., max_length=255)
+    posterurl: Optional[str] = Field(None, max_length=255)
+    lengthmin: Optional[int] = Field(None, gt=0, lt=500)
     rating: Optional[str] = Field(None, max_length=10)
-    release_date: date
+    releasedate: Optional[date] = None
     description: Optional[str] = None
     director: Optional[str] = Field(None, max_length=200)
-    trailer_url: Optional[str] = Field(None, max_length=500)
+    trailerurl: Optional[str] = Field(None, max_length=255)
+    language: Optional[str] = Field('English', max_length=50)
 
 
 class MovieCreate(MovieBase):
@@ -45,51 +45,77 @@ class MovieCreate(MovieBase):
 
 
 class MovieUpdate(BaseModel):
-    title: Optional[str] = Field(None, max_length=200)
-    poster_url: Optional[str] = Field(None, max_length=500)
-    language: Optional[str] = Field(None, max_length=50)
-    duration_min: Optional[int] = Field(None, gt=0, lt=500)
+    title: Optional[str] = Field(None, max_length=255)
+    posterurl: Optional[str] = Field(None, max_length=255)
+    lengthmin: Optional[int] = Field(None, gt=0, lt=500)
     rating: Optional[str] = Field(None, max_length=10)
-    release_date: Optional[date] = None
+    releasedate: Optional[date] = None
     description: Optional[str] = None
     director: Optional[str] = Field(None, max_length=200)
-    trailer_url: Optional[str] = Field(None, max_length=500)
+    trailerurl: Optional[str] = Field(None, max_length=255)
+    language: Optional[str] = Field(None, max_length=50)
     genre_ids: Optional[List[int]] = None
     cast: Optional[List[str]] = None
     is_active: Optional[int] = Field(None, ge=0, le=1)
 
 
-class MovieResponse(MovieBase):
+class MovieResponse(BaseModel):
     eidr: str
-    created_at: datetime
-    updated_at: datetime
-    is_active: int
+    title: str
+    poster_url: Optional[str] = None
+    duration_min: Optional[int] = None
+    rating: Optional[str] = None
+    release_date: Optional[date] = None
+    description: Optional[str] = None
+    director: Optional[str] = None
+    trailer_url: Optional[str] = None
+    language: Optional[str] = None
     genres: List[GenreResponse] = []
     cast: List[str] = []
-    average_rating: float
-    review_count: int
+    average_rating: float = 0.0
+    review_count: int = 0
     
     class Config:
         from_attributes = True
+    
+    @classmethod
+    def from_orm_model(cls, movie):
+        """Convert SQLAlchemy model to response schema"""
+        return cls(
+            eidr=movie.eidr,
+            title=movie.title,
+            poster_url=movie.posterurl,
+            duration_min=movie.lengthmin,
+            rating=movie.rating,
+            release_date=movie.releasedate,
+            description=movie.description,
+            director=movie.director,
+            trailer_url=movie.trailerurl,
+            language=movie.language,
+            genres=[GenreResponse.model_validate(g) for g in movie.genres],
+            cast=movie.cast,
+            average_rating=movie.average_rating,
+            review_count=movie.review_count
+        )
 
 
 class MovieListResponse(BaseModel):
     eidr: str
     title: str
-    poster_url: Optional[str]
-    language: str
-    duration_min: int
-    rating: Optional[str]
-    release_date: date
+    poster_url: Optional[str] = None
+    duration_min: Optional[int] = None
+    rating: Optional[str] = None
+    release_date: Optional[date] = None
+    language: Optional[str] = None
     genres: List[GenreResponse] = []
-    average_rating: float
-    review_count: int
+    average_rating: float = 0.0
+    review_count: int = 0
     
     class Config:
         from_attributes = True
 
 
-# ========== Movie Filter Schema ==========
+# ==================== Filter Schema ====================
 class MovieFilter(BaseModel):
     title: Optional[str] = None
     genres: Optional[List[str]] = None
@@ -97,13 +123,13 @@ class MovieFilter(BaseModel):
     max_duration: Optional[int] = Field(None, le=500)
     languages: Optional[List[str]] = None
     age_rating: Optional[str] = None
-    sort_by: Optional[str] = Field(None, pattern="^(title|release_date|rating|duration)$")
-    order: Optional[str] = Field("asc", pattern="^(asc|desc)$")
+    sort_by: Optional[str] = Field("title")
+    order: Optional[str] = Field("asc")
     skip: int = Field(0, ge=0)
     limit: int = Field(20, ge=1, le=100)
 
 
-# ========== Review Schemas ==========
+# ==================== Review Schemas ====================
 class ReviewBase(BaseModel):
     rating: float = Field(..., ge=1.0, le=5.0)
     review_text: Optional[str] = None
@@ -121,29 +147,9 @@ class ReviewUpdate(BaseModel):
 class ReviewResponse(ReviewBase):
     id: int
     movie_eidr: str
-    user_id: str
+    user_id: int
     created_at: datetime
-    updated_at: datetime
-    
-    class Config:
-        from_attributes = True
-
-
-# ========== Movie Request Schema ==========
-class MovieRequestCreate(BaseModel):
-    eidr: str = Field(..., max_length=50)
-    requested_by: str = Field(..., max_length=50)  # User ID
-    notes: Optional[str] = None
-
-
-class MovieRequestResponse(BaseModel):
-    id: int
-    eidr: str
-    requested_by: str
-    status: str  # pending, approved, rejected
-    notes: Optional[str]
-    created_at: datetime
-    processed_at: Optional[datetime]
+    updated_at: Optional[datetime] = None
     
     class Config:
         from_attributes = True

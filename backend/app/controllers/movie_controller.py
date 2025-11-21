@@ -1,6 +1,6 @@
 """
-Movie Management Controller
-FastAPI routes for movie CRUD operations and discovery
+Movie Controller - API Routes
+FastAPI router for movie endpoints
 """
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
@@ -17,54 +17,69 @@ from app.utils.auth import get_current_user, get_current_admin
 
 router = APIRouter(prefix="/api/movies", tags=["Movies"])
 
-# ========== Genre Endpoints ==========
+
+# Helper function to convert movie to response
+def movie_to_response(movie) -> dict:
+    return {
+        "eidr": movie.eidr,
+        "title": movie.title,
+        "poster_url": movie.posterurl,
+        "duration_min": movie.lengthmin,
+        "rating": movie.rating,
+        "release_date": movie.releasedate,
+        "description": movie.description,
+        "director": movie.director,
+        "trailer_url": movie.trailerurl,
+        "language": movie.language,
+        "genres": [{"id": g.id, "name": g.name, "description": g.description, "created_at": g.created_at} for g in movie.genres],
+        "cast": movie.cast,
+        "average_rating": movie.average_rating,
+        "review_count": movie.review_count
+    }
+
+
+# ==================== Genre Endpoints ====================
 @router.post("/genres", response_model=GenreResponse, status_code=status.HTTP_201_CREATED)
-async def create_genre(
-    genre: GenreCreate,
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_admin)
-):
-    """Create a new genre (Admin only)"""
+async def create_genre(genre: GenreCreate, db: Session = Depends(get_db), user=Depends(get_current_admin)):
     service = MovieService(db)
-    return service.create_genre(genre)
+    try:
+        return service.create_genre(genre)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 
 @router.get("/genres", response_model=List[GenreResponse])
 async def get_all_genres(db: Session = Depends(get_db)):
-    """Get all genres - Public endpoint"""
     service = MovieService(db)
     return service.get_all_genres()
 
-# ========== Movie CRUD Endpoints ==========
-@router.post("/", response_model=MovieResponse, status_code=status.HTTP_201_CREATED)
-async def create_movie(
-    movie: MovieCreate,
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_admin)
-):
-    """Create a new movie (Admin only)"""
-    service = MovieService(db)
-    return service.create_movie(movie)
 
-@router.get("/", response_model=List[MovieListResponse])
+# ==================== Movie CRUD Endpoints ====================
+@router.post("/", status_code=status.HTTP_201_CREATED)
+async def create_movie(movie: MovieCreate, db: Session = Depends(get_db), user=Depends(get_current_admin)):
+    service = MovieService(db)
+    try:
+        created = service.create_movie(movie)
+        return movie_to_response(created)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/")
 async def get_movies(
-    title: Optional[str] = Query(None, description="Filter by title (partial match)"),
-    genres: Optional[str] = Query(None, description="Filter by genres (comma-separated)"),
-    min_duration: Optional[int] = Query(None, ge=0, description="Minimum duration in minutes"),
-    max_duration: Optional[int] = Query(None, le=500, description="Maximum duration in minutes"),
-    languages: Optional[str] = Query(None, description="Filter by languages (comma-separated)"),
-    age_rating: Optional[str] = Query(None, description="Filter by age rating"),
-    sort_by: Optional[str] = Query("title", regex="^(title|release_date|rating|duration)$"),
-    order: Optional[str] = Query("asc", regex="^(asc|desc)$"),
+    title: Optional[str] = Query(None),
+    genres: Optional[str] = Query(None),
+    min_duration: Optional[int] = Query(None, ge=0),
+    max_duration: Optional[int] = Query(None, le=500),
+    languages: Optional[str] = Query(None),
+    age_rating: Optional[str] = Query(None),
+    sort_by: Optional[str] = Query("title"),
+    order: Optional[str] = Query("asc"),
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db)
 ):
-    """
-    Get list of movies with filtering, sorting, and pagination
-    Public endpoint - No authentication required
-    """
-    # Build filter object
-    filter_obj = MovieFilter(
+    filters = MovieFilter(
         title=title,
         genres=genres.split(',') if genres else None,
         min_duration=min_duration,
@@ -77,96 +92,67 @@ async def get_movies(
         limit=limit
     )
     service = MovieService(db)
-    return service.get_movies(filter_obj)
+    movies = service.get_movies(filters)
+    return [movie_to_response(m) for m in movies]
 
-@router.get("/{eidr}", response_model=MovieResponse)
+
+@router.get("/discovery/now-showing")
+async def get_now_showing(limit: int = Query(20, ge=1, le=50), db: Session = Depends(get_db)):
+    service = MovieService(db)
+    movies = service.get_now_showing(limit)
+    return [movie_to_response(m) for m in movies]
+
+
+@router.get("/discovery/this-week")
+async def get_this_week(limit: int = Query(20, ge=1, le=50), db: Session = Depends(get_db)):
+    service = MovieService(db)
+    movies = service.get_this_week(limit)
+    return [movie_to_response(m) for m in movies]
+
+
+@router.get("/discovery/coming-soon")
+async def get_coming_soon(limit: int = Query(20, ge=1, le=50), db: Session = Depends(get_db)):
+    service = MovieService(db)
+    movies = service.get_coming_soon(limit)
+    return [movie_to_response(m) for m in movies]
+
+
+@router.get("/{eidr}")
 async def get_movie(eidr: str, db: Session = Depends(get_db)):
-    """Get single movie details by EIDR - Public endpoint"""
     service = MovieService(db)
     movie = service.get_movie_by_eidr(eidr)
     if not movie:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Movie with EIDR '{eidr}' not found"
-        )
-    return movie
+        raise HTTPException(status_code=404, detail=f"Movie '{eidr}' not found")
+    return movie_to_response(movie)
 
-@router.put("/{eidr}", response_model=MovieResponse)
-async def update_movie(
-    eidr: str,
-    movie_update: MovieUpdate,
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_admin)
-):
-    """Update movie details (Admin only)"""
+
+@router.put("/{eidr}")
+async def update_movie(eidr: str, movie_update: MovieUpdate, db: Session = Depends(get_db), user=Depends(get_current_admin)):
     service = MovieService(db)
-    updated_movie = service.update_movie(eidr, movie_update)
-    if not updated_movie:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Movie with EIDR '{eidr}' not found"
-        )
-    return updated_movie
+    updated = service.update_movie(eidr, movie_update)
+    if not updated:
+        raise HTTPException(status_code=404, detail=f"Movie '{eidr}' not found")
+    return movie_to_response(updated)
+
 
 @router.delete("/{eidr}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_movie(
-    eidr: str,
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_admin)
-):
-    """Delete movie (Admin only) - Soft delete by setting is_active=0"""
+async def delete_movie(eidr: str, db: Session = Depends(get_db), user=Depends(get_current_admin)):
     service = MovieService(db)
-    success = service.delete_movie(eidr)
-    if not success:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Movie with EIDR '{eidr}' not found"
-        )
+    if not service.delete_movie(eidr):
+        raise HTTPException(status_code=404, detail=f"Movie '{eidr}' not found")
 
-# ========== Movie Discovery Endpoints ==========
-@router.get("/discovery/now-showing", response_model=List[MovieListResponse])
-async def get_now_showing(
-    db: Session = Depends(get_db),
-    limit: int = Query(20, ge=1, le=50)
-):
-    """Get movies showing today - Public endpoint"""
-    service = MovieService(db)
-    return service.get_now_showing(limit)
 
-@router.get("/discovery/this-week", response_model=List[MovieListResponse])
-async def get_this_week(
-    db: Session = Depends(get_db),
-    limit: int = Query(20, ge=1, le=50)
-):
-    """Get movies showing this week - Public endpoint"""
-    service = MovieService(db)
-    return service.get_this_week(limit)
-
-@router.get("/discovery/coming-soon", response_model=List[MovieListResponse])
-async def get_coming_soon(
-    db: Session = Depends(get_db),
-    limit: int = Query(20, ge=1, le=50)
-):
-    """Get upcoming movies - Public endpoint"""
-    service = MovieService(db)
-    return service.get_coming_soon(limit)
-
-# ========== Review Endpoints ==========
+# ==================== Review Endpoints ====================
 @router.post("/{eidr}/reviews", response_model=ReviewResponse, status_code=status.HTTP_201_CREATED)
-async def create_review(
-    eidr: str,
-    review: ReviewCreate,
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
-):
-    """Submit a review for a movie (Requires authentication)"""
+async def create_review(eidr: str, review: ReviewCreate, db: Session = Depends(get_db), user=Depends(get_current_user)):
     if review.movie_eidr != eidr:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Movie EIDR in path does not match request body"
-        )
+        raise HTTPException(status_code=400, detail="EIDR mismatch")
     service = MovieService(db)
-    return service.create_review(review, current_user.id)
+    try:
+        return service.create_review(review, user.id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 
 @router.get("/{eidr}/reviews", response_model=List[ReviewResponse])
 async def get_movie_reviews(
@@ -175,38 +161,21 @@ async def get_movie_reviews(
     limit: int = Query(10, ge=1, le=50),
     db: Session = Depends(get_db)
 ):
-    """Get all reviews for a movie - Public endpoint"""
     service = MovieService(db)
     return service.get_movie_reviews(eidr, skip, limit)
 
+
 @router.put("/reviews/{review_id}", response_model=ReviewResponse)
-async def update_review(
-    review_id: int,
-    review_update: ReviewUpdate,
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
-):
-    """Update user's own review"""
+async def update_review(review_id: int, review_update: ReviewUpdate, db: Session = Depends(get_db), user=Depends(get_current_user)):
     service = MovieService(db)
-    updated_review = service.update_review(review_id, review_update, current_user.id)
-    if not updated_review:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Review not found or you don't have permission to update it"
-        )
-    return updated_review
+    updated = service.update_review(review_id, review_update, user.id)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Review not found or unauthorized")
+    return updated
+
 
 @router.delete("/reviews/{review_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_review(
-    review_id: int,
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
-):
-    """Delete user's own review"""
+async def delete_review(review_id: int, db: Session = Depends(get_db), user=Depends(get_current_user)):
     service = MovieService(db)
-    success = service.delete_review(review_id, current_user.id)
-    if not success:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Review not found or you don't have permission to delete it"
-        )
+    if not service.delete_review(review_id, user.id):
+        raise HTTPException(status_code=404, detail="Review not found or unauthorized")

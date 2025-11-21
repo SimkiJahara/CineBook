@@ -1,35 +1,67 @@
+"""
+CineBook FastAPI Application
+Main entry point for the backend API
+"""
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import engine, Base
 from app.controllers.movie_controller import router as movie_router
 
-# Create all database tables (runs on startup)
-Base.metadata.create_all(bind=engine)
-
+# Create FastAPI app
 app = FastAPI(
     title="CineBook API",
-    description="Movie Booking Platform API",
-    version="1.0.0"
+    description="Movie Booking Platform - Movie Management Module",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
 )
 
-# CORS middleware — allows frontend to connect
+# CORS middleware - allows frontend to connect
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production replace with your frontend URL
+    allow_origins=[
+        "http://localhost:8080",
+        "http://127.0.0.1:8080",
+        "http://localhost:3000",
+        "http://localhost:5500",
+        "*"  # Allow all in development
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include all movie routes
+# Include movie routes
 app.include_router(movie_router)
 
-@app.get("/")
-async def root():
-    return {"message": "Welcome to CineBook API"}
 
-# Only used when running directly with python main.py
+@app.get("/", tags=["Root"])
+async def root():
+    """Root endpoint - API info"""
+    return {
+        "message": "Welcome to CineBook API",
+        "status": "online",
+        "version": "1.0.0",
+        "docs": "/docs",
+        "module": "Movie Management & Discovery"
+    }
+
+
+@app.get("/health", tags=["Root"])
+async def health_check():
+    """Health check endpoint"""
+    return {"status": "healthy", "api": "online"}
+
+
+# Startup event
+@app.on_event("startup")
+async def startup():
+    print("🎬 CineBook Movie API starting...")
+    print("📚 Docs: http://localhost:8000/docs")
+
+
+# Run with: python -m app.main
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

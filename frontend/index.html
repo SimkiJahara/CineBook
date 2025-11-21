@@ -8,11 +8,11 @@
     <link rel="stylesheet" href="css/home.css">
 </head>
 <body>
-    <!-- Navigation Bar -->
+    <!-- Navigation -->
     <nav class="navbar">
         <div class="container">
             <div class="nav-brand">
-                <img src="images/logo.png" alt="CineBook Logo" class="logo">
+                <span class="logo">🎬</span>
                 <h1>CineBook</h1>
             </div>
             <ul class="nav-links">
@@ -30,20 +30,17 @@
 
     <!-- Hero Section -->
     <section class="hero">
-        <div class="hero-overlay"></div>
         <div class="hero-content container">
             <h1 class="hero-title">Book Your Movie Tickets Seamlessly</h1>
             <p class="hero-subtitle">Experience cinema like never before with CineBook</p>
             <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Search for movies, theatres, or shows...">
-                <button class="btn btn-primary" onclick="searchMovies()">
-                    <span>Search</span>
-                </button>
+                <input type="text" id="searchInput" placeholder="Search for movies...">
+                <button class="btn btn-primary" onclick="searchMovies()">Search</button>
             </div>
         </div>
     </section>
 
-    <!-- Now Showing Section -->
+    <!-- Now Showing -->
     <section class="movies-section">
         <div class="container">
             <div class="section-header">
@@ -51,14 +48,13 @@
                 <a href="movies.html?filter=now-showing" class="view-all">View All →</a>
             </div>
             <div class="movies-grid" id="nowShowingGrid">
-                <!-- Movies will be loaded dynamically -->
                 <div class="loading">Loading movies...</div>
             </div>
         </div>
     </section>
 
-    <!-- This Week Section -->
-    <section class="movies-section">
+    <!-- This Week -->
+    <section class="movies-section alt-bg">
         <div class="container">
             <div class="section-header">
                 <h2>This Week</h2>
@@ -70,7 +66,7 @@
         </div>
     </section>
 
-    <!-- Coming Soon Section -->
+    <!-- Coming Soon -->
     <section class="movies-section">
         <div class="container">
             <div class="section-header">
@@ -88,7 +84,7 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h3>CineBook</h3>
+                    <h3>🎬 CineBook</h3>
                     <p>Your ultimate movie booking platform</p>
                 </div>
                 <div class="footer-section">
@@ -108,17 +104,9 @@
                         <li><a href="bookings.html">My Bookings</a></li>
                     </ul>
                 </div>
-                <div class="footer-section">
-                    <h4>Support</h4>
-                    <ul>
-                        <li><a href="#">Help Center</a></li>
-                        <li><a href="#">Terms of Service</a></li>
-                        <li><a href="#">Privacy Policy</a></li>
-                    </ul>
-                </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 CineBook. All rights reserved.</p>
+                <p>© 2025 CineBook. All rights reserved.</p>
             </div>
         </div>
     </footer>

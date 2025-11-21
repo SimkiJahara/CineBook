@@ -1,0 +1,96 @@
+/* ========== MOVIE DETAILS PAGE ========== */
+.movie-details-page { padding: 40px 0; min-height: 80vh; }
+.error-state { text-align: center; padding: 60px; }
+
+/* ========== MOVIE HEADER ========== */
+.movie-header {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 40px;
+    background: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    margin-bottom: 40px;
+}
+.poster-container { position: sticky; top: 100px; height: fit-content; }
+.movie-poster { width: 100%; border-radius: 10px; box-shadow: var(--shadow-lg); }
+.movie-info-main h1 { font-size: 32px; margin-bottom: 15px; }
+.movie-meta { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; }
+.movie-meta span { padding: 6px 12px; background: var(--light); border-radius: 5px; font-size: 14px; }
+.movie-genres { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.movie-genres .genre-tag { background: var(--primary); color: #fff; padding: 6px 14px; border-radius: 20px; }
+
+/* ========== RATING BOX ========== */
+.rating-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+    background: var(--light);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--primary);
+}
+.rating-box .star { color: var(--accent); font-size: 28px; }
+.rating-box #avgRating { font-size: 28px; font-weight: 700; }
+.rating-box #reviewCount { color: var(--text-light); }
+
+.description { line-height: 1.8; margin-bottom: 20px; color: var(--text); }
+.credits { margin-bottom: 25px; }
+.credits p { margin-bottom: 8px; }
+.actions { display: flex; gap: 15px; flex-wrap: wrap; }
+
+/* ========== REVIEWS ========== */
+.reviews-section {
+    background: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    margin-bottom: 40px;
+}
+.reviews-section .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid var(--light); padding-bottom: 15px; }
+.reviews-section h2 { font-size: 24px; }
+.reviews-list { display: flex; flex-direction: column; gap: 20px; }
+
+.review-card {
+    padding: 20px;
+    background: var(--light);
+    border-radius: 8px;
+    border-left: 4px solid var(--primary);
+}
+.review-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+.review-user { font-weight: 600; }
+.review-stars { color: var(--accent); }
+.review-date { font-size: 13px; color: var(--text-light); margin-bottom: 10px; }
+.review-text { line-height: 1.7; }
+.no-reviews { text-align: center; padding: 40px; color: var(--text-light); }
+
+/* ========== REVIEW FORM ========== */
+.review-form-section {
+    background: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+}
+.login-prompt { text-align: center; padding: 40px; background: var(--light); border-radius: 8px; }
+.login-prompt p { margin-bottom: 15px; color: var(--text-light); }
+.review-form { max-width: 600px; }
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; font-weight: 600; margin-bottom: 10px; }
+.form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-family: inherit; resize: vertical; }
+.form-group textarea:focus { border-color: var(--primary); outline: none; }
+
+/* ========== STAR INPUT ========== */
+.star-input { display: flex; flex-direction: row-reverse; justify-content: flex-end; font-size: 32px; }
+.star-input input { display: none; }
+.star-input label { cursor: pointer; color: #ddd; }
+.star-input label:hover, .star-input label:hover ~ label, .star-input input:checked ~ label { color: var(--accent); }
+
+.success-msg { padding: 20px; background: #d4edda; color: #155724; border-radius: 5px; }
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 968px) {
+    .movie-header { grid-template-columns: 1fr; }
+    .poster-container { position: static; max-width: 300px; margin: 0 auto; }
+}
