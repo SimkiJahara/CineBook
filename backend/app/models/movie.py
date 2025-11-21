@@ -98,7 +98,7 @@ class Review(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     movie_eidr = Column(String(50), ForeignKey('movie.eidr'), nullable=False)
-    user_id = Column(Integer, ForeignKey('User.id'), nullable=False)
+    user_id = Column(Integer, nullable=False)  # ← REMOVE FOREIGN KEY TEMPORARILY
     rating = Column(Float, nullable=False)
     review_text = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)

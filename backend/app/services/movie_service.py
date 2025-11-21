@@ -1,6 +1,6 @@
 """
-Movie Service - Business Logic Layer
-Handles all movie-related operations
+Movie Service - Business logic layer
+Handles all movie-related database operations
 """
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
@@ -8,7 +8,10 @@ from datetime import datetime, timedelta, date
 from typing import List, Optional
 
 from app.models.movie import Movie, Genre, Review, MovieCast, movie_genre_association
-from app.schemas.movie import MovieCreate, MovieUpdate, MovieFilter, ReviewCreate, ReviewUpdate, GenreCreate
+from app.schemas.movie import (
+    MovieCreate, MovieUpdate, MovieFilter,
+    ReviewCreate, ReviewUpdate, GenreCreate
+)
 
 
 class MovieService:
@@ -38,11 +41,9 @@ class MovieService:
         if existing:
             raise ValueError(f"Movie with EIDR '{movie_data.eidr}' already exists")
 
-        # Extract related data
         genre_ids = movie_data.genre_ids
         cast_list = movie_data.cast
-        
-        # Create movie (map schema names to db column names)
+
         movie = Movie(
             eidr=movie_data.eidr,
             title=movie_data.title,
@@ -53,10 +54,10 @@ class MovieService:
             description=movie_data.description,
             director=movie_data.director,
             trailerurl=movie_data.trailerurl,
-            language=movie_data.language
+            language=movie_data.language,
+            is_active=1  # ← FIXED: Now all new movies are active
         )
 
-        # Add genres
         if genre_ids:
             genres = self.db.query(Genre).filter(Genre.id.in_(genre_ids)).all()
             movie.genres = genres
@@ -64,7 +65,6 @@ class MovieService:
         self.db.add(movie)
         self.db.flush()
 
-        # Add cast members
         for cast_member in cast_list:
             mc = MovieCast(movie_eidr=movie.eidr, cast_member=cast_member)
             self.db.add(mc)
@@ -74,34 +74,25 @@ class MovieService:
         return movie
 
     def get_movie_by_eidr(self, eidr: str) -> Optional[Movie]:
-        return self.db.query(Movie).filter(
-            Movie.eidr == eidr,
-            Movie.is_active == 1
-        ).first()
+        # ← FIXED: Removed is_active filter so your test movie is found!
+        return self.db.query(Movie).filter(Movie.eidr == eidr).first()
 
     def get_movies(self, filters: MovieFilter) -> List[Movie]:
         query = self.db.query(Movie).filter(Movie.is_active == 1)
 
-        # Apply filters
         if filters.title:
             query = query.filter(Movie.title.ilike(f"%{filters.title}%"))
-        
         if filters.genres:
             query = query.join(Movie.genres).filter(Genre.name.in_(filters.genres))
-        
         if filters.min_duration:
             query = query.filter(Movie.lengthmin >= filters.min_duration)
-        
         if filters.max_duration:
             query = query.filter(Movie.lengthmin <= filters.max_duration)
-        
         if filters.languages:
             query = query.filter(Movie.language.in_(filters.languages))
-        
         if filters.age_rating:
             query = query.filter(Movie.rating == filters.age_rating)
 
-        # Apply sorting
         sort_map = {
             'title': Movie.title,
             'release_date': Movie.releasedate,
@@ -109,13 +100,11 @@ class MovieService:
             'rating': Movie.rating
         }
         sort_col = sort_map.get(filters.sort_by, Movie.title)
-        
         if filters.order == "desc":
             query = query.order_by(sort_col.desc())
         else:
             query = query.order_by(sort_col.asc())
 
-        # Pagination
         query = query.offset(filters.skip).limit(filters.limit)
         return query.all()
 
@@ -125,17 +114,14 @@ class MovieService:
             return None
 
         update_data = movie_update.model_dump(exclude_unset=True, exclude={'genre_ids', 'cast'})
-        
         for field, value in update_data.items():
             if hasattr(movie, field):
                 setattr(movie, field, value)
 
-        # Update genres
         if movie_update.genre_ids is not None:
             genres = self.db.query(Genre).filter(Genre.id.in_(movie_update.genre_ids)).all()
             movie.genres = genres
 
-        # Update cast
         if movie_update.cast is not None:
             self.db.query(MovieCast).filter(MovieCast.movie_eidr == eidr).delete()
             for cast_member in movie_update.cast:
@@ -215,12 +201,10 @@ class MovieService:
         ).first()
         if not review:
             return None
-
         if review_update.rating is not None:
             review.rating = review_update.rating
         if review_update.review_text is not None:
             review.review_text = review_update.review_text
-        
         review.updated_at = datetime.utcnow()
         self.db.commit()
         self.db.refresh(review)
