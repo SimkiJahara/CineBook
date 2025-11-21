@@ -1,5 +1,6 @@
 /**
  * Movie Details Page JavaScript
+ * FIXED: Field names to match backend (posterurl, lengthmin, releasedate, trailerurl)
  */
 let movie = null;
 let reviewsSkip = 0;
@@ -25,15 +26,17 @@ function displayMovie() {
     document.getElementById('movieContent').style.display = 'block';
     document.title = `${movie.title} - CineBook`;
     
-    const poster = movie.poster_url || 'https://via.placeholder.com/300x450/333/fff?text=No+Poster';
+    // FIXED: posterurl instead of poster_url
+    const poster = movie.posterurl || 'https://via.placeholder.com/300x450/333/fff?text=No+Poster';
     document.getElementById('moviePoster').src = poster;
     document.getElementById('movieTitle').textContent = movie.title;
     
+    // FIXED: lengthmin instead of duration_min, releasedate instead of release_date
     document.getElementById('movieMeta').innerHTML = `
         <span>${movie.rating || 'Not Rated'}</span>
-        <span>${movie.duration_min || '?'} min</span>
+        <span>${movie.lengthmin || '?'} min</span>
         <span>${movie.language || 'English'}</span>
-        <span>${movie.release_date || 'TBA'}</span>
+        <span>${movie.releasedate || 'TBA'}</span>
     `;
     
     document.getElementById('movieGenres').innerHTML = movie.genres.map(g => 
@@ -45,7 +48,8 @@ function displayMovie() {
     document.getElementById('director').textContent = movie.director || 'Unknown';
     document.getElementById('cast').textContent = movie.cast?.join(', ') || 'Not available';
     
-    if (movie.trailer_url) document.getElementById('trailerBtn').style.display = 'inline-block';
+    // FIXED: trailerurl instead of trailer_url
+    if (movie.trailerurl) document.getElementById('trailerBtn').style.display = 'inline-block';
 }
 
 async function loadReviews(eidr, append = false) {
@@ -124,4 +128,5 @@ function scrollToReviewForm() {
 }
 
 function bookTickets() { window.location.href = `screenings.html?movie=${movie.eidr}`; }
-function watchTrailer() { if (movie.trailer_url) window.open(movie.trailer_url, '_blank'); }
+// FIXED: trailerurl instead of trailer_url
+function watchTrailer() { if (movie.trailerurl) window.open(movie.trailerurl, '_blank'); }

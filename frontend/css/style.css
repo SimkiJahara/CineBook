@@ -2,8 +2,9 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-    --primary: #e50914;
-    --primary-dark: #b20710;
+    /* CHANGED: Red to Maroon color scheme */
+    --primary: #800020;          /* Maroon */
+    --primary-dark: #5c0018;     /* Darker maroon for hover */
     --dark: #141414;
     --dark-secondary: #221f1f;
     --light: #f8f9fa;

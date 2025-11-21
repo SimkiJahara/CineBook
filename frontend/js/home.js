@@ -1,5 +1,6 @@
 /**
  * Home Page JavaScript
+ * FIXED: Field names to match backend (posterurl, lengthmin, releasedate)
  */
 document.addEventListener('DOMContentLoaded', async () => {
     await loadNowShowing();
@@ -46,7 +47,8 @@ function displayMovies(movies, container) {
 }
 
 function createMovieCard(movie) {
-    const poster = movie.poster_url || 'https://via.placeholder.com/300x450/333/fff?text=No+Poster';
+    // FIXED: posterurl instead of poster_url
+    const poster = movie.posterurl || 'https://via.placeholder.com/300x450/333/fff?text=No+Poster';
     const rating = movie.average_rating > 0 ? movie.average_rating.toFixed(1) : 'N/A';
     const genres = movie.genres.slice(0, 2).map(g => `<span class="genre-tag">${g.name}</span>`).join('');
     
@@ -57,7 +59,8 @@ function createMovieCard(movie) {
                 <h3 class="movie-title">${movie.title}</h3>
                 <div class="movie-meta">
                     <span class="movie-rating">${rating}</span>
-                    <span class="movie-duration">${movie.duration_min || '?'} min</span>
+                    <!-- FIXED: lengthmin instead of duration_min -->
+                    <span class="movie-duration">${movie.lengthmin || '?'} min</span>
                 </div>
                 <div class="movie-genres">${genres}</div>
                 <p class="movie-language">${movie.language || 'English'}</p>

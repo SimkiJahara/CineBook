@@ -1,5 +1,6 @@
 /**
  * Movies Catalogue Page JavaScript
+ * FIXED: Field names to match backend (posterurl, lengthmin, releasedate)
  */
 let currentPage = 1;
 const perPage = 20;
@@ -82,7 +83,8 @@ function displayMovies(movies, container) {
 }
 
 function createCard(m) {
-    const poster = m.poster_url || 'https://via.placeholder.com/300x450/333/fff?text=No+Poster';
+    // FIXED: posterurl instead of poster_url
+    const poster = m.posterurl || 'https://via.placeholder.com/300x450/333/fff?text=No+Poster';
     const rating = m.average_rating > 0 ? m.average_rating.toFixed(1) : 'N/A';
     const genres = m.genres.slice(0, 2).map(g => `<span class="genre-tag">${g.name}</span>`).join('');
     
@@ -93,7 +95,8 @@ function createCard(m) {
                 <h3 class="movie-title">${m.title}</h3>
                 <div class="movie-meta">
                     <span class="movie-rating">${rating}</span>
-                    <span class="movie-duration">${m.duration_min || '?'} min</span>
+                    <!-- FIXED: lengthmin instead of duration_min -->
+                    <span class="movie-duration">${m.lengthmin || '?'} min</span>
                 </div>
                 <div class="movie-genres">${genres}</div>
                 <p class="movie-language">${m.language || 'English'}</p>

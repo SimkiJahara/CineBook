@@ -1,0 +1,74 @@
+.admin-page { padding: 40px 0; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+.page-header h1 { font-size: 32px; }
+
+.admin-movies-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.admin-movie-card {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s;
+}
+.admin-movie-card:hover { transform: translateY(-5px); }
+.admin-movie-card img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+}
+.admin-card-info {
+    padding: 15px;
+}
+.admin-card-info h3 {
+    margin: 0 0 10px;
+    font-size: 18px;
+}
+.admin-card-actions {
+    display: flex; gap: 10px; margin-top: 15px;
+}
+.admin-card-actions button {
+    flex: 1; padding: 8px;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed; z-index: 1000;
+    left: 0; top: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    align-items: center; justify-content: center;
+}
+.modal-content {
+    background: #fff; width: 90%; max-width: 800px;
+    border-radius: 10px; max-height: 90vh; overflow-y: auto;
+}
+.modal-header {
+    padding: 20px; border-bottom: 1px solid #eee;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.close { font-size: 28px; cursor: pointer; color: #aaa; }
+.close:hover { color: #000; }
+
+form { padding: 20px; }
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+.form-group.full { grid-column: 1 / -1; }
+.form-group label { display: block; margin-bottom: 8px; font-weight: 600; }
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;
+}
+.checkbox-group {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+}
+.modal-actions {
+    padding: 20px; border-top: 1px solid #eee;
+    display: flex; gap: 15px; justify-content: flex-end;
+}
