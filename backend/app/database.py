@@ -8,7 +8,9 @@ from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 import os
 
-# Load environment variables
+# THIS IS THE ONLY LINE YOU NEED TO ADD
+import psycopg   # ← Fixes "ModuleNotFoundError: No module named 'psycopg2'"
+
 load_dotenv()
 
 # Get database URL from environment
@@ -45,10 +47,10 @@ def test_connection():
     try:
         conn = engine.connect()
         conn.close()
-        print("✅ Database connected!")
+        print("Database connected!")
         return True
     except Exception as e:
-        print(f"❌ Database error: {e}")
+        print(f"Database error: {e}")
         return False
 
 

@@ -55,7 +55,7 @@ class MovieService:
             director=movie_data.director,
             trailerurl=movie_data.trailerurl,
             language=movie_data.language,
-            is_active=1  # ← FIXED: Now all new movies are active
+            is_active=1
         )
 
         if genre_ids:
@@ -74,7 +74,6 @@ class MovieService:
         return movie
 
     def get_movie_by_eidr(self, eidr: str) -> Optional[Movie]:
-        # ← FIXED: Removed is_active filter so your test movie is found!
         return self.db.query(Movie).filter(Movie.eidr == eidr).first()
 
     def get_movies(self, filters: MovieFilter) -> List[Movie]:
@@ -143,27 +142,50 @@ class MovieService:
     # ==================== Discovery ====================
     def get_now_showing(self, limit: int = 20) -> List[Movie]:
         today = date.today()
-        return self.db.query(Movie).filter(
-            Movie.is_active == 1,
-            Movie.releasedate <= today
-        ).order_by(Movie.releasedate.desc()).limit(limit).all()
+        return (
+            self.db.query(Movie)
+            .filter(Movie.is_active == 1, Movie.releasedate <= today)
+            .order_by(Movie.releasedate.desc())
+            .limit(limit)
+            .all()
+        )
 
     def get_this_week(self, limit: int = 20) -> List[Movie]:
+        """Movies releasing from Monday to Sunday of the current week"""
         today = date.today()
+        # Monday of this week
         week_start = today - timedelta(days=today.weekday())
+        # Sunday of this week
         week_end = week_start + timedelta(days=6)
-        return self.db.query(Movie).filter(
-            Movie.is_active == 1,
-            Movie.releasedate >= week_start,
-            Movie.releasedate <= week_end
-        ).order_by(Movie.releasedate.asc()).limit(limit).all()
+
+        return (
+            self.db.query(Movie)
+            .filter(
+                Movie.is_active == 1,
+                Movie.releasedate >= week_start,
+                Movie.releasedate <= week_end
+            )
+            .order_by(Movie.releasedate.asc())
+            .limit(limit)
+            .all()
+        )
 
     def get_coming_soon(self, limit: int = 20) -> List[Movie]:
+        """Movies releasing AFTER this week"""
         today = date.today()
-        return self.db.query(Movie).filter(
-            Movie.is_active == 1,
-            Movie.releasedate > today
-        ).order_by(Movie.releasedate.asc()).limit(limit).all()
+        # Monday of this week
+        week_start = today - timedelta(days=today.weekday())
+        # Sunday of this week
+        week_end = week_start + timedelta(days=6)
+        next_monday = week_end + timedelta(days=1)
+
+        return (
+            self.db.query(Movie)
+            .filter(Movie.is_active == 1, Movie.releasedate >= next_monday)
+            .order_by(Movie.releasedate.asc())
+            .limit(limit)
+            .all()
+        )
 
     # ==================== Reviews ====================
     def create_review(self, review_data: ReviewCreate, user_id: int) -> Review:
@@ -190,9 +212,14 @@ class MovieService:
         return review
 
     def get_movie_reviews(self, movie_eidr: str, skip: int = 0, limit: int = 10) -> List[Review]:
-        return self.db.query(Review).filter(
-            Review.movie_eidr == movie_eidr
-        ).order_by(Review.created_at.desc()).offset(skip).limit(limit).all()
+        return (
+            self.db.query(Review)
+            .filter(Review.movie_eidr == movie_eidr)
+            .order_by(Review.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
     def update_review(self, review_id: int, review_update: ReviewUpdate, user_id: int) -> Optional[Review]:
         review = self.db.query(Review).filter(
