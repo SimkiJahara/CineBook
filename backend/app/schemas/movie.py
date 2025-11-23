@@ -1,7 +1,4 @@
-"""
-Movie Schemas - Pydantic validation models
-Request/Response validation for API
-"""
+
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import date, datetime

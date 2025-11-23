@@ -1,7 +1,4 @@
-"""
-Movie Service - Business logic layer
-Handles all movie-related database operations
-"""
+
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
 from datetime import datetime, timedelta, date

@@ -1,14 +1,11 @@
-"""
-CineBook FastAPI Application
-Main entry point for the backend API
-"""
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import engine, Base
 from app.controllers.movie_controller import router as movie_router
 
-# Create FastAPI app
+
 app = FastAPI(
     title="CineBook API",
     description="Movie Booking Platform - Movie Management Module",
@@ -25,7 +22,7 @@ app.add_middleware(
         "http://127.0.0.1:8080",
         "http://localhost:3000",
         "http://localhost:5500",
-        "*"  # Allow all in development
+        "*"  
     ],
     allow_credentials=True,
     allow_methods=["*"],

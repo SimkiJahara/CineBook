@@ -1,15 +1,12 @@
-"""
-Database Configuration
-SQLAlchemy setup for NeonDB PostgreSQL
-"""
+
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 import os
 
-# THIS IS THE ONLY LINE YOU NEED TO ADD
-import psycopg   # ← Fixes "ModuleNotFoundError: No module named 'psycopg2'"
+
+import psycopg   
 
 load_dotenv()
 
@@ -23,7 +20,7 @@ if not DATABASE_URL:
 engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True,
-    echo=False  # Set True to see SQL queries
+    echo=False  
 )
 
 # Create session factory

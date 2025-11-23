@@ -1,7 +1,4 @@
-"""
-Movie Models - SQLAlchemy ORM
-Matches team's NeonDB structure with extensions
-"""
+
 from sqlalchemy import Column, String, Integer, Date, Text, Float, DateTime, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from datetime import datetime
