@@ -17,9 +17,9 @@ class User(Base):
 
 
     # Relationships to the specialized tables (One-to-One)
-    theaterowner = relationship("TheaterOwner", back_populates="users", uselist=False)
-    superadmin = relationship("Superadmin", back_populates="users", uselist=False)
-    buyer = relationship("Buyer", back_populates="users", uselist=False)
+    theaterowner = relationship("TheatreOwner", back_populates="user", uselist=False)
+    superadmin = relationship("Superadmin", back_populates="user", uselist=False)
+    buyer = relationship("Buyer", back_populates="user", uselist=False)
 
     def __repr__(self):
         return f"<User(id={self.id}, email='{self.email}', role='{self.role}')>"

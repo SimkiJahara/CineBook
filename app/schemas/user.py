@@ -71,6 +71,29 @@ class UserBase(BaseModel):
     class Config:
         from_attributes = True # Important: Allows Pydantic to read ORM objects
 
+class UserInDBBase(UserBase):
+    """Common fields for User model stored in the database."""
+    id: int
+    is_active: bool = True
+    # The 'hashed_password' is the key field that distinguishes UserInDB from UserBase/UserResponse
+    hashed_password: str
+    created_at: datetime
+    updated_at: datetime
+    
+    # We omit the nested role data (theaterowner, buyer, superadmin) 
+    # as the DB model itself is often simpler when retrieved for internal use.
+    
+    class Config:
+        from_attributes = True
+
+# The schema used for internal logic (like security checks)
+class UserInDB(UserInDBBase):
+    """Schema for User model data used internally (e.g., in CRUD and security)."""
+    pass 
+    # You might include the nested roles here if your ORM populates them 
+    # when retrieving the user for authentication, but often they are omitted 
+    # to keep the authentication object light.
+
 class UserCreate(UserBase):
     """Schema for creating a new User (Input validation)."""
     # The password is required on creation and should not be returned in responses.
@@ -111,6 +134,9 @@ class UserUpdate(UserBase):
     name: Optional[str] = None
     role: Optional[UserRole] = None
     # Add other fields allowed to be updated
+
+
+    
 
 # --- Update forward references for nested models if using Pydantic V1/complex typing ---
 # TheaterOwnerResponse.model_rebuild() # Use for Pydantic V2
