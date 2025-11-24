@@ -1,5 +1,5 @@
 from typing import Optional, List, Union, Any, Dict
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from app.core.config import UserRole  # Assuming UserRole is an Enum (e.g., in app/core/config.py)
 from datetime import datetime
 
@@ -96,13 +96,13 @@ class UserInDB(UserInDBBase):
 
 class UserCreate(UserBase):
     """Schema for creating a new User (Input validation)."""
-    # The password is required on creation and should not be returned in responses.
-    password: str
+    
+    # 🎯 FIX: Add max_length constraint for the password
+    # 72 bytes is the bcrypt limit. Setting a character limit of 70 is safer 
+    # and provides a clearer error to the user than server-side truncation.
+    password: str = Field(..., min_length=8, max_length=70) 
 
     # **Specialized Data for Initial Creation**
-    # Include initial fields for the specialized role (e.g., Buyer's fullname or TheaterOwner's businessname).
-    # This structure simplifies a single registration endpoint.
-
     # Buyer specific field
     fullname: Optional[str] = None
 
@@ -111,8 +111,7 @@ class UserCreate(UserBase):
     ownername: Optional[str] = None
     phone: Optional[str] = None
     licensenumber: Optional[str] = None
-    # NOTE: Bank details and logo are typically added later, but can be included here if needed.
-
+    
     # Validation: Add custom validation logic here (e.g., ensuring required fields are present 
     # based on the `role` value). This is omitted for brevity.
 

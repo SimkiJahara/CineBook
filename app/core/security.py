@@ -12,8 +12,24 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
+#def get_password_hash(password: str) -> str:
+ #   return pwd_context.hash(password)
+
 def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
+    # --- IMPORTANT: Fix for the 72-byte limit ---
+    # Encode the string to bytes, take the first 72 bytes, and pass that to hash.
+    # While this fixes the server error, you should ideally validate the length
+    # in your Pydantic model and return a 400 Bad Request to the user.
+    password_bytes = password.encode('utf-8')
+    if len(password_bytes) > 72:
+        # Truncate to the maximum allowed length (72 bytes)
+        # Note: This is an internal fix; Pydantic validation is better for the user.
+        password_to_hash = password_bytes[:72]
+    else:
+        password_to_hash = password_bytes
+        
+    return pwd_context.hash(password_to_hash)
+
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
