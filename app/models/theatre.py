@@ -38,9 +38,3 @@ class Theater(Base):
     def __repr__(self):
         return f"<Theater(companyid={self.companyid}, branchid='{self.branchid}', name='{self.name}')>"
 
-# --- IMPORTANT ADJUSTMENT ---
-# The 'TheaterOwner' model must be updated to include the back-reference:
-# class TheaterOwner(Base):
-#     # ... other columns ...
-#     theaters = relationship("Theater", back_populates="owner")
-# ...

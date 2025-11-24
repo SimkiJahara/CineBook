@@ -20,6 +20,8 @@ class TheaterOwner(Base):
 
     # Relationship back to the base User
     user = relationship("User", back_populates="theaterowner")
+    # ⬅️ ADD THE RELATIONSHIP HERE (one-to-many with Theater)
+    theaters = relationship("Theater", back_populates="owner")
 
     def __repr__(self):
         return f"<TheaterOwner(id={self.id}, businessname='{self.businessname}')>"
