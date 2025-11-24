@@ -1,9 +1,17 @@
 from sqlalchemy.orm import Session, joinedload # Import joinedload for clarity
 # NOTE: Removed 'db.' prefixes from joinload, use 'joinedload' directly
-from app.models.user import User, TheaterOwner, Buyer, Superadmin 
+
 from app.schemas.user import UserCreate, UserUpdate
 from app.core.config import UserRole 
 from typing import Optional
+
+# Import the base User model from users.py
+from app.models.users import User
+
+# Import the specialized models from their own files
+from app.models.buyer import Buyer
+from app.models.theatreowner import TheaterOwner
+from app.models.superadmin import Superadmin
 
 # --- Helper Function (Password Hashing) ---
 # NOTE: In a real app, you'd use a utility for secure hashing (e.g., bcrypt/passlib)

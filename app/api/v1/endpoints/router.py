@@ -96,9 +96,9 @@ def read_user(
 #         db.close()
 
 
-This `router.py` file provides the structure for your user endpoints. You will need to ensure your main FastAPI application includes this router:
+"""This `router.py` file provides the structure for your user endpoints. You will need to ensure your main FastAPI application includes this router:"""
 
-```python
+
 # In your main.py or app/main.py
 from fastapi import FastAPI
 from app.api.v1.endpoints.router import router as user_router
