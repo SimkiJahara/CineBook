@@ -2,15 +2,19 @@ import uvicorn
 from fastapi import FastAPI
 from app.core.config import settings
 from app.core.db import Base, engine # Imports Base class for metadata and engine for connection
+
+# Import the APIRouters for users and authentication
 from app.api.v1.endpoints.router import router as user_router # Imports the APIRouter for users
+from app.api.v1.endpoints.auth import router as auth_router # Imports the APIRouter for authentication
+
+# Import all models to ensure they are loaded and registered with SQLAlchemy's Base metadata 
+# before table creation in the startup event.
 from app.models.users import User
 from app.models.theatreowner import TheatreOwner
 from app.models.theatre import Theatre
-
 from app.models.buyer import Buyer
+from app.models.superadmin import Superadmin # <-- Added Superadmin model import
 
-
-#you are ensuring that all your model classes are loaded and properly registered with the SQLAlchemy base registry *before* the `startup` event handler tries to use them to create tables. This should finally resolve the `failed to locate a name ('Theatre')` error.
 
 # 1. Create the main FastAPI application instance
 # We use the project name and version from settings for documentation purposes
@@ -42,7 +46,14 @@ app.include_router(
     tags=["Users"] # Optional: Adds a tag to the OpenAPI docs
 )
 
-# 4. Add a simple root path endpoint (`/`)
+# 4. Include the authentication router under the base prefix `/v1`
+app.include_router(
+    auth_router,
+    prefix="/v1", # The login endpoint will be accessible at /v1/token
+    tags=["Authentication"] # Adds a tag for the login flow
+)
+
+# 5. Add a simple root path endpoint (`/`)
 @app.get("/", summary="Root Path")
 def read_root():
     """

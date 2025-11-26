@@ -1,4 +1,4 @@
-from typing import Optional, List, Union, Any, Dict
+from typing import Optional, List, Union, Any, Dict, Literal
 from pydantic import BaseModel, EmailStr, Field
 from app.core.config import UserRole  # Assuming UserRole is an Enum (e.g., in app/core/config.py)
 from datetime import datetime
@@ -71,7 +71,7 @@ class UserBase(BaseModel):
     class Config:
         from_attributes = True # Important: Allows Pydantic to read ORM objects
 
-class UserInDBBase(UserBase):
+class UserInDBBase(UserBase): #keeping it same 
     """Common fields for User model stored in the database."""
     id: int
     is_active: bool = True
@@ -86,7 +86,7 @@ class UserInDBBase(UserBase):
     class Config:
         from_attributes = True
 
-# The schema used for internal logic (like security checks)
+# The schema is used for internal logic (like security checks)
 class UserInDB(UserInDBBase):
     """Schema for User model data used internally (e.g., in CRUD and security)."""
     pass 
@@ -95,25 +95,51 @@ class UserInDB(UserInDBBase):
     # to keep the authentication object light.
 
 class UserCreate(UserBase):
-    """Schema for creating a new User (Input validation)."""
+    """The **base** schema for creating a new User (Input validation).
+    This only includes fields common to all user types (email, name, role) plus password."""
     
-    # 🎯 FIX: Add max_length constraint for the password
-    # 72 bytes is the bcrypt limit. Setting a character limit of 70 is safer 
-    # and provides a clearer error to the user than server-side truncation.
+    # Password field, restricted to ensure bcrypt compatibility
     password: str = Field(..., min_length=8, max_length=70) 
 
-    # **Specialized Data for Initial Creation**
-    # Buyer specific field
-    fullname: Optional[str] = None
+    # NOTE: Role-specific fields (fullname, businessname, etc.) are removed from here
+    # and moved to the dedicated schemas below.
 
-    # TheaterOwner specific fields
-    businessname: Optional[str] = None
-    ownername: Optional[str] = None
-    phone: Optional[str] = None
-    licensenumber: Optional[str] = None
+    #adding this new code snippets for seperate creations of buyer and theatreowner
+
     
-    # Validation: Add custom validation logic here (e.g., ensuring required fields are present 
-    # based on the `role` value). This is omitted for brevity.
+    
+    # --- Specialized User Creation Schemas ---
+
+class BuyerCreate(UserCreate):
+    """Schema for creating a new Buyer user. Inherits base fields from UserCreate."""
+    
+    # Required field based on the 'buyer' model
+    fullname: str
+
+    # FIX: Use Literal instead of Field(..., const=True) for Pydantic V2
+    # This forces the value to be exactly UserRole.buyer ('Buyer')
+    role: Literal[UserRole.buyer] = UserRole.buyer
+
+
+class TheatreOwnerCreate(UserCreate):
+    """Schema for creating a new TheatreOwner user. Inherits base fields from UserCreate."""
+    
+    # Required fields based on the 'theaterowner' model
+    businessname: str
+    ownername: str
+    licensenumber: str
+    
+    # Optional fields from the model
+    phone: Optional[str] = None
+    bankdetails: Optional[Dict[str, Any]] = None # For JSON data
+    logourl: Optional[str] = None
+
+    # FIX: Use Literal instead of Field(..., const=True) for Pydantic V2
+    # This forces the value to be exactly UserRole.theatre_owner ('TheatreOwner')
+    role: Literal[UserRole.theatre_owner] = UserRole.theatre_owner
+
+
+# ... (Keep existing code for UserResponse and UserUpdate)
 
 
 class UserResponse(UserBase):

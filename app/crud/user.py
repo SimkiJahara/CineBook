@@ -1,12 +1,13 @@
-from typing import Optional, Type, Any
+from typing import Optional, Type, Any, Union #added union
 from sqlalchemy.orm import Session, joinedload
 
 # 1. IMPORT SECURITY FUNCTIONS
 from app.core.security import get_password_hash, verify_password
 
 # 2. IMPORT MODELS AND SCHEMAS
-from app.schemas.user import UserCreate, UserInDB # Assuming UserInDB is the Pydantic schema for retrieved user data
-from app.core.config import UserRole 
+from app.schemas.user import UserCreate, UserInDB, BuyerCreate, TheatreOwnerCreate
+UserCreateUnion = Union[UserCreate, BuyerCreate, TheatreOwnerCreate]
+from app.core.config import UserRole
 
 # Import the base User model from models/users.py
 from app.models.users import User
@@ -46,7 +47,7 @@ class CRUDUser:
             joinedload(User.superadmin),
         ).first()
 
-    def create_user(self, db: Session, user_in: UserCreate) -> User:
+    def create_user(self, db: Session, user_in: UserCreateUnion) -> User:
         """Create a new User and their corresponding specialized role entry."""
         
         # 1. Prepare User model data (using the real password hash function)
@@ -54,7 +55,7 @@ class CRUDUser:
         db_user = User(
             email=user_in.email,
             name=user_in.name,
-            passwordhash=hashed_password, # The column name in your model
+            passwordhash=hashed_password, 
             role=user_in.role
         )
         
@@ -63,13 +64,20 @@ class CRUDUser:
 
         # 2. Prepare specialized model data based on role
         if user_in.role == UserRole.buyer:
-            # NOTE: Assuming user_in.fullname is passed in the schema for Buyer
+            # Safely access the 'fullname' field which exists on BuyerCreate
             db_buyer = Buyer(id=db_user.id, fullname=user_in.fullname)
             db.add(db_buyer)
-        elif user_in.role == UserRole.theater_owner:
+        elif user_in.role == UserRole.theatre_owner:
+            # Safely access the owner-specific fields
             db_owner = TheatreOwner(
-                id=db_user.id, businessname=user_in.businessname, ownername=user_in.ownername,
-                phone=user_in.phone, licensenumber=user_in.licensenumber,
+                id=db_user.id, 
+                businessname=user_in.businessname, 
+                ownername=user_in.ownername,
+                phone=user_in.phone, 
+                licensenumber=user_in.licensenumber,
+                # bankdetails and logourl are optional and will be None if not provided
+                bankdetails=getattr(user_in, 'bankdetails', None), 
+                logourl=getattr(user_in, 'logourl', None),
             )
             db.add(db_owner)
         elif user_in.role == UserRole.super_admin:
@@ -82,7 +90,6 @@ class CRUDUser:
         
         # 4. Return the eagerly loaded user object
         return self.get_user(db, db_user.id)
-
 
     # ----------------------------------------------------
     # Authentication Logic (NEW)
