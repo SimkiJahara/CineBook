@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from sqlalchemy.orm import sessionmaker, DeclarativeBase, Session
 from app.core.config import settings
 from typing import Generator
 
@@ -28,12 +28,21 @@ class Base(DeclarativeBase):
 
 # --- 4. Dependency: get_db ---
 
-def get_db() -> Generator:
+def get_db() -> Generator[Session, None, None]: # Added Session type hint
     """
     Dependency function to provide a synchronous SQLAlchemy session to API endpoints.
+    Uses a try/except/finally block to ensure connection is closed and 
+    rollback is performed on any error, otherwise commits are kept.
     """
     db = SessionLocal()
     try:
+        # Yield the database session to the endpoint function
         yield db
+    except Exception:
+        # If an error happens inside the endpoint (before db.commit()), 
+        # explicitly roll back the transaction.
+        db.rollback()
+        raise # Re-raise the exception for FastAPI to handle
     finally:
+        # Always close the session after the request is finished.
         db.close()
