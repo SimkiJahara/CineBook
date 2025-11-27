@@ -1,5 +1,6 @@
-from sqlalchemy import column, Integer, String, ForeignKey
-from app.utils.database import Base
+from sqlalchemy import Column, Integer, String, ForeignKey,Date,Time,DateTime,Numeric
+from app.database import Base
+from datetime import datetime
 
 class City(Base):
     """creates a City model/table in database"""
@@ -68,7 +69,10 @@ class Screening(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    movie_id = Column(Integer, ForeignKey("movies.id"), nullable=False)
+    # movie_id = Column(Integer, ForeignKey("movies.id"), nullable=False)
+    # Temporary: no ForeignKey because Movie table is not in this branch yet
+    movie_id = Column(Integer, nullable=False)
+
     hall_id = Column(Integer, ForeignKey("halls.id"), nullable=False)
 
     show_date = Column(Date, nullable=False)
