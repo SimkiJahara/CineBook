@@ -1,7 +1,12 @@
+"""Movie schemas module for CineBook API.
+
+Defines Pydantic schemas for movies, genres, and reviews.
+"""
+
+from datetime import date, datetime
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
-from typing import List, Optional
-from datetime import date, datetime
 
 
 # ==================== Genre Schemas ====================
@@ -17,7 +22,7 @@ class GenreCreate(GenreBase):
 class GenreResponse(GenreBase):
     id: int
     created_at: Optional[datetime] = None
-    
+
     class Config:
         from_attributes = True
 
@@ -26,14 +31,14 @@ class GenreResponse(GenreBase):
 class MovieBase(BaseModel):
     eidr: str = Field(..., max_length=50)
     title: str = Field(..., max_length=255)
-    posterurl: Optional[str] = Field(None, max_length=255)        # ← DB: posterurl
-    lengthmin: Optional[int] = Field(None, gt=0, lt=500)          # ← DB: lengthmin
-    rating: Optional[str] = Field(None, max_length=10)            # ← DB: rating
-    releasedate: Optional[date] = None                            # ← DB: releasedate
+    posterurl: Optional[str] = Field(None, max_length=255)  # ← DB: posterurl
+    lengthmin: Optional[int] = Field(None, gt=0, lt=500)  # ← DB: lengthmin
+    rating: Optional[str] = Field(None, max_length=10)  # ← DB: rating
+    releasedate: Optional[date] = None  # ← DB: releasedate
     description: Optional[str] = None
     director: Optional[str] = Field(None, max_length=200)
-    trailerurl: Optional[str] = Field(None, max_length=255)       # ← DB: trailerurl
-    language: Optional[str] = Field('English', max_length=50)
+    trailerurl: Optional[str] = Field(None, max_length=255)  # ← DB: trailerurl
+    language: Optional[str] = Field("English", max_length=50)
 
     class Config:
         from_attributes = True
@@ -65,13 +70,13 @@ class MovieUpdate(BaseModel):
 class MovieResponse(BaseModel):
     eidr: str
     title: str
-    posterurl: Optional[str] = None           # ← matches DB
-    lengthmin: Optional[int] = None           # ← matches DB
+    posterurl: Optional[str] = None  # ← matches DB
+    lengthmin: Optional[int] = None  # ← matches DB
     rating: Optional[str] = None
-    releasedate: Optional[date] = None        # ← matches DB
+    releasedate: Optional[date] = None  # ← matches DB
     description: Optional[str] = None
     director: Optional[str] = None
-    trailerurl: Optional[str] = None          # ← matches DB
+    trailerurl: Optional[str] = None  # ← matches DB
     language: Optional[str] = None
     genres: List[GenreResponse] = []
     cast: List[str] = []

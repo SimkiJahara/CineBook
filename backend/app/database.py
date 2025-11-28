@@ -1,12 +1,16 @@
+"""Database configuration module for CineBook API.
+
+This module sets up the SQLAlchemy engine and session for PostgreSQL
+connection.
+"""
+
+from dotenv import load_dotenv
+import os
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from dotenv import load_dotenv
-import os
 
-
-import psycopg   
 
 load_dotenv()
 
@@ -20,7 +24,7 @@ if not DATABASE_URL:
 engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True,
-    echo=False  
+    echo=False,
 )
 
 # Create session factory
@@ -31,7 +35,12 @@ Base = declarative_base()
 
 
 def get_db():
-    """Database session dependency for FastAPI"""
+    """Database session dependency for FastAPI.
+
+    Yields a session and ensures it is closed after use.
+
+    :yield: SQLAlchemy session.
+    """
     db = SessionLocal()
     try:
         yield db
@@ -40,7 +49,10 @@ def get_db():
 
 
 def test_connection():
-    """Test database connection"""
+    """Test the database connection.
+
+    :return: True if connected successfully, False otherwise.
+    """
     try:
         conn = engine.connect()
         conn.close()
