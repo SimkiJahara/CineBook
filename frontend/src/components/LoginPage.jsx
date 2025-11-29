@@ -1,25 +1,38 @@
 import React, { useState } from "react";
 
-// The local 'colors' object is still used in the old code,
-// but is now redundant for the class generation itself.
-// We can remove it and replace the uses inside the getButtonClasses logic.
-
+// API URL is set
 const API_BASE_URL = "http://localhost:8000/api/v1";
 
-// Utility function for API calls with built-in error handling (NO CHANGES HERE)
+// Utility function for API calls with built-in error handling
 const callLoginAPI = async (endpoint, payload) => {
   try {
+    let headers = {};
+    let body;
+
+    // FIX: The FastAPI OAuth2 endpoint expects 'application/x-www-form-urlencoded' data.
+    if (endpoint === "auth/token") {
+      // Convert the payload object into a URLSearchParams string (form data).
+      headers["Content-Type"] = "application/x-www-form-urlencoded";
+
+      // Note: We use payload here, which is already structured correctly
+      // in handleLogin (only username and password/role-related fields).
+      body = new URLSearchParams(payload).toString();
+    } else {
+      // For all other standard API endpoints, send as JSON.
+      headers["Content-Type"] = "application/json";
+      body = JSON.stringify(payload);
+    }
+
     const response = await fetch(`${API_BASE_URL}/${endpoint}`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
+      headers: headers,
+      body: body, // Use the correctly formatted body
     });
 
     const data = await response.json();
 
     if (!response.ok) {
+      // Ensure the error message pulls the detail field, which FastAPI uses for errors.
       throw new Error(
         data.detail || `Login failed with status ${response.status}`
       );
@@ -27,6 +40,7 @@ const callLoginAPI = async (endpoint, payload) => {
 
     return data;
   } catch (error) {
+    // Log the error to the console for debugging
     console.error("API Call Error:", error.message);
     throw error;
   }
@@ -54,18 +68,29 @@ const LoginPage = () => {
 
     const endpoint = "auth/token";
 
+    // FIX: FastAPI OAuth2PasswordRequestForm expects the user identifier as 'username'.
+    // We pass the email as 'username' and explicitly include the 'role' as a field
+    // which the FastAPI endpoint *may* extract later for role-specific authentication.
     const payload = {
-      email: email,
+      username: email, // Changed 'email' to 'username' as expected by FastAPI's OAuth2 form.
       password: password,
+      // Pass the role as an extra piece of data in the form body.
+      // This works because FastAPI's OAuth2PasswordRequestForm is a form dependency,
+      // and additional fields can be included in the form-urlencoded body.
       role: role,
     };
 
     try {
       const data = await callLoginAPI(endpoint, payload);
 
+      // Handle successful login
       setSuccessMessage(`Login successful as ${role}! Token received.`);
       console.log("Login Success Data:", data);
+
+      // OPTIONAL TODO: Store the token (data.access_token) securely (e.g., cookies or state)
+      // and redirect the user to the correct role-specific dashboard.
     } catch (err) {
+      // Set the error state from the caught error message
       setError(err.message);
     } finally {
       setLoading(false);
@@ -74,7 +99,6 @@ const LoginPage = () => {
   };
 
   // Tailwind CSS classes for the primary action buttons
-  // *** FIX: Changed dynamic classes to use the static names defined in tailwind.config.js ***
   const getButtonClasses = (role) => `
         w-full py-3 px-6 text-lg font-bold transition duration-300 transform
         rounded-xl shadow-lg
@@ -100,30 +124,30 @@ const LoginPage = () => {
 
   return (
     <div
-      // *** FIX: Replaced bg-[${colors.background}] with bg-cine-background ***
+      // Using static Tailwind classes for theme colors.
       className={`min-h-screen flex items-center justify-center p-4 bg-cine-background font-sans`}
     >
       {/* Login Card Container */}
       <div
-        // *** FIX: Replaced bg-[${colors.surface}] with bg-cine-surface ***
+        // Using static Tailwind classes for theme colors.
         className={`w-full max-w-md p-8 space-y-8 bg-cine-surface rounded-2xl shadow-2xl shadow-red-900/50`}
       >
         <div className="text-center">
           <h2
-            // *** FIX: Replaced text-[${colors.text}] with text-cine-text ***
+            // Using static Tailwind classes for theme colors.
             className={`text-4xl font-extrabold text-cine-text tracking-tight`}
           >
             CineBook Login
           </h2>
           <p
-            // *** FIX: Replaced text-[${colors.textSecondary}] with text-cine-text-secondary ***
+            // Using static Tailwind classes for theme colors.
             className={`mt-2 text-sm text-cine-text-secondary`}
           >
             Enter your credentials and select your role
           </p>
         </div>
 
-        {/* Status Messages (NO CHANGES HERE) */}
+        {/* Status Messages */}
         {error && (
           <div
             className="p-4 text-sm text-red-100 bg-red-600 rounded-lg"
@@ -141,7 +165,7 @@ const LoginPage = () => {
           </div>
         )}
 
-        <form className="mt-8 space-y-6">
+        <form className="mt-8 space-y-6" onSubmit={(e) => e.preventDefault()}>
           {/* Email Input */}
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
@@ -154,7 +178,7 @@ const LoginPage = () => {
                 type="email"
                 autoComplete="email"
                 required
-                // *** FIX: Replaced focus:ring/border-[${colors.primary}] with focus:ring/border-cine-primary ***
+                // Using static Tailwind classes for focus rings.
                 className={`appearance-none rounded-t-xl relative block w-full px-3 py-3 border border-gray-700 placeholder-gray-400 text-white bg-neutral-800 focus:outline-none focus:ring-cine-primary focus:border-cine-primary focus:z-10 sm:text-sm`}
                 placeholder="Email address"
                 value={email}
@@ -173,18 +197,23 @@ const LoginPage = () => {
                 type="password"
                 autoComplete="current-password"
                 required
-                // *** FIX: Replaced focus:ring/border-[${colors.primary}] with focus:ring/border-cine-primary ***
+                // Using static Tailwind classes for focus rings.
                 className={`appearance-none rounded-b-xl relative block w-full px-3 py-3 border border-gray-700 placeholder-gray-400 text-white bg-neutral-800 focus:outline-none focus:ring-cine-primary focus:border-cine-primary focus:z-10 sm:text-sm`}
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                onKeyDown={(e) => handleKeyPress(e, "buyer")}
+                onKeyDown={(e) => {
+                  // Allow pressing enter to log in as default role (buyer)
+                  if (e.key === "Enter" && !loading) {
+                    handleLogin("buyer");
+                  }
+                }}
                 disabled={loading}
               />
             </div>
           </div>
 
-          {/* Role Selection Buttons (NO CHANGES TO LOGIC) */}
+          {/* Role Selection Buttons */}
           <div className="space-y-4 pt-4">
             <button
               type="button"
@@ -284,7 +313,7 @@ const LoginPage = () => {
           </div>
 
           <div
-            // *** FIX: Replaced text-[${colors.textSecondary}] with text-cine-text-secondary ***
+            // Using static Tailwind classes for theme colors.
             className={`text-center pt-4 text-cine-text-secondary text-sm`}
           >
             <p>

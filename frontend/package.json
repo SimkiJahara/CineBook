@@ -1,7 +1,6 @@
 {
   "name": "frontend",
   "version": "1.0.0",
-  "type": "module",
   "main": "index.js",
   "license": "ISC",
   "description": "CineBook React Frontend built with Vite",
