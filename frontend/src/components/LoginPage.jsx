@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom"; // Added Link and useNavigate
 
 // API URL is set
 const API_BASE_URL = "http://localhost:8000/api/v1";
@@ -53,6 +54,8 @@ const LoginPage = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [selectedRole, setSelectedRole] = useState(null);
+  // Using useNavigate is a good practice, even if not used yet
+  const navigate = useNavigate();
 
   const handleLogin = async (role) => {
     setError(null);
@@ -89,6 +92,7 @@ const LoginPage = () => {
 
       // OPTIONAL TODO: Store the token (data.access_token) securely (e.g., cookies or state)
       // and redirect the user to the correct role-specific dashboard.
+      // Example redirect: navigate(`/${role}/dashboard`);
     } catch (err) {
       // Set the error state from the caught error message
       setError(err.message);
@@ -107,13 +111,13 @@ const LoginPage = () => {
             ? "bg-gray-700 text-gray-500 cursor-not-allowed" // Loading state (darker)
             : "hover:scale-[1.02] hover:shadow-xl" // Hover state
         }
-        ${
-          role === "buyer"
-            ? "bg-cine-primary text-white hover:bg-cine-secondary" // Use static theme names
-            : role === "owner"
-            ? `bg-red-800 text-white hover:bg-red-900`
-            : `bg-neutral-800 text-white hover:bg-neutral-900`
-        }
+       ${
+         role === "buyer"
+           ? "bg-cine-primary text-white hover:bg-cine-secondary" // If role is buyer
+           : role === "owner" // If role is NOT buyer, check if it is owner
+           ? `bg-red-800 text-white hover:bg-red-900` // If role is owner
+           : `bg-neutral-800 text-white hover:bg-neutral-900` // If role is NEITHER buyer NOR owner (e.g., superadmin)
+       }
     `;
 
   const handleKeyPress = (event, role) => {
@@ -249,11 +253,11 @@ const LoginPage = () => {
 
             <button
               type="button"
-              onClick={() => handleLogin("owner")}
+              onClick={() => handleLogin("theatreowner")}
               className={getButtonClasses("owner")}
-              disabled={loading && selectedRole !== "owner"}
+              disabled={loading && selectedRole !== "theatreowner"}
             >
-              {loading && selectedRole === "owner" ? (
+              {loading && selectedRole === "theatreowner" ? (
                 <svg
                   className="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline"
                   xmlns="http://www.w3.org/2000/svg"
@@ -312,13 +316,21 @@ const LoginPage = () => {
             </button>
           </div>
 
-          <div
-            // Using static Tailwind classes for theme colors.
-            className={`text-center pt-4 text-cine-text-secondary text-sm`}
-          >
-            <p>
+          {/* Registration Link and Role Explanation */}
+          <div className="flex flex-col items-center pt-4 space-y-2">
+            <p className={`text-sm text-cine-text-secondary`}>
               Your role is determined by your credentials and the button you
               choose.
+            </p>
+            <p className={`text-sm text-cine-text-secondary`}>
+              Don't have an account?
+              {/* This is the key link to the registration page */}
+              <Link
+                to="/register"
+                className="font-bold text-red-600 hover:text-red-800 ml-1 underline"
+              >
+                Register here
+              </Link>
             </p>
           </div>
         </form>

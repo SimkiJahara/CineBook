@@ -1,4 +1,4 @@
-from typing import Optional, Type, Any, Union #added union
+from typing import Optional, Type, Any, Union 
 from sqlalchemy.orm import Session, joinedload
 
 # 1. IMPORT SECURITY FUNCTIONS
@@ -6,6 +6,7 @@ from app.core.security import get_password_hash, verify_password
 
 # 2. IMPORT MODELS AND SCHEMAS
 from app.schemas.user import UserCreate, UserInDB, BuyerCreate, TheatreOwnerCreate
+# Define the union type for all possible creation schemas
 UserCreateUnion = Union[UserCreate, BuyerCreate, TheatreOwnerCreate]
 from app.core.config import UserRole
 
@@ -26,13 +27,13 @@ class CRUDUser:
     """
     
     # ----------------------------------------------------
-    # Public Functions (Existing Logic, updated for class)
+    # Public Functions
     # ----------------------------------------------------
 
     def get_user(self, db: Session, user_id: int) -> Optional[User]:
         """Retrieve a User by their ID, including all nested roles and theatres."""
         return db.query(User).filter(User.id == user_id).options(
-            # FIX: Changed 'theaters' to 'theatres' to match the attribute name in TheatreOwner
+            # Correctly eager load the relationships
             joinedload(User.theaterowner).joinedload(TheatreOwner.theatres),
             joinedload(User.buyer),
             joinedload(User.superadmin),
@@ -41,7 +42,7 @@ class CRUDUser:
     def get_user_by_email(self, db: Session, email: str) -> Optional[User]:
         """Retrieve a User by their email, including all nested roles and theatres."""
         return db.query(User).filter(User.email == email).options(
-            # FIX: Changed 'theaters' to 'theatres' to match the attribute name in TheatreOwner
+            # Correctly eager load the relationships
             joinedload(User.theaterowner).joinedload(TheatreOwner.theatres),
             joinedload(User.buyer),
             joinedload(User.superadmin),
@@ -50,17 +51,29 @@ class CRUDUser:
     def create_user(self, db: Session, user_in: UserCreateUnion) -> User:
         """Create a new User and their corresponding specialized role entry."""
         
-        # 1. Prepare User model data (using the real password hash function)
+        # 1. Prepare User model data
         hashed_password = get_password_hash(user_in.password)
+        
+        # --- FIX: Determine the 'name' field for the base User model ---
+        # 1. Start with the default 'name' from the base UserCreate schema (or None)
+        user_display_name = getattr(user_in, 'name', None)
+
+        # 2. Override/set the name using role-specific fields if available
+        if hasattr(user_in, 'fullname') and user_in.role == UserRole.buyer:
+            user_display_name = user_in.fullname
+        elif hasattr(user_in, 'ownername') and user_in.role == UserRole.theatre_owner:
+            user_display_name = user_in.ownername
+
+        # Create the base User entry
         db_user = User(
             email=user_in.email,
-            name=user_in.name,
+            name=user_display_name, 
             passwordhash=hashed_password, 
             role=user_in.role
         )
         
         db.add(db_user)
-        db.flush() 
+        db.flush() # Flush to get the db_user.id for the foreign key
 
         # 2. Prepare specialized model data based on role
         if user_in.role == UserRole.buyer:
@@ -68,14 +81,14 @@ class CRUDUser:
             db_buyer = Buyer(id=db_user.id, fullname=user_in.fullname)
             db.add(db_buyer)
         elif user_in.role == UserRole.theatre_owner:
-            # Safely access the owner-specific fields
+            # Safely map all required fields from TheatreOwnerCreate
             db_owner = TheatreOwner(
                 id=db_user.id, 
                 businessname=user_in.businessname, 
                 ownername=user_in.ownername,
-                phone=user_in.phone, 
                 licensenumber=user_in.licensenumber,
-                # bankdetails and logourl are optional and will be None if not provided
+                # Optional fields are safely retrieved, defaulting to None if missing in the payload
+                phone=getattr(user_in, 'phone', None), 
                 bankdetails=getattr(user_in, 'bankdetails', None), 
                 logourl=getattr(user_in, 'logourl', None),
             )
@@ -92,7 +105,7 @@ class CRUDUser:
         return self.get_user(db, db_user.id)
 
     # ----------------------------------------------------
-    # Authentication Logic (NEW)
+    # Authentication Logic 
     # ----------------------------------------------------
 
     def authenticate_user(
@@ -100,11 +113,11 @@ class CRUDUser:
         db: Session,
         email: str,
         password: str
-    ) -> Optional[Type[UserInDB]]:
+    ) -> Optional[User]:
         """
         Retrieves a user by email and verifies the provided plain password.
         """
-        # 1. Find the user by email
+        # 1. Find the user by email (eagerly loads nested roles)
         user = self.get_user_by_email(db, email=email)
         if not user:
             return None # User not found
@@ -114,6 +127,7 @@ class CRUDUser:
             return None # Password mismatch
 
         # 3. If authentication is successful, return the user object
+        # NOTE: Returning the ORM object which matches the UserInDBBase data structure
         return user
 
 

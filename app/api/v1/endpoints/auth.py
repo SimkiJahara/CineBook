@@ -1,16 +1,21 @@
 # app/api/v1/endpoints/auth.py
 
-from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Optional, Union, Literal # Added Union and Literal for type hints
+from fastapi import APIRouter, Depends, HTTPException, status, Path, Body # Added Path and Body
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session # Added Session import
+from sqlalchemy.orm import Session 
 
 # --- Import REAL Components ---
 from app.core.security import create_access_token
 from app.schemas.token import Token # The Pydantic schema for the response
 from app.crud.user import crud_user # The actual CRUD instance
 from app.core.dependencies import get_db # The actual DB dependency
-
+from app.schemas.user import (
+    UserResponse,
+    BuyerCreate, 
+    TheatreOwnerCreate 
+) # Import creation schemas and response schema
+from app.core.config import UserRole # Import the UserRole enum
 
 # --- FastAPI Router ---
 
@@ -50,3 +55,42 @@ def login_for_access_token(
 
     # 4. Return the standard Token response
     return Token(access_token=access_token, token_type="bearer")
+
+
+@router.post(
+    "/register/{role}", 
+    response_model=UserResponse, 
+    status_code=status.HTTP_201_CREATED,
+    tags=["Authentication"]
+)
+def register_user(
+    *,
+    db: Session = Depends(get_db),
+    # Validate the 'role' path parameter against allowed values
+    role: Literal[UserRole.buyer, UserRole.theatre_owner, UserRole.super_admin] = Path(..., title="User Role"),
+    # Dynamically select the input schema using the discriminator (the 'role' field in the body)
+    user_in: Union[BuyerCreate, TheatreOwnerCreate] = Body(..., discriminator="role")
+):
+    """
+    Register a new user (Buyer or Theatre Owner) using role-specific schemas.
+    """
+    
+    # 1. Check if a user with that email already exists
+    if crud_user.get_user_by_email(db, email=user_in.email):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The user with this email already exists in the system."
+        )
+
+    # 2. Basic validation check: ensure role in URL path matches role in request body
+    if role != user_in.role:
+         raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Mismatched role in path ('{role}') and request body ('{user_in.role}')."
+        )
+    
+    # 3. Create the user and the associated role model using the unified CRUD function
+    # The `crud_user.create_user` method handles which specific role model (Buyer/TheatreOwner) to instantiate.
+    user = crud_user.create_user(db, user_in=user_in)
+
+    return user

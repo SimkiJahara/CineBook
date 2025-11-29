@@ -1,12 +1,20 @@
+// frontend/src/components/RegisterPage.jsx
+
 import React, { useState } from "react";
 import { registerUser } from "../api/auth";
 import { useNavigate } from "react-router-dom";
 
 const RegisterPage = () => {
-  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("buyer"); // Default role
+
+  // Role-specific fields state variables
+  const [fullname, setFullname] = useState(""); // For 'buyer' (maps to fullname)
+  const [ownername, setOwnername] = useState(""); // For 'theatreowner' (maps to ownername)
+  const [businessname, setBusinessname] = useState(""); // For 'theatreowner'
+  const [licensenumber, setLicensenumber] = useState(""); // For 'theatreowner'
+
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
@@ -16,10 +24,39 @@ const RegisterPage = () => {
     setError("");
     setSuccess("");
 
+    let payload = {
+      email,
+      password,
+      role, // Pass the role to match the endpoint and schema type
+    };
+
+    if (role === "buyer") {
+      // Required field for BuyerCreate is 'fullname'
+      if (!fullname) {
+        setError("Full Name is required for a Buyer.");
+        return;
+      }
+      payload.fullname = fullname;
+    } else if (role === "theatreowner") {
+      // Required fields for TheatreOwnerCreate: businessname, ownername, licensenumber
+      if (!businessname || !ownername || !licensenumber) {
+        setError("All required fields must be filled for a Theatre Owner.");
+        return;
+      }
+      payload.businessname = businessname;
+      payload.ownername = ownername;
+      payload.licensenumber = licensenumber;
+
+      // Optional fields like phone, bankdetails, logourl can be added here if collected in the form
+    } else {
+      setError("Invalid user role selected.");
+      return;
+    }
+
     try {
-      // Controller logic in the function below
-      const data = await registerUser(username, email, password, role);
-      setSuccess(`Registration successful! Welcome, ${data.username}.`);
+      const data = await registerUser(payload);
+      // Assuming the successful response contains the user's email
+      setSuccess(`Registration successful! Welcome, ${data.email}.`);
 
       // Redirect after a short delay
       setTimeout(() => {
@@ -31,6 +68,12 @@ const RegisterPage = () => {
       );
     }
   };
+
+  // Helper variables for dynamic form fields
+  const isBuyer = role === "buyer";
+  const nameValue = isBuyer ? fullname : ownername;
+  const setNameChange = isBuyer ? setFullname : setOwnername;
+  const nameLabel = isBuyer ? "Full Name" : "Owner Name";
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
@@ -47,23 +90,35 @@ const RegisterPage = () => {
           <p className="text-green-500 mb-4 text-center">{success}</p>
         )}
 
-        <div className="mb-4">
+        {/* Role Selection */}
+        <div className="mb-6">
           <label
             className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="username"
+            htmlFor="role"
           >
-            Username
+            Register as
           </label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          <select
+            id="role"
+            value={role}
+            onChange={(e) => {
+              setRole(e.target.value);
+              // Clear role-specific fields when role changes to prevent sending old data
+              setFullname("");
+              setOwnername("");
+              setBusinessname("");
+              setLicensenumber("");
+            }}
+            className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             required
-          />
+          >
+            {/* Values must match the roles used in the backend's UserRole enum and API path: 'buyer' or 'theatreowner' */}
+            <option value="buyer">Buyer</option>
+            <option value="theatreowner">Theatre Owner</option>
+          </select>
         </div>
 
+        {/* Email Field */}
         <div className="mb-4">
           <label
             className="block text-gray-700 text-sm font-bold mb-2"
@@ -81,12 +136,13 @@ const RegisterPage = () => {
           />
         </div>
 
+        {/* Password Field - Note: backend enforces min_length=8 */}
         <div className="mb-6">
           <label
             className="block text-gray-700 text-sm font-bold mb-2"
             htmlFor="password"
           >
-            Password
+            Password (min 8 chars)
           </label>
           <input
             type="password"
@@ -95,29 +151,66 @@ const RegisterPage = () => {
             onChange={(e) => setPassword(e.target.value)}
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
             required
+            minLength={8}
+            maxLength={70}
           />
         </div>
 
-        <div className="mb-6">
+        {/* Dynamic Name Field (Full Name for Buyer, Owner Name for Theatre Owner) */}
+        <div className="mb-4">
           <label
             className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="role"
+            htmlFor="nameInput"
           >
-            Register as
+            {nameLabel}
           </label>
-          <select
-            id="role"
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          <input
+            type="text"
+            id="nameInput"
+            value={nameValue}
+            onChange={(e) => setNameChange(e.target.value)}
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             required
-          >
-            {/* Assuming roles from your backend schema */}
-            <option value="buyer">Buyer</option>
-            <option value="theatreowner">Theatre Owner</option>
-            {/* Super Admin should not register via this public form */}
-          </select>
+          />
         </div>
+
+        {/* Theatre Owner Specific Fields (Conditional Rendering) */}
+        {!isBuyer && (
+          <>
+            <div className="mb-4">
+              <label
+                className="block text-gray-700 text-sm font-bold mb-2"
+                htmlFor="businessname"
+              >
+                Business Name
+              </label>
+              <input
+                type="text"
+                id="businessname"
+                value={businessname}
+                onChange={(e) => setBusinessname(e.target.value)}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                required
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                className="block text-gray-700 text-sm font-bold mb-2"
+                htmlFor="licensenumber"
+              >
+                License Number
+              </label>
+              <input
+                type="text"
+                id="licensenumber"
+                value={licensenumber}
+                onChange={(e) => setLicensenumber(e.target.value)}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+                required
+              />
+            </div>
+          </>
+        )}
 
         <div className="flex items-center justify-between">
           <button
