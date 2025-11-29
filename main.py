@@ -1,7 +1,10 @@
 import uvicorn
 from fastapi import FastAPI
+#from fastapi.staticfiles import StaticFiles
+#from fastapi.responses import HTMLResponse
 from app.core.config import settings
 from app.core.db import Base, engine # Imports Base class for metadata and engine for connection
+
 
 # Import the APIRouters for users and authentication
 from app.api.v1.endpoints.router import router as user_router # Imports the APIRouter for users
@@ -23,6 +26,7 @@ app = FastAPI(
     version=settings.VERSION,
     openapi_url="/openapi.json"
 )
+
 
 # 2. Add a startup event handler to automatically create all database tables
 # This function is executed asynchronously when the FastAPI application starts up.
@@ -64,6 +68,7 @@ def read_root():
         "version": settings.VERSION,
         "documentation": "/docs"
     }
+
 
 # Optional: Configuration for running the application directly (for local testing)
 if __name__ == "__main__":

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CineBook Login</title>
+
+    <!-- Load Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- CRITICAL FIX: Configure Tailwind to safely list your custom dynamic colors -->
+    <script>
+      tailwind.config = {
+        // Safelist ensures Tailwind keeps these utility classes, even if it can't
+        // analyze them from the dynamic JavaScript code.
+        safelist: [
+          "bg-[#E50914]", // primary
+          "hover:bg-[#B80010]", // secondary
+          "bg-[#0A0A0A]", // background
+          "bg-[#1C1C1C]", // surface
+          "text-[#FFFFFF]", // text
+          "text-[#AAAAAA]", // textSecondary
+          "shadow-red-900/50",
+          // Also add colors used in specific roles (Buyer is primary, Owner/Admin are fixed)
+          "bg-red-800",
+          "hover:bg-red-900",
+          "bg-neutral-800",
+          "hover:bg-neutral-900",
+        ],
+        // Ensure JIT mode is disabled since we are using safelist with CDN
+        mode: "jit",
+        theme: {
+          extend: {
+            // This allows Tailwind to recognize the color names within the dynamic string logic
+            colors: {
+              primary: "#E50914",
+              secondary: "#B80010",
+              background: "#0A0A0A",
+              surface: "#1C1C1C",
+              text: "#FFFFFF",
+              textSecondary: "#AAAAAA",
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      /* Optional: Ensure the body background matches the React component's background color variable for a seamless look */
+      body {
+        background-color: #0a0a0a; /* Matching colors.background from LoginPage.jsx */
+      }
+    </style>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+
+    <div id="root"></div>
+
+    <script type="module" src="/src/App.jsx"></script>
+  </body>
+</html>
