@@ -141,6 +141,17 @@ class TheatreOwnerCreate(UserCreate):
 
 # ... (Keep existing code for UserResponse and UserUpdate)
 
+class SuperadminCreate(UserCreate):
+    """Schema for creating a new Superadmin user. Inherits base fields from UserCreate."""
+    
+    # Superadmin does not have any extra fields beyond the base User fields.
+    # We only need to enforce the role.
+    
+    # FIX: Use Literal to force the value to be exactly UserRole.super_admin ('Superadmin')
+    role: Literal[UserRole.super_admin] = UserRole.super_admin
+
+# ... (rest of the file remains the same)
+
 
 class UserResponse(UserBase):
     """Schema for returning User data (Output structure), including one-to-one nested roles."""

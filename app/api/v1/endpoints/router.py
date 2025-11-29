@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 # Import CRUD operations and Pydantic schemas
 from app.crud.user import  crud_user
 # Import the specialized creation schemas
-from app.schemas.user import UserResponse, BuyerCreate, TheatreOwnerCreate 
+from app.schemas.user import UserResponse, BuyerCreate, TheatreOwnerCreate, SuperadminCreate
 # Import database utility function (Dependency for the session)
 from app.core.dependencies import get_db
 
@@ -102,6 +102,45 @@ def register_theatre_owner(
     # 3. Return the created user object
     return new_user
 
+
+### 3. Register Superadmin Endpoint (`POST /users/admin`)
+
+@router.post(
+    "/admin",
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Register a new Superadmin user",
+)
+def register_superadmin(
+    user_in: SuperadminCreate, # Uses the specialized SuperadminCreate schema
+    db: Session = Depends(get_db)
+):
+    """
+    Registers a **Superadmin** user. Used for initial setup only.
+    """
+    
+    # 1. Check for existing user by email
+    db_user = crud_user.get_user_by_email(db, email=user_in.email)
+    if db_user:
+        # If user exists, raise a 409 Conflict error
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Email already registered."
+        )
+        
+    # 2. Create the new user.
+    try:
+        new_user = crud_user.create_user(db, user_in=user_in)
+    except Exception as e:
+        # Catch any unexpected database errors during creation
+        print(f"Error during Superadmin user creation: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Could not complete Superadmin registration due to a server error."
+        )
+
+    # 3. Return the created user object
+    return new_user
 
 ### 3. Read User Endpoint (`GET /users/{user_id}`)
 # ... (The rest of the file remains the same)
