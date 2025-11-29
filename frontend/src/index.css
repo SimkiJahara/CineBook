@@ -1,0 +1,23 @@
+/* frontend/src/index.css */
+
+/* 1. MANDATORY Tailwind Directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 2. Global Base Styles (Fix for Black Screen) */
+body {
+  /* Remove default browser margin */
+  margin: 0;
+  /* Set the default background color to match your dark theme */
+  background-color: #0a0a0a;
+  /* Set the default text color to prevent black text on black background */
+  color: white;
+  font-family: sans-serif;
+  min-height: 100vh;
+}
+
+#root {
+  /* Ensure the React mounting element fills the viewport */
+  min-height: 100vh;
+}

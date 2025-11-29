@@ -1,9 +1,12 @@
 import React, { useState } from "react";
-// Assuming you have defined your FastAPI backend URL (e.g., running on http://localhost:8000)
-// Replace this with your actual backend host when deploying
+
+// The local 'colors' object is still used in the old code,
+// but is now redundant for the class generation itself.
+// We can remove it and replace the uses inside the getButtonClasses logic.
+
 const API_BASE_URL = "http://localhost:8000/api/v1";
 
-// Utility function for API calls with built-in error handling
+// Utility function for API calls with built-in error handling (NO CHANGES HERE)
 const callLoginAPI = async (endpoint, payload) => {
   try {
     const response = await fetch(`${API_BASE_URL}/${endpoint}`, {
@@ -16,67 +19,41 @@ const callLoginAPI = async (endpoint, payload) => {
 
     const data = await response.json();
 
-    // Check for HTTP errors (e.g., 401 Unauthorized, 404 Not Found, 500 Internal Error)
     if (!response.ok) {
-      // Throw the error message from the backend, or a generic message if none
       throw new Error(
         data.detail || `Login failed with status ${response.status}`
       );
     }
 
-    // Return the successful response data
     return data;
   } catch (error) {
     console.error("API Call Error:", error.message);
-    // Re-throw the error to be handled by the component's state update logic
     throw error;
   }
 };
 
-// --- Custom Theme Colors for Cinebook (Updated to Red & Black) ---
-const colors = {
-  primary: "#E50914", // Vibrant Cinema Red for main actions (e.g., Netflix red)
-  secondary: "#B80010", // Darker Red for accents or secondary buttons
-  background: "#0A0A0A", // Deep Black for the overall screen
-  surface: "#1C1C1C", // Slightly lighter black for the card/form area
-  text: "#FFFFFF", // White for primary text
-  textSecondary: "#AAAAAA", // Light grey for hints/labels
-};
-
 const LoginPage = () => {
-  // State to hold user input for login
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  // State for UI feedback
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
-  const [selectedRole, setSelectedRole] = useState(null); // Tracks which role button was clicked
+  const [selectedRole, setSelectedRole] = useState(null);
 
-  /**
-   * Handles the form submission and initiates the login process.
-   * @param {string} role - The intended user role (buyer, owner, superadmin).
-   */
   const handleLogin = async (role) => {
-    // Clear previous state
     setError(null);
     setSuccessMessage(null);
     setLoading(true);
-    setSelectedRole(role); // Highlight the button being used
+    setSelectedRole(role);
 
-    // Basic client-side validation
     if (!email || !password) {
       setError("Email and password are required.");
       setLoading(false);
       return;
     }
 
-    const endpoint = "auth/token"; // Endpoint for the OAuth2 login flow
+    const endpoint = "auth/token";
 
-    // NOTE: FastAPI's OAuth2PasswordRequestForm expects data in 'application/x-www-form-urlencoded' format.
-    // However, since we are sending JSON with email/password/role here, your FastAPI endpoint
-    // needs to be adjusted to accept JSON or you need to send form data.
-    // We will stick to JSON for simplicity on the frontend and assume the backend is adjusted.
     const payload = {
       email: email,
       password: password,
@@ -86,23 +63,18 @@ const LoginPage = () => {
     try {
       const data = await callLoginAPI(endpoint, payload);
 
-      // On successful login
       setSuccessMessage(`Login successful as ${role}! Token received.`);
-      // In a real application, you would store the token (data.access_token)
-      // in localStorage or a secure cookie and redirect the user.
-
-      // SIMULATION: Log the received token/data for demonstration
       console.log("Login Success Data:", data);
     } catch (err) {
-      // Error handling from the API utility function
       setError(err.message);
     } finally {
       setLoading(false);
-      setSelectedRole(null); // Reset role highlight
+      setSelectedRole(null);
     }
   };
 
   // Tailwind CSS classes for the primary action buttons
+  // *** FIX: Changed dynamic classes to use the static names defined in tailwind.config.js ***
   const getButtonClasses = (role) => `
         w-full py-3 px-6 text-lg font-bold transition duration-300 transform
         rounded-xl shadow-lg
@@ -113,14 +85,13 @@ const LoginPage = () => {
         }
         ${
           role === "buyer"
-            ? `bg-[${colors.primary}] text-white hover:bg-[${colors.secondary}]` // Strong Red
+            ? "bg-cine-primary text-white hover:bg-cine-secondary" // Use static theme names
             : role === "owner"
-            ? `bg-red-800 text-white hover:bg-red-900` // Muted Red/Maroon
-            : `bg-neutral-800 text-white hover:bg-neutral-900` // Dark Grey/Black for Superadmin
+            ? `bg-red-800 text-white hover:bg-red-900`
+            : `bg-neutral-800 text-white hover:bg-neutral-900`
         }
     `;
 
-  // Function to handle the Enter key press in input fields
   const handleKeyPress = (event, role) => {
     if (event.key === "Enter" && !loading) {
       handleLogin(role);
@@ -129,24 +100,30 @@ const LoginPage = () => {
 
   return (
     <div
-      className={`min-h-screen flex items-center justify-center p-4 bg-[${colors.background}] font-sans`}
+      // *** FIX: Replaced bg-[${colors.background}] with bg-cine-background ***
+      className={`min-h-screen flex items-center justify-center p-4 bg-cine-background font-sans`}
     >
       {/* Login Card Container */}
       <div
-        className={`w-full max-w-md p-8 space-y-8 bg-[${colors.surface}] rounded-2xl shadow-2xl shadow-red-900/50`}
+        // *** FIX: Replaced bg-[${colors.surface}] with bg-cine-surface ***
+        className={`w-full max-w-md p-8 space-y-8 bg-cine-surface rounded-2xl shadow-2xl shadow-red-900/50`}
       >
         <div className="text-center">
           <h2
-            className={`text-4xl font-extrabold text-[${colors.text}] tracking-tight`}
+            // *** FIX: Replaced text-[${colors.text}] with text-cine-text ***
+            className={`text-4xl font-extrabold text-cine-text tracking-tight`}
           >
             CineBook Login
           </h2>
-          <p className={`mt-2 text-sm text-[${colors.textSecondary}]`}>
+          <p
+            // *** FIX: Replaced text-[${colors.textSecondary}] with text-cine-text-secondary ***
+            className={`mt-2 text-sm text-cine-text-secondary`}
+          >
             Enter your credentials and select your role
           </p>
         </div>
 
-        {/* Status Messages */}
+        {/* Status Messages (NO CHANGES HERE) */}
         {error && (
           <div
             className="p-4 text-sm text-red-100 bg-red-600 rounded-lg"
@@ -177,8 +154,8 @@ const LoginPage = () => {
                 type="email"
                 autoComplete="email"
                 required
-                // Note: Input background is changed to dark neutral for better contrast
-                className={`appearance-none rounded-t-xl relative block w-full px-3 py-3 border border-gray-700 placeholder-gray-400 text-white bg-neutral-800 focus:outline-none focus:ring-[${colors.primary}] focus:border-[${colors.primary}] focus:z-10 sm:text-sm`}
+                // *** FIX: Replaced focus:ring/border-[${colors.primary}] with focus:ring/border-cine-primary ***
+                className={`appearance-none rounded-t-xl relative block w-full px-3 py-3 border border-gray-700 placeholder-gray-400 text-white bg-neutral-800 focus:outline-none focus:ring-cine-primary focus:border-cine-primary focus:z-10 sm:text-sm`}
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -196,8 +173,8 @@ const LoginPage = () => {
                 type="password"
                 autoComplete="current-password"
                 required
-                // Note: Input background is changed to dark neutral for better contrast
-                className={`appearance-none rounded-b-xl relative block w-full px-3 py-3 border border-gray-700 placeholder-gray-400 text-white bg-neutral-800 focus:outline-none focus:ring-[${colors.primary}] focus:border-[${colors.primary}] focus:z-10 sm:text-sm`}
+                // *** FIX: Replaced focus:ring/border-[${colors.primary}] with focus:ring/border-cine-primary ***
+                className={`appearance-none rounded-b-xl relative block w-full px-3 py-3 border border-gray-700 placeholder-gray-400 text-white bg-neutral-800 focus:outline-none focus:ring-cine-primary focus:border-cine-primary focus:z-10 sm:text-sm`}
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -207,7 +184,7 @@ const LoginPage = () => {
             </div>
           </div>
 
-          {/* Role Selection Buttons (Red & Black Theme) */}
+          {/* Role Selection Buttons (NO CHANGES TO LOGIC) */}
           <div className="space-y-4 pt-4">
             <button
               type="button"
@@ -307,7 +284,8 @@ const LoginPage = () => {
           </div>
 
           <div
-            className={`text-center pt-4 text-[${colors.textSecondary}] text-sm`}
+            // *** FIX: Replaced text-[${colors.textSecondary}] with text-cine-text-secondary ***
+            className={`text-center pt-4 text-cine-text-secondary text-sm`}
           >
             <p>
               Your role is determined by your credentials and the button you
