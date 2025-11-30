@@ -37,7 +37,7 @@ class User(Base):
     bookings = relationship(
         "Booking", 
         back_populates="user", 
-        foreign_keys="[Booking.user_id]"
+        foreign_keys="[Booking.buyerid]"
     )
     
     # ---------------------------------------------

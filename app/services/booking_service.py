@@ -170,9 +170,10 @@ async def confirm_booking(db: Session, user_id: int, show_id: int, seat_ids: Lis
             )
         
         # 3. Final Commit: Update ShowSeat status to BOOKED and create Booking records
+        # FIX APPLIED for PostgreSQL compatibility: Using buyerid and screeningid
         new_booking = Booking(
-            user_id=user_id,
-            show_id=show_id,
+            buyerid=user_id,
+            screeningid=show_id,
             total_price=total_price,
             payment_token=payment_token,
             status=Booking.BookingStatus.CONFIRMED
@@ -187,8 +188,9 @@ async def confirm_booking(db: Session, user_id: int, show_id: int, seat_ids: Lis
             show_seat.hold_expiry_time = None 
 
             # Create the link record
+            # FIX APPLIED for PostgreSQL compatibility: Accessing the correct PK attribute 'bookingid'
             booked_seat = BookedSeat(
-                booking_id=new_booking.id,
+                booking_id=new_booking.bookingid,
                 show_seat_id=show_seat.id
             )
             booked_seat_objects.append(booked_seat)
@@ -207,6 +209,7 @@ async def confirm_booking(db: Session, user_id: int, show_id: int, seat_ids: Lis
         raise e
     except Exception as e:
         db.rollback()
+        # This is where the SyntaxError typically occurs if indentation is wrong
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An unexpected error occurred during confirmation: {str(e)}"

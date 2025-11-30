@@ -21,7 +21,7 @@ from app.models.buyer import Buyer
 from app.models.superadmin import Superadmin 
 from app.models.movie import Movie       # <--- CRITICAL: Movie model import
 from app.models.screen import Screen     # <--- CRITICAL: Screen model import
-from app.models.show import Show         # <--- CRITICAL: Show model import
+from app.models.show import Screening        # <--- CRITICAL: Show model import
 from app.models.seat import ShowSeat, Seat, Booking, BookedSeat # All booking models
 
 
