@@ -6,21 +6,26 @@ from app.core.config import settings
 from app.core.db import Base, engine # Imports Base class for metadata and engine for connection
 
 
-# Import the APIRouters for users and authentication
-from app.api.v1.endpoints.router import router as user_router # Imports the APIRouter for users
-from app.api.v1.endpoints.auth import router as auth_router # Imports the APIRouter for authentication
+# Import the APIRouters
+from app.api.v1.endpoints.router import router as user_router 
+from app.api.v1.endpoints.auth import router as auth_router 
+from app.api.v1.endpoints.bookings import router as bookings_router
+from app.api.v1.endpoints.shows import router as shows_router
 
-# Import all models to ensure they are loaded and registered with SQLAlchemy's Base metadata 
+# Import ALL models to ensure they are loaded and registered with SQLAlchemy's Base metadata 
 # before table creation in the startup event.
 from app.models.users import User
 from app.models.theatreowner import TheatreOwner
 from app.models.theatre import Theatre
 from app.models.buyer import Buyer
-from app.models.superadmin import Superadmin # <-- Added Superadmin model import
+from app.models.superadmin import Superadmin 
+from app.models.movie import Movie       # <--- CRITICAL: Movie model import
+from app.models.screen import Screen     # <--- CRITICAL: Screen model import
+from app.models.show import Show         # <--- CRITICAL: Show model import
+from app.models.seat import ShowSeat, Seat, Booking, BookedSeat # All booking models
 
 
 # 1. Create the main FastAPI application instance
-# We use the project name and version from settings for documentation purposes
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
@@ -29,35 +34,45 @@ app = FastAPI(
 
 
 # 2. Add a startup event handler to automatically create all database tables
-# This function is executed asynchronously when the FastAPI application starts up.
 @app.on_event("startup")
 def on_startup():
     """
     Creates all database tables defined by SQLAlchemy's Base metadata.
-    This ensures the database schema is ready before the API handles requests.
     """
     print("Database startup: Attempting to create all tables...")
-    # Note: engine is imported from app.core.db, which should be configured 
-    # for synchronous operation as per the project requirements.
+    # This call relies on all models being imported above ⬆️
     Base.metadata.create_all(bind=engine)
     print("Database startup: Tables created successfully.")
 
 # 3. Include the user router under the base prefix `/v1`
-# The router itself has a prefix of `/users`, resulting in paths like `/v1/users/create`
 app.include_router(
     user_router,
     prefix="/v1",
-    tags=["Users"] # Optional: Adds a tag to the OpenAPI docs
+    tags=["Users"] 
 )
 
 # 4. Include the authentication router under the base prefix `/v1`
 app.include_router(
     auth_router,
-    prefix="/v1", # The login endpoint will be accessible at /v1/token
-    tags=["Authentication"] # Adds a tag for the login flow
+    prefix="/v1", 
+    tags=["Authentication"] 
 )
 
-# 5. Add a simple root path endpoint (`/`)
+# 5. Include the bookings router under the base prefix `/v1`
+app.include_router(
+    bookings_router,
+    prefix="/v1", 
+    tags=["Bookings"] 
+)
+
+# 6. Include the shows router (which contains the WebSocket endpoint)
+app.include_router(
+    shows_router,
+    prefix="/v1", 
+    tags=["Shows"] 
+)
+
+# 7. Add a simple root path endpoint (`/`)
 @app.get("/", summary="Root Path")
 def read_root():
     """

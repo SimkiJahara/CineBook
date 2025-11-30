@@ -1,3 +1,5 @@
+# /app/api/v1/endpoints/router.py (Modified)
+
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -9,15 +11,8 @@ from app.schemas.user import UserResponse, BuyerCreate, TheatreOwnerCreate, Supe
 # Import database utility function (Dependency for the session)
 from app.core.dependencies import get_db
 
-# The prefix ensures all endpoints here start with /v1/users (e.g., /v1/users/)
-# NOTE: The /v1 part is typically added when including the router in the main app
-router = APIRouter(
-    prefix="/users",
-    tags=["Users"],
-)
-
-# The prefix ensures all endpoints here start with /v1/users (e.g., /v1/users/)
-# NOTE: The /v1 part is typically added when including the router in the main app
+# The router prefix ensures all endpoints here start with /users
+# (The /v1 part is added when including the router in main.py)
 router = APIRouter(
     prefix="/users",
     tags=["Users"],
@@ -142,14 +137,8 @@ def register_superadmin(
     # 3. Return the created user object
     return new_user
 
-### 3. Read User Endpoint (`GET /users/{user_id}`)
-# ... (The rest of the file remains the same)
 
-
-
-
-
-### 2. Read User Endpoint (`GET /users/{user_id}`)
+### 4. Read User Endpoint (`GET /users/{user_id}`)
 
 @router.get(
     "/{user_id}", 
@@ -161,8 +150,7 @@ def read_user(
     db: Session = Depends(get_db)
 ):
     """
-    Retrieves a user by ID, including all nested role details (e.g., the nested `theaters` list 
-    for a TheaterOwner) using SQLAlchemy's relationships.
+    Retrieves a user by ID, including all nested role details using SQLAlchemy's relationships.
     """
     
     # 1. Fetch user from the database
@@ -176,6 +164,4 @@ def read_user(
         )
         
     # 3. Return the user object
-    # FastAPI/Pydantic converts the ORM model to the UserResponse schema, 
-    # leveraging from_attributes=True to include nested relationships.
     return db_user
