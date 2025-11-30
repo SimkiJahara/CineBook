@@ -54,24 +54,29 @@ class BookingBase(BaseModel):
     seat_codes: Optional[List[str]] = None
 
 
+# app/schemas/booking.py
+
 class BookingCreate(BaseModel):
     """
     Schema used when creating a new booking.
 
     For now, we keep it simple:
-    - frontend sends user_id
+    - backend fills user_id from auth if not provided
     - frontend sends screening_id
     - frontend sends list of seat labels
     - frontend sends price per seat
     """
 
-    user_id: int
+    # 🔑 make this optional so frontend is not forced to send it
+    user_id: int | None = None
+
     screening_id: int
 
     seats: List[str]
     seat_price: float
 
     payment_method: str  # "bkash", "nagad", "card"
+
 
 
 class BookingRead(BookingBase):

@@ -1,62 +1,50 @@
-"""
-Controller functions for bookings.
-
-Here we write simple Python functions that:
-- talk to the database (via SQLAlchemy session)
-- use our Booking and BookedSeat models
-"""
+# app/controllers/booking_controller.py
 
 from sqlalchemy.orm import Session
 from datetime import datetime
 
-from app.models.booking import Booking, BookingSeat
+from app.models.booking import Booking, BookedSeat
 from app.schemas.booking import BookingCreate, BookingRead
 
 
 def create_booking(db: Session, booking_in: BookingCreate) -> Booking:
     """
     Create a booking in the database.
-    If seat_codes is not provided, use the default seats: A1, A2, A3.
+
+    - If booking_in.seats is provided, use those.
+    - If not, fall back to default ["A1", "A2", "A3"].
+    - total_price = number_of_seats * seat_price
     """
 
-    # ✅ 1. Decide which seats to use
-    # If frontend sends seat_codes -> use those
-    # If not -> use default fake seats
-    seat_codes = booking_in.seat_codes or ["A1", "A2", "A3"]
+    # 1) Decide which seats to use
+    seats_to_use = booking_in.seats or ["A1", "A2", "A3"]
 
-    # ✅ 2. Create the main booking row
+    # 2) Compute total price
+    total_price = len(seats_to_use) * booking_in.seat_price
+
+    # 3) Create main booking row
     booking = Booking(
         user_id=booking_in.user_id,
         screening_id=booking_in.screening_id,
-        total_price=booking_in.total_price,
+        total_price=total_price,
         payment_method=booking_in.payment_method,
-        payment_status=booking_in.payment_status,
+        payment_status="PAID",  # fixed for now
         created_at=datetime.utcnow(),
     )
 
     db.add(booking)
-    db.flush()  # so that booking.id is available
+    db.flush()  # to get booking.id
 
-    # ✅ 3. Create seat rows (one per seat_code)
-    for code in seat_codes:
-        # very simple split: first char = row, rest = number (like "A1", "B12")
-        row = code[0]
-        number_part = code[1:] if len(code) > 1 else "0"
-
-        try:
-            number = int(number_part)
-        except ValueError:
-            number = 0  # fall back if something weird comes
-
-        seat = BookingSeat(
+    # 4) Create BookedSeat rows (match your model: seat_label + price)
+    for code in seats_to_use:
+        seat = BookedSeat(
             booking_id=booking.id,
-            seat_row=row,
-            seat_number=number,
-            seat_code=code,
+            seat_label=code,
+            price=booking_in.seat_price,
         )
         db.add(seat)
 
-    # ✅ 4. Save to DB
+    # 5) Save everything
     db.commit()
     db.refresh(booking)
 
@@ -68,7 +56,6 @@ def get_bookings_for_user(db: Session, user_id: int) -> list[Booking]:
     Get all bookings for one user.
     Returns a list of Booking objects.
     """
-
     bookings = (
         db.query(Booking)
         .filter(Booking.user_id == user_id)
