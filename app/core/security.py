@@ -1,3 +1,5 @@
+# /app/core/security.py
+
 """
 Security Utilities and JWT Authentication.
 
@@ -74,7 +76,7 @@ def decode_jwt(token: str) -> dict:
             token, 
             settings.SECRET_KEY.get_secret_value(), 
             algorithms=[settings.ALGORITHM],
-            options={"verify_exp": False} # FIX: Disable expiration check for old mock tokens
+            # FIX: Removed options={"verify_exp": False} to enforce standard expiration check
         )
         # FIX: Ensure 'user_id' key exists by mapping 'id' if 'user_id' is missing.
         if "user_id" not in payload and "id" in payload:
@@ -105,7 +107,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
             token, 
             settings.SECRET_KEY.get_secret_value(), 
             algorithms=[settings.ALGORITHM],
-            options={"verify_exp": False} # FIX: Disable expiration check for old mock tokens
+            # FIX: Removed options={"verify_exp": False} to enforce standard expiration check
         )
         # Extract user ID and ensure it exists. 
         # FIX: Check for the 'id' key if 'user_id' is missing from the payload (from the problematic token in logs)

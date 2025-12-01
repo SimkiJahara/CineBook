@@ -16,6 +16,46 @@ const nanoid = customAlphabet(
   10
 );
 
+// --- NEW UTILITY: JWT DECODER ---
+
+/**
+ * Decodes the payload section of a JWT token to extract the user ID.
+ * NOTE: This only decodes the payload, it does NOT validate the signature or expiry.
+ * @param {string} token The JWT string (e.g., header.payload.signature)
+ * @returns {number|null} The user ID, or null if decoding fails.
+ */
+export function getUserIdFromToken(token) {
+  if (!token) return null;
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) {
+      console.error("Invalid JWT format.");
+      return null;
+    }
+
+    // Base64Url decode the payload (part[1])
+    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    // Handle padding for older/non-compliant tokens if needed
+    const paddedBase64 =
+      base64.length % 4 === 0
+        ? base64
+        : base64 + "=".repeat(4 - (base64.length % 4));
+
+    const payload = JSON.parse(atob(paddedBase64));
+
+    // Match backend logic for user_id/id keys
+    const userId = payload.user_id || payload.id;
+    return typeof userId === "number"
+      ? userId
+      : userId
+      ? parseInt(userId, 10)
+      : null;
+  } catch (error) {
+    console.error("Failed to decode token payload:", error);
+    return null;
+  }
+}
+
 // --- MOCK DATA GENERATION (Re-added for standalone functionality) ---
 
 /**
