@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Movie Schedule Form</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f5f5f5;
+        margin: 0;
+        padding: 40px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .form-container {
+        background: #fff;
+        padding: 25px 35px;
+        width: 600px;
+        border-radius: 10px;
+        box-shadow: 0 0 12px rgba(0,0,0,0.1);
+    }
+
+    .row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: bold;
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 8px;
+        margin-top: 3px;
+        box-sizing: border-box;
+    }
+
+    /* Card grid */
+    .card-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .card {
+        background: #fafafa;
+        border: 1px solid #ddd;
+        padding: 12px;
+        border-radius: 8px;
+    }
+
+    .card .time {
+        font-weight: bold;
+        margin-bottom: 6px;
+    }
+
+    /* Ticket pricing rows */
+    .pricing-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .pricing-row input {
+        width: 120px;
+    }
+
+    /* Submit */
+    .submit-btn {
+        width: 100%;
+        padding: 12px;
+        background: #0078ff;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    .submit-btn:hover {
+        background: #005fcc;
+    }
+</style>
+</head>
+
+<body>
+<div class="form-container">
+    <form>
+
+        <!-- Row 1: Date & Hall Number -->
+        <div class="row">
+            <div style="width:48%;">
+                <label for="date">Date</label>
+                <input type="date" id="date">
+            </div>
+            <div style="width:48%;">
+                <label for="hall">Hall Number</label>
+                <select id="hall">
+                    <option>Select Hall</option>
+                    <option>Hall 1</option>
+                    <option>Hall 2</option>
+                    <option>Hall 3</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Card grid -->
+        <div class="card-grid">
+            <div class="card">
+                <div class="time">10:00 AM – 12:00 PM</div>
+                <div class="title">Movie A</div>
+            </div>
+            <div class="card">
+                <div class="time">01:00 PM – 03:00 PM</div>
+                <div class="title">Movie B</div>
+            </div>
+            <div class="card">
+                <div class="time">04:00 PM – 06:00 PM</div>
+                <div class="title">Movie C</div>
+            </div>
+            <div class="card">
+                <div class="time">07:00 PM – 09:00 PM</div>
+                <div class="title">Movie D</div>
+            </div>
+        </div>
+
+        <!-- Movie dropdown (searchable) -->
+        <label for="movie">Movie</label>
+        <input list="movies" id="movie" placeholder="Search movie...">
+        <datalist id="movies">
+            <option>Interstellar</option>
+            <option>Inception</option>
+            <option>The Matrix</option>
+            <option>Dune</option>
+            <option>Avengers</option>
+        </datalist>
+
+        <br><br>
+
+        <!-- Time picker -->
+        <label for="time">Time</label>
+        <input type="time" id="time">
+        <br><br>
+
+        <!-- Ticket pricing -->
+        <label>Ticket Pricing</label>
+        
+        <div class="pricing-row">
+            <span>Regular Seat</span>
+            <input type="number" placeholder="Price">
+        </div>
+
+        <div class="pricing-row">
+            <span>Premium Seat</span>
+            <input type="number" placeholder="Price">
+        </div>
+
+        <div class="pricing-row">
+            <span>VIP Seat</span>
+            <input type="number" placeholder="Price">
+        </div>
+
+        <br>
+
+        <button class="submit-btn" type="submit">Submit</button>
+
+    </form>
+</div>
+</body>
+</html>
