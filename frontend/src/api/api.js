@@ -95,18 +95,22 @@ export async function fetchShowDetails(showId) {
 /**
  * Initiates a WebSocket connection for real-time seat status updates.
  * @param {number} showId The ID of the show.
+ * @param {string} authToken The user's authentication token.
  * @param {function} onMessageCallback Callback function to handle incoming message data.
  * @returns {WebSocket} The established WebSocket connection object.
  */
-export function connectSeatUpdates(showId, onMessageCallback) {
+export function connectSeatUpdates(showId, authToken, onMessageCallback) {
   const clientId = nanoid(); // Generate unique ID for client connection
 
-  // WS URL structure: ws://<server_url>/api/v1/shows/ws/{show_id}?clientId=<unique_id>
+  // Conditionally add the token to the query string (Backend will validate this)
+  const tokenQuery = authToken ? `&token=${authToken}` : "";
+
+  // WS URL structure: ws://<server_url>/api/v1/shows/ws/{show_id}?clientId=<unique_id>&token=<auth_token>
   const wsProtocol = API_BASE_URL.startsWith("https") ? "wss" : "ws";
   const wsUrl = `${wsProtocol}://${API_BASE_URL.replace(
     /^http(s?):\/\//,
     ""
-  )}${API_V1_STR}/shows/ws/${showId}?clientId=${clientId}`;
+  )}${API_V1_STR}/shows/ws/${showId}?clientId=${clientId}${tokenQuery}`;
 
   console.log(`Attempting to connect to WS: ${wsUrl}`);
 

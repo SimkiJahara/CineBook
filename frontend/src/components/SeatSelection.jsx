@@ -112,32 +112,35 @@ const SeatSelection = ({ showId, authToken }) => {
         setSeats(data.layout || []);
 
         // Establish WebSocket connection for real-time updates
-        ws = connectSeatUpdates(showId, (message) => {
+        ws = connectSeatUpdates(showId, authToken, (message) => {
           if (message.event === "seat_update" && Array.isArray(message.seats)) {
             setSeats((prevSeats) => {
               const updatedSeatsMap = new Map(prevSeats.map((s) => [s.id, s]));
 
-              message.seats.forEach((updatedSeat) => {
-                updatedSeatsMap.set(updatedSeat.id, updatedSeat);
+              message.seats.forEach(
+                (updatedSeat) => {
+                  updatedSeatsMap.set(updatedSeat.id, updatedSeat);
 
-                // Logic for handling the countdown timer
-                if (
-                  updatedSeat.status === "Pending" &&
-                  updatedSeat.hold_expiry_time &&
-                  updatedSeat.reserved_by_user_id === 10
-                ) {
-                  // Assuming user ID 10 is the authenticated user from the mock token
-                  setHoldExpiry(new Date(updatedSeat.hold_expiry_time));
-                } else if (
-                  updatedSeat.status !== "Pending" &&
-                  prevSeats.find((s) => s.id === updatedSeat.id)?.status ===
-                    "Pending"
-                ) {
-                  // If a seat changes from Pending (by anyone), reset the countdown if it was the reason for the timer.
-                  // In a full app, you would tie the countdown explicitly to the specific user's holding reservation ID.
-                  setHoldExpiry(null);
-                }
-              });
+                  // Logic for handling the countdown timer
+                  if (
+                    updatedSeat.status === "Pending" &&
+                    updatedSeat.hold_expiry_time &&
+                    updatedSeat.reserved_by_user_id === 10
+                  ) {
+                    // Assuming user ID 10 is the authenticated user from the mock token
+                    setHoldExpiry(new Date(updatedSeat.hold_expiry_time));
+                  } else if (
+                    updatedSeat.status !== "Pending" &&
+                    prevSeats.find((s) => s.id === updatedSeat.id)?.status ===
+                      "Pending"
+                  ) {
+                    // If a seat changes from Pending (by anyone), reset the countdown if it was the reason for the timer.
+                    // In a full app, you would tie the countdown explicitly to the specific user's holding reservation ID.
+                    setHoldExpiry(null);
+                  }
+                },
+                [showId, authToken]
+              );
               return Array.from(updatedSeatsMap.values());
             });
           }

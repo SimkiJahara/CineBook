@@ -17,7 +17,7 @@ from app.core.config import settings
 from app.core.db import Base, engine
 
 # Import the APIRouters
-from app.api.v1.endpoints.router import router as user_router
+from app.api.v1.endpoints.users import router as user_router
 from app.api.v1.endpoints.auth import router as auth_router
 from app.api.v1.endpoints.bookings import router as bookings_router
 from app.api.v1.endpoints.shows import router as shows_router
@@ -115,31 +115,34 @@ def on_startup():
 # --- END Alembic Integration Fix ---
 
 
-# 4. Include the user router under the base prefix `/v1`
+# CRITICAL FIX: Changed 'prefix="/v1"' to 'prefix=settings.API_V1_STR' for all routers.
+# This registers endpoints under /api/v1/... (matching frontend) instead of just /v1/...
+
+# 4. Include the user router under the base prefix `/api/v1`
 app.include_router(
     user_router,
-    prefix="/v1",
+    prefix=settings.API_V1_STR,
     tags=["Users"]
 )
 
-# 5. Include the authentication router under the base prefix `/v1`
+# 5. Include the authentication router under the base prefix `/api/v1`
 app.include_router(
     auth_router,
-    prefix="/v1",
+    prefix=settings.API_V1_STR,
     tags=["Authentication"]
 )
 
-# 6. Include the bookings router under the base prefix `/v1`
+# 6. Include the bookings router under the base prefix `/api/v1`
 app.include_router(
     bookings_router,
-    prefix="/v1",
+    prefix=settings.API_V1_STR,
     tags=["Bookings"]
 )
 
 # 7. Include the shows router (which contains the WebSocket endpoint)
 app.include_router(
     shows_router,
-    prefix="/v1",
+    prefix=settings.API_V1_STR,
     tags=["Shows"]
 )
 
@@ -157,7 +160,6 @@ def read_root():
         "version": settings.VERSION,
         "documentation": "/docs"
     }
-
 
 # Optional: Configuration for running the application directly (for local testing)
 if __name__ == "__main__":

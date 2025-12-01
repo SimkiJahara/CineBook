@@ -7,11 +7,18 @@ FastAPI dependency to authenticate and authorize users based on their access tok
 
 from datetime import datetime, timedelta
 from typing import Optional
+# Added InvalidTokenError here so it is available for import and use
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from app.core.config import settings # Assuming settings holds JWT configuration
+from app.core.config import settings 
+
+# --- NEW: Custom Error Class ---
+class InvalidTokenError(Exception):
+    """Raised when a JWT token is invalid or expired."""
+    pass
+# -----------------------------
 
 # --- Configuration ---
 # CryptContext for password hashing
@@ -25,37 +32,18 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/token")
 def get_password_hash(password: str) -> str:
     """
     Hashes a plaintext password using the configured CryptContext (bcrypt).
-
-    :param password: The plain text password.
-    :type password: str
-    :return: The securely hashed password string.
-    :rtype: str
     """
     return pwd_context.hash(password)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
     Verifies a plaintext password against a hashed one.
-
-    :param plain_password: The password provided by the user (unhashed).
-    :type plain_password: str
-    :param hashed_password: The stored hashed password from the database.
-    :type hashed_password: str
-    :return: True if the passwords match, False otherwise.
-    :rtype: bool
     """
     return pwd_context.verify(plain_password, hashed_password)
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     """
     Creates a JWT access token containing the user's data and an expiry timestamp.
-
-    :param data: The payload data to encode (e.g., {"user_id": 1, "role": "Buyer"}).
-    :type data: dict
-    :param expires_delta: Optional timedelta for custom token expiration.
-    :type expires_delta: Optional[datetime.timedelta]
-    :return: The encoded JWT string.
-    :rtype: str
     """
     to_encode = data.copy()
     if expires_delta:
@@ -74,20 +62,30 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     )
     return encoded_jwt
 
-# --- Dependency Function (The missing piece) ---
+# --- NEW: Standalone JWT Decoder (used by WebSockets) ---
+def decode_jwt(token: str) -> dict:
+    """
+    Decodes and validates a JWT token using settings.
+    
+    :raises InvalidTokenError: If decoding fails due to expiration or invalid signature.
+    """
+    try:
+        payload = jwt.decode(
+            token, 
+            settings.SECRET_KEY, 
+            algorithms=[settings.ALGORITHM]
+        )
+        return payload
+    except JWTError as e:
+        # Catch all JWT errors (expired, invalid signature, etc.) and raise our custom error
+        raise InvalidTokenError(f"JWT validation failed: {e}")
+# ----------------------------------------------------
 
+
+# --- Dependency Function ---
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
     """
     Dependency that decodes and validates the JWT token, returning the user payload.
-
-    This function is used to protect API endpoints, ensuring only authenticated users 
-    can access them. It validates the token's signature and expiration time.
-
-    :param token: The raw JWT token extracted from the request's Authorization header.
-    :type token: str
-    :raises HTTPException: 401 Unauthorized if the token is invalid, expired, or missing user data.
-    :return: A dictionary containing the authenticated user's ID and role (e.g., {"id": 1, "role": "Buyer"}).
-    :rtype: dict
     """
     # Define credentials exception for unauthorized access
     credentials_exception = HTTPException(
@@ -97,7 +95,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
     )
     
     try:
-        # 1. Decode the token
+        # 1. Decode the token (JWTError will be caught below)
         payload = jwt.decode(
             token, 
             settings.SECRET_KEY, 
