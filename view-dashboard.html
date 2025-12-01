@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .tasks {
+            display: flex;
+            flex-direction: column;
+            row-gap: 15px;
+            align-items: center;
+        }
+        .task {
+            background-color: brown;
+            color: white;
+            padding: 20px 40px;
+            width: 500px;
+            font-size: 24px;
+            text-align: center;
+            border-radius: 12px;
+            /* margin: 15px; */
+            /* display: inline-block; */
+            
+        }
+        .task a {
+            color: white;
+        }
+        .header {
+            display: flex;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            background-color: brown;
+            align-items: center;
+        }
+        .logo {
+            flex: 2;
+            font-size: 30px;
+        }
+        .logout {
+            flex: 1;
+            text-align: right;
+            font-size: 20px;
+        }
+        .logo a {
+            color: white;
+        }
+        .logout a {
+            padding: 8px 25px;
+            border-radius: 3px;
+            background-color: white;
+            color: brown;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="logo">
+            <a href="https://youtube.com"> CineBook </a>
+        </div>
+
+        <div class="logout">
+            <a href="https://youtube.com"> Log Out </a>
+        </div>
+    </div>
+    
+    <div class="tasks">
+        <div class="task">
+            <a href="https://youtube.com"> Schedule A Screening </a>
+        </div>
+
+        <div class="task">
+            <a href="https://youtube.com"> View Unpublished Screenings </a>
+        </div>
+
+        <div class="task">
+            <a href="https://youtube.com"> View Published Screenings </a>
+        </div>
+
+        <div class="task">
+            <a href="https://youtube.com"> View Past Screenings </a>
+        </div>
+
+        <div class="task">
+            <a href="https://youtube.com"> Request Movie Addition to Database </a>
+        </div class="task">
+
+        <div class="task">
+            <a href="https://youtube.com"> Check Status of Movie Addition Request </a>
+        </div>
+    </div>
+</body>
+</html>
