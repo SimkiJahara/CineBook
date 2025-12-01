@@ -4,10 +4,6 @@ SQLAlchemy Models for Seats and Bookings.
 This module defines the models related to physical seats, the real-time status
 of seats for specific shows (ShowSeat), the final confirmed booking transaction (Booking),
 and the mapping of booked seats (BookedSeat).
-
-The Seat model has been refactored to use a simple foreign key relationship to the
-Screen model (via screen_id) instead of a complex composite key structure,
-resolving the missing table error.
 """
 
 import enum
@@ -49,23 +45,6 @@ class Seat(Base):
     Represents a physical seat in a screen layout.
     
     The primary key is now a composite of ``seatid`` and ``screen_id``.
-
-    :ivar seatid: Component of the composite primary key: The seat's identifier (e.g., 'A1').
-    :vartype seatid: str
-    :ivar screen_id: Component of the composite primary key: Foreign key to the :class:`~app.models.screen.Screen` table.
-    :vartype screen_id: int
-    :ivar rownumber: The row identifier (e.g., 'A', 'B').
-    :vartype rownumber: str
-    :ivar number: The column/number identifier of the seat.
-    :vartype number: int
-    :ivar type: The type of seat (e.g., 'Standard', 'VIP').
-    :vartype type: str
-    :ivar status: The general status of the seat type.
-    :vartype status: str
-    :ivar screen: Relationship back to the parent :class:`~app.models.screen.Screen` object.
-    :vartype screen: relationship
-    :ivar show_seats: Relationship to the :class:`ShowSeat` model.
-    :vartype show_seats: relationship
     """
     __tablename__ = "seat"
     
@@ -85,6 +64,7 @@ class Seat(Base):
 
     __table_args__ = (
         # The previous ForeignKeyConstraint referencing 'seatlayout' is REMOVED to fix the error.
+        # Keeping empty tuple to avoid issue with declaration of __table_args__ as non-dict
     )
 
 
@@ -137,7 +117,6 @@ class ShowSeat(Base):
 class Booking(Base):
     """
     Represents a final confirmed booking transaction (e.g., ticket purchase).
-    ... (No changes needed for Booking)
     """
     __tablename__ = "booking"
 
@@ -162,7 +141,13 @@ class Booking(Base):
 
 
     # relationships
-    user = relationship("Buyer", back_populates="bookings", foreign_keys="[Booking.buyerid]")
+    # 🚀 FIX: Added 'overlaps' parameter to silence the SAWarning related to User/Buyer inheritance
+    user = relationship(
+        "Buyer", 
+        back_populates="bookings", 
+        foreign_keys="[Booking.buyerid]",
+        overlaps="bookings"
+    )
     # FIX: Renamed 'show' to 'screening'
     screening = relationship("Screening", back_populates="bookings", foreign_keys="[Booking.screeningid]") 
     booked_seats = relationship("BookedSeat", back_populates="booking")
@@ -171,7 +156,6 @@ class Booking(Base):
 class BookedSeat(Base):
     """
     Mapping table between a :class:`Booking` and the individual :class:`ShowSeat` confirmed.
-    ... (No changes needed for BookedSeat)
     """
     __tablename__ = "bookingseat" # FIX: Correct schema table name
     

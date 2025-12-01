@@ -1,52 +1,57 @@
 """
-SQLAlchemy Model for Movie.
+SQLAlchemy Models for Screening.
 
-This module defines the Movie table, which stores details about films available
-for screening and establishes a one-to-many relationship with the Screening model.
+This module defines the Screening table and imports necessary dependencies.
 """
 
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, DateTime
+# Importing Float and ForeignKey are necessary for the columns defined below
+from sqlalchemy import Column, Integer, DateTime, ForeignKey, Float
 from sqlalchemy.orm import relationship
+
 from app.core.db import Base 
+# Note: You may need to import Movie and Screen if your IDE/linter complains, 
+# but SQLAlchemy can resolve the strings if the models are imported in main.py.
+# from .movie import Movie
+# from .screen import Screen 
 
-class Movie(Base):
+class Screening(Base):
     """
-    Represents a movie available for screening.
-
-    :ivar id: Unique primary key of the movie.
-    :vartype id: int
-    :ivar title: The main title of the movie (required).
-    :vartype title: str
-    :ivar director: The name of the movie's director.
-    :vartype director: str
-    :ivar release_date: The official release date of the movie.
-    :vartype release_date: datetime.datetime
-    :ivar duration_minutes: The runtime of the movie in minutes (required).
-    :vartype duration_minutes: int
-    :ivar rating: The content rating of the movie (e.g., PG, R).
-    :vartype rating: str
-    :ivar screenings: Relationship to the :class:`~app.models.show.Screening` model, representing
-        all screenings of this movie. Deleting a movie deletes all associated screenings.
-    :vartype screenings: relationship
+    Represents a specific showing of a movie at a theatre screen.
     """
-
-    __tablename__ = "movie"
+    __tablename__ = "screening"
+    
+    # FIX 1: Add extend_existing=True for robustness, as models are imported in main.py
+    __table_args__ = {'extend_existing': True}
 
     id = Column(Integer, primary_key=True, index=True) 
     
-    title = Column(String, nullable=False, index=True)
-    director = Column(String, nullable=True)
-    release_date = Column(DateTime, nullable=True)
-    duration_minutes = Column(Integer, nullable=False)
-    rating = Column(String, nullable=True)
+    # --- Foreign Keys ---
+    movie_id = Column(Integer, ForeignKey("movie.id"), index=True, nullable=False)
     
-    # FIX: Changed relationship target from "Show" to "Screening" and attribute name to 'screenings'
-    screenings = relationship(
-        "Screening", 
-        back_populates="movie", 
-        cascade="all, delete-orphan"
-    )
+    # 💡 FIX 2: Add the foreign key column linking a screening to its screen.
+    screen_id = Column(Integer, ForeignKey("screen.id"), index=True, nullable=False)
+    
+    start_time = Column(DateTime, nullable=False, index=True)
+    price = Column(Float, nullable=False)
 
+    # --- Relationships ---
+    # 1. Relationship back to Movie
+    movie = relationship("Movie", back_populates="screenings")
+
+    # 2. FIX 3: Relationship back to Screen to satisfy the Screen.screenings relationship
+    screen = relationship("Screen", back_populates="screenings")
+
+    # 3. Relationship to ShowSeat (Defined in app/models/seat.py with back_populates="screening")
+    show_seats = relationship(
+        "ShowSeat", 
+        back_populates="screening",
+        cascade="all, delete-orphan", 
+        primaryjoin="Screening.id == ShowSeat.screening_id" 
+    )
+    
+    # 4. Relationship to Booking (Defined in app/models/seat.py with back_populates="screening")
+    bookings = relationship("Booking", back_populates="screening")
+    
     def __repr__(self):
-        return f"<Movie(id={self.id}, title='{self.title}')>"
+        return f"<Screening(id={self.id}, movie_id={self.movie_id}, screen_id={self.screen_id}, start_time='{self.start_time}')>"
