@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 # NOTE: Assuming these imports are correct based on your project structure
 from app.crud.user import  crud_user
 from app.schemas.user import UserResponse, BuyerCreate, TheatreOwnerCreate, SuperadminCreate
-from app.core.dependencies import get_db
+from app.core.db import get_db
 
 router = APIRouter(
     prefix="/users",

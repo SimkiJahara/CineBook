@@ -65,19 +65,7 @@ async def lifespan(app: FastAPI):
     """
     Handles startup and shutdown events using FastAPI's lifespan context manager.
 
-<<<<<<< HEAD
     Database setup (Base.metadata.create_all) has been removed and delegated to Alembic.
-=======
-    **Startup:**
-    1. Creates all database tables via SQLAlchemy's Base metadata.
-    2. Starts the background scheduler for seat hold cleanup.
-
-    **Shutdown:**
-    1. Gracefully shuts down the background scheduler.
-
-    :param app: The FastAPI application instance.
-    :yields: Control back to the application to handle requests.
->>>>>>> 496d5912409a5983da933bd4c61159826a81830e
     """
     # === Startup Events ===
     print("Application startup...")
@@ -101,14 +89,9 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-<<<<<<< HEAD
     openapi_url="/openapi.json"
     # NOTE: In a real environment, you should also pass 'lifespan=lifespan' here, 
     # but based on your provided snippet, I'll stick to removing the redundant on_event below.
-=======
-    openapi_url="/openapi.json",
-    lifespan=lifespan # Attach the lifespan context manager
->>>>>>> 496d5912409a5983da933bd4c61159826a81830e
 )
 
 # 2. Add CORS middleware to allow connections from the frontend (e.g., for WebSockets/HTTP)
@@ -120,7 +103,6 @@ app.add_middleware(
     allow_headers=["*"], # Allows all headers
 )
 
-<<<<<<< HEAD
 # 2. Add a startup event handler to automatically create all database tables
 # --- START Alembic Integration Fix ---
 # This event handler is largely redundant if using lifespan and should not contain create_all
@@ -128,17 +110,6 @@ app.add_middleware(
 def on_startup():
     """
     Database schema initialization logic is skipped. It is now handled by Alembic migrations.
-=======
-# 3. Add a startup event handler to automatically create all database tables
-# NOTE: The logic has been moved to the `lifespan` function above, but keeping
-# the on_event for potential backward compatibility.
-@app.on_event("startup")
-def on_startup():
-    """
-    Creates all database tables defined by SQLAlchemy's Base metadata.
-
-    This ensures the database schema is ready before the application accepts traffic.
->>>>>>> 496d5912409a5983da933bd4c61159826a81830e
     """
     print("Database schema initialization skipped, managed by Alembic.")
 # --- END Alembic Integration Fix ---
