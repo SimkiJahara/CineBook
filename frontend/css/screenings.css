@@ -1,0 +1,172 @@
+/* ---- Base layout ---- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+
+  /* 🔥 NEW: white page background */
+  background: #ffffff !important;
+  color: #111 !important;     /* readable text on white background */
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+/* ---- Card container ---- */
+.page-container {
+  width: 100%;
+  max-width: 720px;
+  background: rgba(15, 23, 42, 0.96); /* dark container unchanged */
+  border-radius: 18px;
+  padding: 24px 22px 26px;
+
+  /* nice shadow kept the same */
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(148, 163, 184, 0.16);
+
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  backdrop-filter: blur(10px);
+}
+
+
+/* ---- Heading ---- */
+.page-container h1 {
+  margin: 0 0 10px;
+  font-size: 1.6rem;
+  letter-spacing: 0.03em;
+  color: #e5e7eb;
+}
+
+.page-container > p:first-of-type {
+  margin: 2px 0 16px;
+  font-size: 0.95rem;
+  color: #9ca3af;
+}
+
+.page-container > p:first-of-type strong {
+  color: #e5e7eb;
+}
+
+/* ---- Form fields ---- */
+.field {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field label {
+  font-size: 0.9rem;
+  color: #e5e7eb;
+}
+
+/* inputs & selects */
+select,
+input[type="date"],
+button {
+  font-size: 0.93rem;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background: rgba(15, 23, 42, 0.9);
+  color: #e5e7eb;
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease,
+    transform 0.08s ease;
+}
+
+/* placeholder / default option */
+select:has(option[value=""]:checked),
+select:invalid {
+  color: #9ca3af;
+}
+
+/* focus styles */
+select:focus,
+input[type="date"]:focus {
+  border-color: #f97316;
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.5);
+}
+
+/* disabled state */
+select:disabled,
+input[type="date"]:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ---- Selected info ---- */
+.selected {
+  margin-top: 14px;
+  font-size: 0.95rem;
+  color: #cbd5f5;
+}
+
+.selected span {
+  font-weight: 600;
+  color: #f97316;
+}
+
+/* ---- Button ---- */
+button {
+  margin-top: 16px;
+  cursor: pointer;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f97316, #fb923c);
+  border: none;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  padding: 10px 16px;
+  align-self: flex-start;
+  box-shadow: 0 10px 20px rgba(249, 115, 22, 0.45);
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 26px rgba(249, 115, 22, 0.55);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 6px 14px rgba(249, 115, 22, 0.4);
+}
+
+/* disabled button */
+button[disabled] {
+  background: linear-gradient(135deg, #4b5563, #374151);
+  box-shadow: none;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ---- Responsive tweaks ---- */
+@media (max-width: 600px) {
+  .page-container {
+    padding: 18px 16px 20px;
+    border-radius: 14px;
+  }
+
+  .page-container h1 {
+    font-size: 1.3rem;
+  }
+
+  button {
+    width: 100%;
+    text-align: center;
+  }
+}

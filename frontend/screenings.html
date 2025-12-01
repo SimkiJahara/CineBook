@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CineBook – Select Showtime</title>
+  <link rel="stylesheet" href="css/screenings.css" />
+</head>
+<body>
+  <div class="page-container">
+    <h1>Select Location & Showtime</h1>
+
+    <p>
+      <strong>Movie:</strong>
+      <span id="selectedMovieTitle">Loading…</span>
+    </p>
+
+    <div class="field">
+      <label for="citySelect"><strong>City:</strong></label>
+      <select id="citySelect">
+        <option value="">-- Select a city --</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="theaterSelect"><strong>Theater:</strong></label>
+      <select id="theaterSelect" disabled>
+        <option value="">-- Select a theater --</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="hallSelect"><strong>Hall:</strong></label>
+      <select id="hallSelect" disabled>
+        <option value="">-- Select a hall --</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="dateInput"><strong>Date:</strong></label>
+      <input id="dateInput" type="date" disabled />
+    </div>
+
+    <div class="field">
+      <label for="screeningSelect"><strong>Showtime:</strong></label>
+      <select id="screeningSelect" disabled>
+        <option value="">-- Select showtime --</option>
+      </select>
+    </div>
+
+    <p class="selected">
+      Selected screening ID:
+      <span id="selectedScreeningText">None</span>
+    </p>
+
+    <button id="continueBtn" disabled>Continue to Payment</button>
+  </div>
+
+  <!-- keep your existing core API wrapper -->
+  <script src="js/core-api.js"></script>
+  <script type="module" src="js/screenings.js"></script>
+</body>
+</html>

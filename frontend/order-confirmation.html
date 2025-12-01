@@ -1,0 +1,61 @@
+<!-- frontend/order-confirmation.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CineBook – Order Confirmation</title>
+  <link rel="stylesheet" href="css/order-confirmation.css" />
+</head>
+<body>
+  <div class="page-container">
+    <header class="header">
+      <h1>Order Confirmation</h1>
+      <a href="screenings.html" class="back-link">&larr; Book another show</a>
+    </header>
+
+    <!-- shown if no booking found -->
+    <section id="noBooking" class="card card--border hidden">
+      <h2>No Booking Found</h2>
+      <p>No recent booking detected. Please make a booking first.</p>
+      <a href="screenings.html" class="link-secondary">Go to Screenings</a>
+    </section>
+
+    <!-- main ticket card -->
+    <section id="ticketCard" class="card card--ticket">
+      <div class="ticket-main">
+        <div class="ticket-left">
+          <p class="booking-label">Booking ID</p>
+          <p class="booking-id" id="bookingId">CB-0000</p>
+
+          <h2 id="movieTitle">Movie Title</h2>
+
+          <p><strong>Theater:</strong> <span id="theaterName">-</span></p>
+          <p><strong>Hall:</strong> <span id="hallName">-</span></p>
+          <p><strong>Date:</strong> <span id="showDate">-</span></p>
+          <p><strong>Time:</strong> <span id="showTime">See showtime selection</span></p>
+          <p><strong>Seats:</strong> <span id="seatList">-</span></p>
+          <p class="total-paid">
+            <strong>Total Paid:</strong> <span id="totalPaid">0</span> Tk
+          </p>
+        </div>
+
+        <div class="ticket-right">
+          <div class="qr-box"></div>
+          <p class="qr-label">Show this code at the entrance</p>
+          <p class="qr-text" id="qrText"></p>
+        </div>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button id="downloadBtn" class="btn-primary">
+        Download Ticket (PDF)
+      </button>
+      <a href="bookings.html" class="link-secondary">Go to My Bookings</a>
+    </div>
+  </div>
+
+  <script src="js/core-api.js"></script>
+  <script type="module" src="js/order-confirmation.js"></script>
+</body>
+</html>

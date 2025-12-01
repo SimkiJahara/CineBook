@@ -1,0 +1,81 @@
+<!-- frontend/payment.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CineBook – Payment</title>
+  <link rel="stylesheet" href="css/payment.css" />
+</head>
+<body>
+  <div class="page-container">
+    <header class="header">
+      <h1>CineBook – Payment</h1>
+      <a href="screenings.html" class="back-link">&larr; Back to Showtime Selection</a>
+    </header>
+
+    <!-- Booking summary -->
+    <section id="bookingSummary" class="card card--border">
+      <h2>Booking Summary</h2>
+      <p><strong>Movie:</strong> <span id="movieTitle">Loading…</span></p>
+      <p><strong>Language:</strong> <span id="movieLanguage">-</span></p>
+      <p><strong>Rating:</strong> <span id="movieRating">-</span></p>
+
+      <p><strong>Theater:</strong> <span id="theaterName">-</span></p>
+      <p><strong>Hall:</strong> <span id="hallName">-</span></p>
+      <p><strong>Date:</strong> <span id="showDate">-</span></p>
+      <p><strong>Time:</strong> <span id="showTime">-</span></p>
+      <p><strong>Seats:</strong> <span id="seatList">-</span></p>
+    </section>
+
+    <!-- Price details -->
+    <section class="card card--border">
+      <h2>Price Details</h2>
+      <p>
+        Ticket price
+        (<span id="seatCount">3</span> x
+        <span id="seatPrice">0</span> Tk):
+        <strong><span id="subTotal">0</span> Tk</strong>
+      </p>
+      <p>
+        Platform fee:
+        <strong><span id="platformFee">50</span> Tk</strong>
+      </p>
+      <hr />
+      <p class="total-row">
+        <strong>Total:</strong>
+        <span id="totalAmount">0</span> Tk
+      </p>
+    </section>
+
+    <!-- Payment method -->
+    <section class="card card--border">
+      <h2>Select Payment Method</h2>
+
+      <label class="payment-option">
+        <input type="radio" name="paymentMethod" value="bkash" checked />
+        bKash
+      </label>
+
+      <label class="payment-option">
+        <input type="radio" name="paymentMethod" value="nagad" />
+        Nagad
+      </label>
+
+      <label class="payment-option">
+        <input type="radio" name="paymentMethod" value="card" />
+        Credit / Debit Card
+      </label>
+    </section>
+
+    <div class="actions">
+      <button id="payNowBtn" class="btn-primary">
+        Pay Now
+      </button>
+      <p id="paymentStatus" class="payment-status"></p>
+    </div>
+  </div>
+
+  <script src="js/core-api.js"></script>
+  <script type="module" src="js/payment.js"></script>
+</body>
+</html>
