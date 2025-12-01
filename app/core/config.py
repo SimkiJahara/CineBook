@@ -68,4 +68,5 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 # Instantiate the settings object
-settings = Settings()
+settings = Settings() 
+
