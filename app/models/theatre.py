@@ -62,10 +62,15 @@ class Theatre(Base):
     isverified = Column(Boolean, nullable=True)
     
     # Foreign Key linking to the TheaterOwner
-    ownerid = Column(Integer, ForeignKey("theaterowner.id"), nullable=False)
+    ownerid = Column(Integer, ForeignKey("theatreowner.id"), nullable=False)
 
     # Relationship to the TheaterOwner
-    owner = relationship("TheatreOwner", back_populates="theatres")
+    # FIX: Explicitly specify the foreign key column to resolve the mapper error.
+    owner = relationship(
+        "TheatreOwner", 
+        back_populates="theatres",
+        foreign_keys=[ownerid] 
+    )
 
     # Relationship to Screen (one-to-many) - CRITICAL COMPOSITE KEY UPDATE
     # The primaryjoin explicitly links Theatre's PK columns to the FK columns in Screen.

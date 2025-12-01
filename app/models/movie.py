@@ -2,7 +2,7 @@
 SQLAlchemy Model for Movie.
 
 This module defines the Movie table, which stores details about films available
-for screening and establishes a one-to-many relationship with the Show model.
+for screening and establishes a one-to-many relationship with the Screening model.
 """
 
 from datetime import datetime
@@ -26,14 +26,17 @@ class Movie(Base):
     :vartype duration_minutes: int
     :ivar rating: The content rating of the movie (e.g., PG, R).
     :vartype rating: str
-    :ivar shows: Relationship to the :class:`~app.models.show.Show` model, representing
-        all screenings of this movie. Deleting a movie deletes all associated shows.
-    :vartype shows: relationship
+    :ivar screenings: Relationship to the :class:`~app.models.show.Screening` model, representing
+        all screenings of this movie. Deleting a movie deletes all associated screenings.
+    :vartype screenings: relationship
     """
 
     __tablename__ = "movie"
 
-    # CRITICAL FIX: Ensure primary_key=True is present and correctly capitalized
+    # FIX: This critical line must be present to resolve the 'Table already defined' error
+    # caused by circular imports during application startup.
+    __table_args__ = {'extend_existing': True}
+
     id = Column(Integer, primary_key=True, index=True) 
     
     title = Column(String, nullable=False, index=True)
@@ -42,9 +45,9 @@ class Movie(Base):
     duration_minutes = Column(Integer, nullable=False)
     rating = Column(String, nullable=True)
     
-    # Relationships back to the Show model
-    shows = relationship(
-        "Show", 
+    # Corrected target to "Screening" and relationship name to 'screenings'
+    screenings = relationship(
+        "Screening", 
         back_populates="movie", 
         cascade="all, delete-orphan"
     )

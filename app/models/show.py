@@ -1,75 +1,52 @@
 """
-SQLAlchemy Model for Screening.
+SQLAlchemy Model for Movie.
 
-This module defines the Screening model (representing a specific showtime), 
-which links a Movie, a Screen, and schedule details, serving as the central 
-entity for booking and real-time seat status.
+This module defines the Movie table, which stores details about films available
+for screening and establishes a one-to-many relationship with the Screening model.
 """
 
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float
+from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 from app.core.db import Base 
 
-# Explicitly import necessary models for relationships
-from app.models.seat import ShowSeat, Booking 
-# Assuming Movie, Screen, and User models exist and are used in other relationships
-
-class Screening(Base): 
+class Movie(Base):
     """
-    Represents a scheduled screening of a movie at a specific time and hall/screen.
+    Represents a movie available for screening.
 
-    :ivar id: Unique primary key of the screening record.
+    :ivar id: Unique primary key of the movie.
     :vartype id: int
-    :ivar movie_id: Foreign key to the :class:`~app.models.movie.Movie` being shown.
-    :vartype movie_id: int
-    :ivar screen_id: Foreign key to the :class:`~app.models.screen.Screen` where the movie is playing.
-    :vartype screen_id: int
-    :ivar start_time: The scheduled start time of the screening.
-    :vartype start_time: datetime.datetime
-    :ivar end_time: The calculated end time of the screening.
-    :vartype end_time: datetime.datetime
-    :ivar base_price: The standard ticket price for this screening.
-    :vartype base_price: float
-    :ivar movie: Relationship back to the parent :class:`~app.models.movie.Movie` object.
-    :vartype movie: relationship
-    :ivar screen: Relationship back to the parent :class:`~app.models.screen.Screen` object.
-    :vartype screen: relationship
-    :ivar show_seats: Relationship to the :class:`~app.models.seat.ShowSeat` model, representing
-        the real-time status of all individual seats for this specific screening.
-    :vartype show_seats: relationship
-    :ivar bookings: Relationship to the :class:`~app.models.seat.Booking` model, listing
-        all confirmed booking transactions for this screening.
-    :vartype bookings: relationship
+    :ivar title: The main title of the movie (required).
+    :vartype title: str
+    :ivar director: The name of the movie's director.
+    :vartype director: str
+    :ivar release_date: The official release date of the movie.
+    :vartype release_date: datetime.datetime
+    :ivar duration_minutes: The runtime of the movie in minutes (required).
+    :vartype duration_minutes: int
+    :ivar rating: The content rating of the movie (e.g., PG, R).
+    :vartype rating: str
+    :ivar screenings: Relationship to the :class:`~app.models.show.Screening` model, representing
+        all screenings of this movie. Deleting a movie deletes all associated screenings.
+    :vartype screenings: relationship
     """
 
-    __tablename__ = "screening" 
+    __tablename__ = "movie"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True) 
     
-    # Foreign Keys
-    movie_id = Column(Integer, ForeignKey("movie.id"), index=True, nullable=False) 
-    screen_id = Column(Integer, ForeignKey("screen.id"), index=True, nullable=False) 
+    title = Column(String, nullable=False, index=True)
+    director = Column(String, nullable=True)
+    release_date = Column(DateTime, nullable=True)
+    duration_minutes = Column(Integer, nullable=False)
+    rating = Column(String, nullable=True)
     
-    # Show details
-    start_time = Column(DateTime, nullable=False)
-    end_time = Column(DateTime, nullable=False)
-    base_price = Column(Float, nullable=False)
-    
-    # Relationships
-    movie = relationship("Movie", back_populates="screenings") 
-    screen = relationship("Screen", back_populates="screenings") 
-    
-    # Relationship to ShowSeat
-    show_seats = relationship(
-        "ShowSeat", 
-        back_populates="screening", 
-        cascade="all, delete-orphan",
-        foreign_keys="[ShowSeat.screening_id]" # Added foreign_keys argument
+    # FIX: Changed relationship target from "Show" to "Screening" and attribute name to 'screenings'
+    screenings = relationship(
+        "Screening", 
+        back_populates="movie", 
+        cascade="all, delete-orphan"
     )
-    
-    # Relationship to Booking
-    bookings = relationship("Booking", back_populates="screening") 
 
     def __repr__(self):
-        return f"<Screening(id={self.id}, start_time='{self.start_time}')>"
+        return f"<Movie(id={self.id}, title='{self.title}')>"

@@ -28,17 +28,27 @@ class Screen(Base):
     :vartype capacity: int
     :ivar theatre: Relationship back to the parent :class:`~app.models.theater.Theatre` object.
     :vartype theatre: relationship
-    :ivar shows: Relationship to the :class:`~app.models.show.Show` model, representing
+    :ivar screenings: Relationship to the :class:`~app.models.show.Screening` model, representing
         all shows scheduled for this screen. Deleting a screen deletes associated shows.
-    :vartype shows: relationship
+    :vartype screenings: relationship
     :ivar seats: Relationship to the :class:`~app.models.seat.Seat` model, representing
         all individual seats within this screen.
     :vartype seats: relationship
     """
 
     __tablename__ = "screen" 
+    
+    # FIX: Add extend_existing=True for robustness against circular imports.
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ['theatre_company_id', 'theatre_branch_id'],
+            ['theater.companyid', 'theater.branchid'] # References the composite PK of the Theatre table
+        ),
+        UniqueConstraint('theatre_company_id', 'theatre_branch_id', 'name', name='_screen_uc'),
+        {'extend_existing': True} # ADDED THIS LINE HERE
+    )
 
-    # CRITICAL FIX: Ensure this ID is defined as the Primary Key
+
     id = Column(Integer, primary_key=True, index=True) 
     
     # Composite Foreign Keys columns for 'theater'
@@ -50,17 +60,12 @@ class Screen(Base):
 
     # Relationships
     theatre = relationship("Theatre", back_populates="screens")
-    shows = relationship("Show", back_populates="screen", cascade="all, delete-orphan")
-    seats = relationship("Seat", back_populates="screen")
+    
+    # Corrected target to "Screening" and property name to 'screenings'
+    screenings = relationship("Screening", back_populates="screen", cascade="all, delete-orphan")
+    
+    seats = relationship("Seat", back_populates="screen", cascade="all, delete-orphan")
 
-    # Define the composite foreign key constraint
-    __table_args__ = (
-        ForeignKeyConstraint(
-            ['theatre_company_id', 'theatre_branch_id'],
-            ['theater.companyid', 'theater.branchid'] # References the composite PK of the Theatre table
-        ),
-        UniqueConstraint('theatre_company_id', 'theatre_branch_id', 'name', name='_screen_uc'),
-    )
 
     def __repr__(self):
         return f"<Screen(id={self.id}, name='{self.name}')>"

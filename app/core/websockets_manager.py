@@ -25,9 +25,14 @@ class ConnectionManager:
         # Dictionary to hold active connections: {show_id: {websocket_client_id: WebSocket}}
         self.active_connections: Dict[int, Dict[str, WebSocket]] = {}
 
-    async def connect(self, show_id: int, websocket: WebSocket, client_id: str):
+    def connect(self, show_id: int, websocket: WebSocket, client_id: str):
         """
-        Accepts a WebSocket connection and registers it under the specified show ID and client ID.
+        Registers an *already accepted* WebSocket connection under the specified
+        show ID and client ID.
+
+        .. note::
+            The WebSocket connection MUST be explicitly accepted by calling
+            ``websocket.accept()`` in the FastAPI endpoint before calling this method.
 
         :param show_id: The ID of the show the client is subscribing to.
         :type show_id: int
@@ -36,7 +41,7 @@ class ConnectionManager:
         :param client_id: A unique identifier for the connecting client.
         :type client_id: str
         """
-        await websocket.accept()
+        # FIX: Removed await websocket.accept() because it is now handled in the endpoint (shows.py)
         if show_id not in self.active_connections:
             self.active_connections[show_id] = {}
         self.active_connections[show_id][client_id] = websocket
