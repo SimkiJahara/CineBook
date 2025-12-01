@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CineBook — Published Screenings</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f5f5f5;
+    }
+
+    /* Header */
+    header {
+        background: #1e1e1e;
+        color: white;
+        padding: 15px 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .header-left {
+        font-size: 22px;
+        font-weight: bold;
+    }
+
+    .header-center {
+        font-size: 18px;
+        font-weight: 500;
+        opacity: 0.9;
+    }
+
+    .header-right {
+        display: flex;
+        aligns-items: center;
+        gap: 20px;
+    }
+
+    .header-right a {
+        color: white;
+        text-decoration: none;
+        font-size: 16px;
+    }
+
+    .logout-btn {
+        background: #ff4b4b;
+        padding: 8px 14px;
+        border: none;
+        color: white;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    /* Page layout */
+    .page-container {
+        display: flex;
+        padding: 25px;
+        gap: 30px;
+        align-items: flex-start;
+    }
+
+    /* Filters */
+    .filters {
+        width: 250px;
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.08);
+    }
+
+    .filters label {
+        font-weight: bold;
+        display: block;
+        margin: 15px 0 5px;
+    }
+
+    .filters input[type="date"],
+    .filters input[list] {
+        width: 100%;
+        padding: 7px;
+        box-sizing: border-box;
+    }
+
+    /* Align checkboxes cleanly */
+    .checkbox-group {
+        margin-top: 5px;
+    }
+
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+
+    .apply-btn {
+        margin-top: 20px;
+        width: 100%;
+        padding: 10px;
+        border: none;
+        background: #0078ff;
+        color: white;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .apply-btn:hover {
+        background: #005fcc;
+    }
+
+    /* Screenings */
+    .screenings {
+        flex: 1;
+    }
+
+    .date-heading {
+        font-size: 22px;
+        font-weight: bold;
+        margin-top: 20px;
+        margin-bottom: 5px;
+        padding-left: 0px;
+    }
+    .date-line {
+        height: 1px;
+        background: #ccc;
+        margin-top: 3px;
+        margin-bottom: 10px;
+        margin-left: 0px;
+        width: 95%;
+    }
+
+    .hall-heading {
+        font-size: 18px;
+        font-weight: 600;
+        margin-top: 10px;
+        margin-bottom: 5px;
+        padding-left: 20px;
+    }
+    .hall-line {
+        height: 1px;
+        background: #ddd;
+        margin-left: 20px;
+        width: 90%;
+        margin-bottom: 12px;
+    }
+
+    /* Movie Card */
+    .movie-card {
+        background: white;
+        padding: 18px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        margin-left: 40px; /* more indent for nested structure */
+        box-shadow: 0 0 8px rgba(0,0,0,0.1);
+
+        /* narrower width */
+        max-width: 700px;
+
+        /* increased height + spacing */
+        padding-bottom: 22px;
+    }
+
+    .card-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+    }
+
+    .datetime-block small {
+        display: block;
+        color: #555;
+        margin-top: 2px;
+    }
+
+    .view-btn {
+        background: #0066ff;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    /* Title (more spacing, height separation) */
+    .movie-title {
+        margin-top: 15px;
+        font-size: 18px;
+        font-weight: bold;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        max-width: 100%;
+        cursor: default;
+
+        /* clearer row separation */
+        padding-bottom: 8px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .movie-title:hover {
+        overflow: visible;
+        white-space: normal;
+        background: #ffffcc;
+        padding: 5px;
+        border-radius: 5px;
+        position: relative;
+        z-index: 10;
+    }
+
+    /* Horizontal seat details scroll */
+    .seat-scroll {
+        margin-top: 15px;
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        padding-bottom: 10px;
+
+        /* more spacing between rows */
+        border-bottom: 1px solid #eee;
+        padding-bottom: 15px;
+    }
+
+    .seat-card {
+        min-width: 140px;
+        background: #fafafa;
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 8px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .seat-card div {
+        margin: 4px 0;
+        font-size: 14px;
+    }
+
+    .pending-time {
+        margin-top: 18px;
+        font-size: 14px;
+        font-style: italic;
+        color: #444;
+    }
+</style>
+</head>
+
+<body>
+
+<!-- Header -->
+<header>
+    <div class="header-left">CineBook</div>
+    <div class="header-center">Your Published Screenings</div>
+
+    <div class="header-right">
+        <a href="dashboard.html">👤 Dashboard</a>
+        <button class="logout-btn">Logout</button>
+    </div>
+</header>
+
+<div class="page-container">
+
+    <!-- Filters Panel -->
+    <div class="filters">
+
+        <label for="f-date">Date</label>
+        <input type="date" id="f-date">
+
+        <label>Hall Number</label>
+        <div class="checkbox-group">
+            <div class="checkbox-item">
+                <input type="checkbox" id="h1"><label for="h1">Hall 1</label>
+            </div>
+            <div class="checkbox-item">
+                <input type="checkbox" id="h2"><label for="h2">Hall 2</label>
+            </div>
+            <div class="checkbox-item">
+                <input type="checkbox" id="h3"><label for="h3">Hall 3</label>
+            </div>
+        </div>
+
+        <label for="movie-search">Movies</label>
+        <input list="movie-list" id="movie-search" placeholder="Search movie...">
+        <datalist id="movie-list">
+            <option>Interstellar</option>
+            <option>Inception</option>
+            <option>The Matrix</option>
+            <option>Dune</option>
+            <option>Avengers</option>
+        </datalist>
+
+        <button class="apply-btn">Apply Filter</button>
+    </div>
+
+    <!-- Screenings List -->
+    <div class="screenings">
+
+        <div class="date-heading">January 10, 2025</div>
+        <div class="date-line"></div>
+
+        <div class="hall-heading">Hall 1</div>
+        <div class="hall-line"></div>
+
+        <!-- Movie Card -->
+        <div class="movie-card">
+            <div class="card-row">
+                <div class="datetime-block">
+                    <strong>Jan 10, 2025</strong>
+                    <small>07:00 PM</small>
+                </div>
+                <div><strong>Hall 1</strong></div>
+                <button class="view-btn">View Live Seat Update</button>
+            </div>
+
+            <div class="movie-title" title="A Very Long Movie Title That Gets Truncated">
+                A Very Long Movie Title That Gets Truncated
+            </div>
+
+            <div class="seat-scroll">
+                <div class="seat-card">
+                    <div>Regular</div>
+                    <div>$10</div>
+                    <div>34 sold</div>
+                </div>
+                <div class="seat-card">
+                    <div>Premium</div>
+                    <div>$15</div>
+                    <div>22 sold</div>
+                </div>
+                <div class="seat-card">
+                    <div>VIP</div>
+                    <div>$20</div>
+                    <div>18 sold</div>
+                </div>
+            </div>
+
+            <div class="pending-time">2 days 5 hours — pending time until showtime start</div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
