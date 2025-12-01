@@ -138,8 +138,8 @@ const SeatSelection = ({ showId, authToken }) => {
                     // In a full app, you would tie the countdown explicitly to the specific user's holding reservation ID.
                     setHoldExpiry(null);
                   }
-                },
-                [showId, authToken]
+                }
+                // REMOVED: [showId, authToken] was incorrectly placed here inside forEach
               );
               return Array.from(updatedSeatsMap.values());
             });
@@ -164,7 +164,7 @@ const SeatSelection = ({ showId, authToken }) => {
         ws.close();
       }
     };
-  }, [showId]);
+  }, [showId, authToken]); // ADDED: authToken to dependency array for correct WebSocket reconnection logic
 
   // 2. Hold Expiry Countdown Timer
   useEffect(() => {
