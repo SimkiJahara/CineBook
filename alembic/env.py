@@ -25,7 +25,11 @@ from app.models.movie import Movie
 from app.models.screen import Screen
 from app.models.show import Screening
 from app.models.seat import ShowSeat, Seat, Booking, BookedSeat
+<<<<<<< HEAD
 # REMOVED: from app.models.promocode import Promocode 
+=======
+from app.models.promocode import Promocode # <-- NEW MODEL IMPORT
+>>>>>>> 496d5912409a5983da933bd4c61159826a81830e
 
 
 # this is the Alembic Config object, which provides
@@ -37,6 +41,10 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # 💡 FIX 3: Set target_metadata to the Base.metadata object 
+<<<<<<< HEAD
+=======
+# so Alembic can find all your model definitions
+>>>>>>> 496d5912409a5983da933bd4c61159826a81830e
 target_metadata = Base.metadata
 
 # 💡 FIX 4: Set SQLAlchemy URL from application settings (Critical for connection)

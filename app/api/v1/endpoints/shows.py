@@ -44,8 +44,8 @@ async def websocket_endpoint(
     Handles WebSocket connections for real-time seat status updates.
 
     Clients connect to this endpoint to subscribe to live updates for a specific
-    show. The server pushes messages when a seat is reserved, confirmed, or
-    released.
+    show. The server immediately accepts the connection, then registers the
+    client with the connection manager.
 
     .. code-block:: none
 
@@ -61,8 +61,12 @@ async def websocket_endpoint(
     """
     
     try:
-        # Connect the client and accept the connection
-        await manager.connect(show_id, websocket, client_id)
+        # FIX: Explicitly accept the connection to complete the handshake IMMEDIATELY.
+        await websocket.accept()
+
+        # Now, register the client with the application-level manager.
+        # The manager.connect implementation must be updated to NOT call accept() again.
+        manager.connect(show_id, websocket, client_id)
         
         # Keep the connection open - server will push data when seat status changes
         while True:

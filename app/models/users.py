@@ -38,7 +38,8 @@ class User(Base):
         currently held (reserved, status=PENDING) by this user.
     :vartype reserved_seats: relationship
     :ivar bookings: Relationship to the :class:`~app.models.seat.Booking` model, linking to final 
-        confirmed bookings made by this user (as a Buyer).
+        confirmed bookings made by this user. This relationship traverses the indirect link 
+        through the :class:`~app.models.buyer.Buyer` ID.
     :vartype bookings: relationship
     """
 
@@ -67,11 +68,13 @@ class User(Base):
         foreign_keys="[ShowSeat.reserved_by_user_id]" 
     )
 
-    # Links to final confirmed bookings made by this user (Booking.user_id)
+    # Links to final confirmed bookings made by this user (Booking.buyerid)
+    # FIX: Explicitly set the join condition and remove 'back_populates' to resolve ambiguity 
+    # since Booking.buyerid links to Buyer.id which is the same as User.id.
     bookings = relationship(
         "Booking", 
-        back_populates="user", 
-        foreign_keys="[Booking.buyerid]"
+        primaryjoin="User.id == foreign(Booking.buyerid)",
+        back_populates=None
     )
     
     # ---------------------------------------------

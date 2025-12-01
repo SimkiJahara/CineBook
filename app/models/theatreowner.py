@@ -55,8 +55,12 @@ class TheatreOwner(Base):
     user = relationship("User", back_populates="theaterowner")
     
     # Relationship to Theatre (one-to-many)
+    # FIX: Explicitly define the join condition using primaryjoin to resolve the mapper ambiguity.
     theatres = relationship(
         "Theatre", 
+        # The join is TheatreOwner.id == Theatre.ownerid. The 'foreign' annotation
+        # is necessary to tell SQLAlchemy the column belongs to the remote side.
+        primaryjoin="TheatreOwner.id == foreign(Theatre.ownerid)", 
         back_populates="owner",
         cascade="all, delete-orphan"
     )

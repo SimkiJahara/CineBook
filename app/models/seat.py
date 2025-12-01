@@ -1,6 +1,13 @@
 """
 SQLAlchemy Models for Seats and Bookings.
+<<<<<<< HEAD
 ...
+=======
+
+This module defines the models related to physical seats, the real-time status
+of seats for specific shows (ShowSeat), the final confirmed booking transaction (Booking),
+and the mapping of booked seats (BookedSeat).
+>>>>>>> 496d5912409a5983da933bd4c61159826a81830e
 """
 
 import enum

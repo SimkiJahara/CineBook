@@ -22,6 +22,8 @@ class Buyer(Base):
     :vartype fullname: str
     :ivar user: Relationship back to the parent User object.
     :vartype user: relationship
+    :ivar bookings: Relationship to the :class:`~app.models.seat.Booking` model, listing all confirmed bookings made by this buyer.
+    :vartype bookings: relationship
     """
     
     __tablename__ = "buyer"
@@ -34,6 +36,15 @@ class Buyer(Base):
 
     # Relationship back to the base User
     user = relationship("User", back_populates="buyer")
+    
+    # FIX: Added the 'overlaps' parameter to suppress the warning about ambiguous relationships
+    # caused by the inheritance structure (Buyer is linked to User, which is also linked to Booking).
+    bookings = relationship(
+        "Booking", 
+        back_populates="user", 
+        cascade="all, delete-orphan",
+        overlaps="user,bookings"
+    )
 
     def __repr__(self):
         return f"<Buyer(id={self.id}, fullname='{self.fullname}')>"
