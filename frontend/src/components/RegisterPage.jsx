@@ -2,18 +2,17 @@
 
 import React, { useState } from "react";
 import { registerUser } from "../api/auth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const RegisterPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("buyer"); // Default role
+  const [role, setRole] = useState("buyer");
 
-  // Role-specific fields state variables
-  const [fullname, setFullname] = useState(""); // For 'buyer' (maps to fullname)
-  const [ownername, setOwnername] = useState(""); // For 'theatreowner' (maps to ownername)
-  const [businessname, setBusinessname] = useState(""); // For 'theatreowner'
-  const [licensenumber, setLicensenumber] = useState(""); // For 'theatreowner'
+  const [fullname, setFullname] = useState("");
+  const [ownername, setOwnername] = useState("");
+  const [businessname, setBusinessname] = useState("");
+  const [licensenumber, setLicensenumber] = useState("");
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -27,18 +26,16 @@ const RegisterPage = () => {
     let payload = {
       email,
       password,
-      role, // Pass the role to match the endpoint and schema type
+      role,
     };
 
     if (role === "buyer") {
-      // Required field for BuyerCreate is 'fullname'
       if (!fullname) {
         setError("Full Name is required for a Buyer.");
         return;
       }
       payload.fullname = fullname;
     } else if (role === "theatreowner") {
-      // Required fields for TheatreOwnerCreate: businessname, ownername, licensenumber
       if (!businessname || !ownername || !licensenumber) {
         setError("All required fields must be filled for a Theatre Owner.");
         return;
@@ -46,8 +43,6 @@ const RegisterPage = () => {
       payload.businessname = businessname;
       payload.ownername = ownername;
       payload.licensenumber = licensenumber;
-
-      // Optional fields like phone, bankdetails, logourl can be added here if collected in the form
     } else {
       setError("Invalid user role selected.");
       return;
@@ -55,10 +50,8 @@ const RegisterPage = () => {
 
     try {
       const data = await registerUser(payload);
-      // Assuming the successful response contains the user's email
       setSuccess(`Registration successful! Welcome, ${data.email}.`);
 
-      // Redirect after a short delay
       setTimeout(() => {
         navigate("/login");
       }, 2000);
@@ -69,31 +62,44 @@ const RegisterPage = () => {
     }
   };
 
-  // Helper variables for dynamic form fields
   const isBuyer = role === "buyer";
   const nameValue = isBuyer ? fullname : ownername;
   const setNameChange = isBuyer ? setFullname : setOwnername;
   const nameLabel = isBuyer ? "Full Name" : "Owner Name";
 
+  const inputClasses =
+    "shadow appearance-none border border-gray-700 rounded-xl w-full py-2 px-3 text-white bg-neutral-800 leading-tight focus:outline-none focus:shadow-outline focus:ring-cine-primary focus:border-cine-primary";
+
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
+    <div
+      // 🔑 THEME FIX: bg-cine-background REMOVED here. It is now on the <body> tag in index.html for instant theme loading.
+      className="min-h-screen flex justify-center items-center p-4 font-sans"
+    >
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-lg shadow-md w-full max-w-md"
+        // CARD SURFACE: bg-cine-surface (Slightly Lighter Black) + Red Shadow
+        className="w-full max-w-md p-8 space-y-6 bg-cine-surface rounded-2xl shadow-2xl shadow-red-900/50"
       >
-        <h2 className="text-2xl font-bold mb-6 text-center text-red-600">
-          User Registration
+        <h2 className="text-3xl font-bold mb-6 text-center text-cine-primary">
+          CineBook Registration
         </h2>
 
-        {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
+        {/* Status Messages */}
+        {error && (
+          <p className="p-4 text-sm text-white bg-cine-primary rounded-lg mb-4 text-center">
+            <span className="font-bold">Error:</span> {error}
+          </p>
+        )}
         {success && (
-          <p className="text-green-500 mb-4 text-center">{success}</p>
+          <p className="p-4 text-sm text-green-100 bg-green-700 rounded-lg mb-4 text-center">
+            <span className="font-bold">Success:</span> {success}
+          </p>
         )}
 
         {/* Role Selection */}
         <div className="mb-6">
           <label
-            className="block text-gray-700 text-sm font-bold mb-2"
+            className="block text-cine-text text-sm font-bold mb-2"
             htmlFor="role"
           >
             Register as
@@ -103,16 +109,14 @@ const RegisterPage = () => {
             value={role}
             onChange={(e) => {
               setRole(e.target.value);
-              // Clear role-specific fields when role changes to prevent sending old data
               setFullname("");
               setOwnername("");
               setBusinessname("");
               setLicensenumber("");
             }}
-            className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            className={inputClasses}
             required
           >
-            {/* Values must match the roles used in the backend's UserRole enum and API path: 'buyer' or 'theatreowner' */}
             <option value="buyer">Buyer</option>
             <option value="theatreowner">Theatre Owner</option>
           </select>
@@ -121,7 +125,7 @@ const RegisterPage = () => {
         {/* Email Field */}
         <div className="mb-4">
           <label
-            className="block text-gray-700 text-sm font-bold mb-2"
+            className="block text-cine-text text-sm font-bold mb-2"
             htmlFor="email"
           >
             Email
@@ -131,15 +135,15 @@ const RegisterPage = () => {
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            className={inputClasses}
             required
           />
         </div>
 
-        {/* Password Field - Note: backend enforces min_length=8 */}
+        {/* Password Field */}
         <div className="mb-6">
           <label
-            className="block text-gray-700 text-sm font-bold mb-2"
+            className="block text-cine-text text-sm font-bold mb-2"
             htmlFor="password"
           >
             Password (min 8 chars)
@@ -149,17 +153,17 @@ const RegisterPage = () => {
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+            className={inputClasses}
             required
             minLength={8}
             maxLength={70}
           />
         </div>
 
-        {/* Dynamic Name Field (Full Name for Buyer, Owner Name for Theatre Owner) */}
+        {/* Dynamic Name Field */}
         <div className="mb-4">
           <label
-            className="block text-gray-700 text-sm font-bold mb-2"
+            className="block text-cine-text text-sm font-bold mb-2"
             htmlFor="nameInput"
           >
             {nameLabel}
@@ -169,7 +173,7 @@ const RegisterPage = () => {
             id="nameInput"
             value={nameValue}
             onChange={(e) => setNameChange(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            className={inputClasses}
             required
           />
         </div>
@@ -179,7 +183,7 @@ const RegisterPage = () => {
           <>
             <div className="mb-4">
               <label
-                className="block text-gray-700 text-sm font-bold mb-2"
+                className="block text-cine-text text-sm font-bold mb-2"
                 htmlFor="businessname"
               >
                 Business Name
@@ -189,13 +193,13 @@ const RegisterPage = () => {
                 id="businessname"
                 value={businessname}
                 onChange={(e) => setBusinessname(e.target.value)}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                className={inputClasses}
                 required
               />
             </div>
             <div className="mb-6">
               <label
-                className="block text-gray-700 text-sm font-bold mb-2"
+                className="block text-cine-text text-sm font-bold mb-2"
                 htmlFor="licensenumber"
               >
                 License Number
@@ -205,7 +209,7 @@ const RegisterPage = () => {
                 id="licensenumber"
                 value={licensenumber}
                 onChange={(e) => setLicensenumber(e.target.value)}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+                className={inputClasses}
                 required
               />
             </div>
@@ -215,16 +219,16 @@ const RegisterPage = () => {
         <div className="flex items-center justify-between">
           <button
             type="submit"
-            className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            className="bg-cine-primary hover:bg-cine-secondary text-white font-bold py-3 px-6 rounded-xl transition duration-300 transform hover:scale-[1.02] focus:outline-none focus:shadow-outline"
           >
             Register
           </button>
-          <a
-            href="/login"
-            className="inline-block align-baseline font-bold text-sm text-red-600 hover:text-red-800"
+          <Link
+            to="/login"
+            className="inline-block align-baseline font-bold text-sm text-cine-primary hover:text-cine-secondary underline"
           >
             Already have an account? Login
-          </a>
+          </Link>
         </div>
       </form>
     </div>

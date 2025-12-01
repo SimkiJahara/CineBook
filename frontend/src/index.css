@@ -5,14 +5,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 2. Global Base Styles (Fix for Black Screen) */
+/* 2. Global Base Styles */
 body {
   /* Remove default browser margin */
   margin: 0;
-  /* Set the default background color to match your dark theme */
-  background-color: #0a0a0a;
-  /* Set the default text color to prevent black text on black background */
-  color: white;
+  /* color: white; is now handled by text-cine-text class on <body> */
   font-family: sans-serif;
   min-height: 100vh;
 }
