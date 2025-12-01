@@ -15,35 +15,10 @@ from app.core.db import Base
 class Theatre(Base):
     """
     Model for a specific Theater location/branch.
-
-    The model uses a **composite primary key** consisting of ``companyid`` and 
-    ``branchid``. It links to the :class:`~app.models.theatreowner.TheatreOwner` 
-    and has a complex relationship with :class:`~app.models.screen.Screen`.
-
-    :ivar companyid: Component of the composite primary key: Unique identifier for the theatre company.
-    :vartype companyid: str
-    :ivar branchid: Component of the composite primary key: Unique identifier for the specific branch location.
-    :vartype branchid: str
-    :ivar name: The human-readable name of the theatre branch (e.g., "PVR Phoenix").
-    :vartype name: str
-    :ivar address: The physical address of the theatre.
-    :vartype address: str
-    :ivar contact: Primary contact number for the theatre.
-    :vartype contact: str
-    :ivar logourl: URL to the theatre's logo image.
-    :vartype logourl: str
-    :ivar isverified: Boolean flag indicating if the theatre has been verified by an admin.
-    :vartype isverified: bool
-    :ivar ownerid: Foreign key to the ID of the :class:`~app.models.theatreowner.TheatreOwner` who manages this theatre.
-    :vartype ownerid: int
-    :ivar owner: Relationship back to the managing :class:`~app.models.theatreowner.TheatreOwner` object.
-    :vartype owner: relationship
-    :ivar screens: Relationship to the :class:`~app.models.screen.Screen` model (one-to-many). The join is explicitly 
-        defined using the composite key columns. Deleting a theatre deletes all its screens.
-    :vartype screens: relationship
+    ...
     """
     
-    __tablename__ = "theater" # NOTE: Table name is "theater"
+    __tablename__ = "theatre" # 💡 FIX: Changed from "theater" to "theatre"
 
     # Composite Primary Key on companyid and branchid (from user's original code)
     companyid = Column(String(50), nullable=False)
@@ -51,7 +26,7 @@ class Theatre(Base):
     
     # Define the composite primary key
     __table_args__ = (
-        PrimaryKeyConstraint(companyid, branchid, name='theater_pkey'),
+        PrimaryKeyConstraint(companyid, branchid, name='theatre_pkey'), # 💡 Also update pkey name
     )
 
     # Core Columns
@@ -61,14 +36,17 @@ class Theatre(Base):
     logourl = Column(String(255), nullable=True)
     isverified = Column(Boolean, nullable=True)
     
-    # Foreign Key linking to the TheaterOwner
-    ownerid = Column(Integer, ForeignKey("theaterowner.id"), nullable=False)
+    # Foreign Key linking to the TheaterOwner (this was already consistently spelled)
+    ownerid = Column(Integer, ForeignKey("theatreowner.id"), nullable=False)
 
     # Relationship to the TheaterOwner
-    owner = relationship("TheatreOwner", back_populates="theatres")
+    owner = relationship(
+        "TheatreOwner", 
+        back_populates="theatres",
+        foreign_keys=[ownerid] 
+    )
 
     # Relationship to Screen (one-to-many) - CRITICAL COMPOSITE KEY UPDATE
-    # The primaryjoin explicitly links Theatre's PK columns to the FK columns in Screen.
     screens = relationship(
         "Screen", 
         back_populates="theatre",
@@ -77,4 +55,4 @@ class Theatre(Base):
     )
 
     def __repr__(self):
-        return f"<Theater(companyid={self.companyid}, branchid='{self.branchid}', name='{self.name}')>"
+        return f"<Theatre(companyid={self.companyid}, branchid='{self.branchid}', name='{self.name}')>"

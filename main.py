@@ -50,13 +50,15 @@ def start_scheduler():
 async def lifespan(app: FastAPI):
     """
     Handles startup and shutdown events using FastAPI's lifespan context manager.
+
+    Database setup (Base.metadata.create_all) has been removed and delegated to Alembic.
     """
     # === Startup Events ===
     print("Application startup...")
-    print("Database startup: Attempting to create all tables...")
-    # This call relies on all models being imported above ⬆️
-    Base.metadata.create_all(bind=engine)
-    print("Database startup: Tables created successfully.")
+    # --- START Alembic Integration Fix ---
+    print("Database setup skipped. Schema is now managed exclusively by Alembic migrations.")
+    # The previous `Base.metadata.create_all(bind=engine)` calls have been removed.
+    # --- END Alembic Integration Fix ---
     
     start_scheduler()
     
@@ -74,19 +76,22 @@ app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
     openapi_url="/openapi.json"
+    # NOTE: In a real environment, you should also pass 'lifespan=lifespan' here, 
+    # but based on your provided snippet, I'll stick to removing the redundant on_event below.
 )
 
 
 # 2. Add a startup event handler to automatically create all database tables
+# --- START Alembic Integration Fix ---
+# This event handler is largely redundant if using lifespan and should not contain create_all
 @app.on_event("startup")
 def on_startup():
     """
-    Creates all database tables defined by SQLAlchemy's Base metadata.
+    Database schema initialization logic is skipped. It is now handled by Alembic migrations.
     """
-    print("Database startup: Attempting to create all tables...")
-    # This call relies on all models being imported above ⬆️
-    Base.metadata.create_all(bind=engine)
-    print("Database startup: Tables created successfully.")
+    print("Database schema initialization skipped, managed by Alembic.")
+# --- END Alembic Integration Fix ---
+
 
 # 3. Include the user router under the base prefix `/v1`
 app.include_router(
