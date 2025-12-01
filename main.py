@@ -1,5 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
+from contextlib import asynccontextmanager # Imports for the modern startup/shutdown
+from apscheduler.schedulers.background import BackgroundScheduler 
 #from fastapi.staticfiles import StaticFiles
 #from fastapi.responses import HTMLResponse
 from app.core.config import settings
@@ -23,6 +25,48 @@ from app.models.movie import Movie       # <--- CRITICAL: Movie model import
 from app.models.screen import Screen     # <--- CRITICAL: Screen model import
 from app.models.show import Screening        # <--- CRITICAL: Show model import
 from app.models.seat import ShowSeat, Seat, Booking, BookedSeat # All booking models
+
+
+# --- SCHEDULER CONFIGURATION ---
+scheduler = BackgroundScheduler()
+
+def start_scheduler():
+    """Configures and starts the background scheduler for cleaning up expired holds."""
+    
+    # Add the cleanup job: runs every 30 seconds
+    # The interval MUST be much shorter than the seat hold duration (180s)
+    scheduler.add_job(
+        release_expired_holds_job_sync, 
+        'interval', 
+        seconds=30, 
+        id='release_expired_holds', 
+        replace_existing=True
+    )
+    scheduler.start()
+    print("🎬 Background Scheduler started: Seat cleanup running every 30 seconds.")
+    # 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Handles startup and shutdown events using FastAPI's lifespan context manager.
+    """
+    # === Startup Events ===
+    print("Application startup...")
+    print("Database startup: Attempting to create all tables...")
+    # This call relies on all models being imported above ⬆️
+    Base.metadata.create_all(bind=engine)
+    print("Database startup: Tables created successfully.")
+    
+    start_scheduler()
+    
+    yield # Application can now handle requests
+
+    # === Shutdown Events ===
+    print("Application shutdown...")
+    if scheduler.running:
+        scheduler.shutdown()
+        print("Background Scheduler shut down gracefully.")
 
 
 # 1. Create the main FastAPI application instance
