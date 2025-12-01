@@ -1,14 +1,31 @@
+"""
+Pydantic Schemas for User Management and Role Specialization.
+
+This module defines the data structures used for user creation, database representation, 
+and API responses. It implements schema inheritance and uses nested schemas to 
+represent the one-to-one and one-to-many relationships defined in the SQLAlchemy models.
+"""
+
 from typing import Optional, List, Union, Any, Dict, Literal
 from pydantic import BaseModel, EmailStr, Field
 from app.core.config import UserRole  # Assuming UserRole is an Enum (e.g., in app/core/config.py)
 from datetime import datetime
 
 # --- Forward Declarations for Nested Models ---
-# Pydantic requires forward references for self-referencing or circularly dependent models.
-# The `update_forward_refs()` call at the end handles these.
 
 class TheaterBase(BaseModel):
-    """Base schema for the Theater model (used for nesting in TheaterOwner)."""
+    """
+    Base schema for the Theatre model (used for nesting in TheatreOwner).
+
+    :ivar companyid: Unique identifier for the theatre company.
+    :vartype companyid: str
+    :ivar branchid: Unique identifier for the specific branch location.
+    :vartype branchid: str
+    :ivar name: The name of the theatre branch.
+    :vartype name: str
+    :ivar address: The physical address of the theatre.
+    :vartype address: str
+    """
     companyid: str
     branchid: str
     name: str
@@ -19,7 +36,16 @@ class TheaterBase(BaseModel):
         from_attributes = True
 
 class TheaterResponse(TheaterBase):
-    """Schema for returning Theater data, includes optional fields."""
+    """
+    Schema for returning Theater data, includes optional fields.
+
+    :ivar contact: Primary contact number for the theatre.
+    :vartype contact: Optional[str]
+    :ivar logourl: URL to the theatre's logo image.
+    :vartype logourl: Optional[str]
+    :ivar isverified: Boolean flag indicating verification status.
+    :vartype isverified: Optional[bool]
+    """
     contact: Optional[str] = None
     logourl: Optional[str] = None
     isverified: Optional[bool] = None
@@ -27,7 +53,26 @@ class TheaterResponse(TheaterBase):
 # --- Specialized Role Schemas (Used for Response Nesting) ---
 
 class TheaterOwnerResponse(BaseModel):
-    """Response schema for TheaterOwner, includes the nested Theater list."""
+    """
+    Response schema for TheaterOwner, includes the nested Theater list.
+
+    :ivar id: Foreign key to User.id.
+    :vartype id: int
+    :ivar businessname: The registered name of the business.
+    :vartype businessname: str
+    :ivar ownername: The full name of the owner/contact.
+    :vartype ownername: str
+    :ivar phone: Contact phone number.
+    :vartype phone: Optional[str]
+    :ivar licensenumber: Official business license number.
+    :vartype licensenumber: str
+    :ivar bankdetails: JSON field storing banking or payment processing details.
+    :vartype bankdetails: Optional[Dict[str, Any]]
+    :ivar logourl: URL to the business logo.
+    :vartype logourl: Optional[str]
+    :ivar theaters: List of :class:`TheaterResponse` objects managed by this owner.
+    :vartype theaters: List[TheaterResponse]
+    """
     id: int # Primary key / Foreign key to User.id
     businessname: str
     ownername: str
@@ -37,14 +82,20 @@ class TheaterOwnerResponse(BaseModel):
     logourl: Optional[str] = None
     
     # Nested relationship (One-to-Many: TheaterOwner -> Theaters)
-    # The 'theaters' attribute must match the SQLAlchemy model's relationship name.
     theaters: List[TheaterResponse] = [] 
 
     class Config:
         from_attributes = True
 
 class BuyerResponse(BaseModel):
-    """Response schema for the Buyer model."""
+    """
+    Response schema for the Buyer model.
+
+    :ivar id: Foreign key to User.id.
+    :vartype id: int
+    :ivar fullname: The full name of the buyer.
+    :vartype fullname: str
+    """
     id: int
     fullname: str
     
@@ -52,7 +103,12 @@ class BuyerResponse(BaseModel):
         from_attributes = True
 
 class SuperadminResponse(BaseModel):
-    """Response schema for the Superadmin model."""
+    """
+    Response schema for the Superadmin model.
+
+    :ivar id: Foreign key to User.id.
+    :vartype id: int
+    """
     id: int
     
     class Config:
@@ -62,67 +118,104 @@ class SuperadminResponse(BaseModel):
 # --- Base User Schemas ---
 
 class UserBase(BaseModel):
-    """The common fields for all User types."""
+    """
+    The common base fields for all User types.
+
+    :ivar email: The unique email address of the user.
+    :vartype email: pydantic.EmailStr
+    :ivar name: Optional display name.
+    :vartype name: Optional[str]
+    :ivar role: The user's role, used for authorization.
+    :vartype role: app.core.config.UserRole
+    """
     email: EmailStr
     name: Optional[str] = None
-    role: UserRole # Used to determine which specialized schema to return
+    role: UserRole 
 
-    # Pydantic's default `Config` is now `model_config` in V2, but `Config` is often used for compatibility.
     class Config:
         from_attributes = True # Important: Allows Pydantic to read ORM objects
 
-class UserInDBBase(UserBase): #keeping it same 
-    """Common fields for User model stored in the database."""
+class UserInDBBase(UserBase):
+    """
+    Common fields for User model stored in the database.
+
+    :ivar id: The unique primary key ID.
+    :vartype id: int
+    :ivar is_active: Activation status (default True).
+    :vartype is_active: bool
+    :ivar hashed_password: The hashed password string.
+    :vartype hashed_password: str
+    :ivar created_at: Timestamp of creation.
+    :vartype created_at: datetime
+    :ivar updated_at: Timestamp of last update.
+    :vartype updated_at: datetime
+    """
     id: int
     is_active: bool = True
-    # The 'hashed_password' is the key field that distinguishes UserInDB from UserBase/UserResponse
     hashed_password: str
     created_at: datetime
     updated_at: datetime
     
-    # We omit the nested role data (theaterowner, buyer, superadmin) 
-    # as the DB model itself is often simpler when retrieved for internal use.
-    
     class Config:
         from_attributes = True
 
-# The schema is used for internal logic (like security checks)
 class UserInDB(UserInDBBase):
-    """Schema for User model data used internally (e.g., in CRUD and security)."""
+    """
+    Schema for User model data used internally (e.g., in CRUD and security).
+    """
     pass 
-    # You might include the nested roles here if your ORM populates them 
-    # when retrieving the user for authentication, but often they are omitted 
-    # to keep the authentication object light.
 
 class UserCreate(UserBase):
-    """The **base** schema for creating a new User (Input validation).
-    This only includes fields common to all user types (email, name, role) plus password."""
+    """
+    The **base** schema for creating a new User (Input validation).
+    Includes fields common to all user types plus the password.
+
+    :ivar password: The plaintext password, validated for length before hashing.
+    :vartype password: str
+    """
     
     # Password field, restricted to ensure bcrypt compatibility
     password: str = Field(..., min_length=8, max_length=70) 
 
-    # NOTE: Role-specific fields (fullname, businessname, etc.) are removed from here
-    # and moved to the dedicated schemas below.
 
-    #adding this new code snippets for seperate creations of buyer and theatreowner
-
-    
-    
-    # --- Specialized User Creation Schemas ---
+# --- Specialized User Creation Schemas ---
 
 class BuyerCreate(UserCreate):
-    """Schema for creating a new Buyer user. Inherits base fields from UserCreate."""
+    """
+    Schema for creating a new Buyer user. Inherits base fields from :class:`UserCreate`.
+
+    :ivar fullname: The full name of the buyer (required).
+    :vartype fullname: str
+    :ivar role: Fixed value enforcing the 'Buyer' role.
+    :vartype role: Literal[UserRole.buyer]
+    """
     
     # Required field based on the 'buyer' model
     fullname: str
 
-    # FIX: Use Literal instead of Field(..., const=True) for Pydantic V2
-    # This forces the value to be exactly UserRole.buyer ('Buyer')
+    # FIX: Use Literal to enforce the role value
     role: Literal[UserRole.buyer] = UserRole.buyer
 
 
 class TheatreOwnerCreate(UserCreate):
-    """Schema for creating a new TheatreOwner user. Inherits base fields from UserCreate."""
+    """
+    Schema for creating a new TheatreOwner user. Inherits base fields from :class:`UserCreate`.
+
+    :ivar businessname: The registered name of the business.
+    :vartype businessname: str
+    :ivar ownername: The full name of the owner/contact.
+    :vartype ownername: str
+    :ivar licensenumber: Mandatory official business license number.
+    :vartype licensenumber: str
+    :ivar phone: Optional contact phone number.
+    :vartype phone: Optional[str]
+    :ivar bankdetails: Optional banking details (JSON format).
+    :vartype bankdetails: Optional[Dict[str, Any]]
+    :ivar logourl: Optional URL to the business logo.
+    :vartype logourl: Optional[str]
+    :ivar role: Fixed value enforcing the 'TheatreOwner' role.
+    :vartype role: Literal[UserRole.theatre_owner]
+    """
     
     # Required fields based on the 'theaterowner' model
     businessname: str
@@ -134,38 +227,50 @@ class TheatreOwnerCreate(UserCreate):
     bankdetails: Optional[Dict[str, Any]] = None # For JSON data
     logourl: Optional[str] = None
 
-    # FIX: Use Literal instead of Field(..., const=True) for Pydantic V2
-    # This forces the value to be exactly UserRole.theatre_owner ('TheatreOwner')
+    # FIX: Use Literal to enforce the role value
     role: Literal[UserRole.theatre_owner] = UserRole.theatre_owner
 
 
-# ... (Keep existing code for UserResponse and UserUpdate)
-
 class SuperadminCreate(UserCreate):
-    """Schema for creating a new Superadmin user. Inherits base fields from UserCreate."""
-    
-    # Superadmin does not have any extra fields beyond the base User fields.
-    # We only need to enforce the role.
-    
-    # FIX: Use Literal to force the value to be exactly UserRole.super_admin ('Superadmin')
-    role: Literal[UserRole.super_admin] = UserRole.super_admin
+    """
+    Schema for creating a new Superadmin user. Inherits base fields from :class:`UserCreate`.
+    Used for initial setup.
 
-# ... (rest of the file remains the same)
+    :ivar role: Fixed value enforcing the 'Superadmin' role.
+    :vartype role: Literal[UserRole.super_admin]
+    """
+    
+    # We only need to enforce the role.
+    role: Literal[UserRole.super_admin] = UserRole.super_admin
 
 
 class UserResponse(UserBase):
-    """Schema for returning User data (Output structure), including one-to-one nested roles."""
+    """
+    Schema for returning User data (Output structure), including one-to-one nested roles.
+    Only one of the nested role fields will be non-null.
+
+    :ivar id: The unique primary key ID.
+    :vartype id: int
+    :ivar theaterowner: Nested :class:`TheaterOwnerResponse` if the user is a Theatre Owner.
+    :vartype theaterowner: Optional[TheaterOwnerResponse]
+    :ivar buyer: Nested :class:`BuyerResponse` if the user is a Buyer.
+    :vartype buyer: Optional[BuyerResponse]
+    :ivar superadmin: Nested :class:`SuperadminResponse` if the user is a Superadmin.
+    :vartype superadmin: Optional[SuperadminResponse]
+    """
     id: int
     
     # Nested role data. Only one of these will be populated for a given user.
-    # The SQLAlchemy ORM will correctly populate the relationship that exists.
-    # The response will return 'null' for the roles that don't exist for the user.
     theaterowner: Optional[TheaterOwnerResponse] = None
     buyer: Optional[BuyerResponse] = None
     superadmin: Optional[SuperadminResponse] = None
 
 # Optional: Schema for User update
 class UserUpdate(UserBase):
+    """
+    Schema for handling user data updates (PATCH requests).
+    All fields are optional, allowing partial updates.
+    """
     email: Optional[EmailStr] = None
     name: Optional[str] = None
     role: Optional[UserRole] = None

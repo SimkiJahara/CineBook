@@ -1,41 +1,58 @@
-# app/api/v1/endpoints/auth.py
-
-from typing import Optional, Union, Literal # Added Union and Literal for type hints
-from fastapi import APIRouter, Depends, HTTPException, status, Path, Body # Added Path and Body
+from typing import Optional, Union, Literal
+from fastapi import APIRouter, Depends, HTTPException, status, Path, Body
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session 
 
 # --- Import REAL Components ---
 from app.core.security import create_access_token
-from app.schemas.token import Token # The Pydantic schema for the response
-from app.crud.user import crud_user # The actual CRUD instance
-from app.core.dependencies import get_db # The actual DB dependency
+from app.schemas.token import Token 
+from app.crud.user import crud_user 
+from app.core.dependencies import get_db 
 from app.schemas.user import (
     UserResponse,
     BuyerCreate, 
     TheatreOwnerCreate 
-) # Import creation schemas and response schema
-from app.core.config import UserRole # Import the UserRole enum
+) 
+from app.core.config import UserRole 
 
 # --- FastAPI Router ---
 
 router = APIRouter()
+# ------------------------
+# 1. MODULE DOCSTRING
+# ------------------------
+"""
+Authentication Endpoints
+
+This module defines the API endpoints for user authentication, including 
+token generation and new user registration for different roles.
+"""
 
 @router.post("/token", response_model=Token, tags=["Authentication"])
 def login_for_access_token(
-    db: Session = Depends(get_db), # Use the actual DB dependency
+    db: Session = Depends(get_db), 
     form_data: OAuth2PasswordRequestForm = Depends()
 ) -> Token:
     """
-    OAuth2 compatible token login endpoint.
+    Retrieves an OAuth2 access token upon successful authentication.
 
-    Uses the username (which is the email) and password from the form data
-    to verify credentials and returns an access token.
+    This endpoint takes a user's email (as username) and password, 
+    verifies the credentials, and issues a JWT access token.
+
+    Args:
+        db: The SQLAlchemy database session dependency.
+        form_data: The standard OAuth2 password request form data (contains username/password).
+
+    Returns:
+        Token: A Pydantic object containing the generated access token and type ("bearer").
+
+    Raises:
+        HTTPException: If the email or password provided is incorrect (HTTP 401 Unauthorized).
     """
     # 1. Authenticate the user (using the REAL crud_user and DB session)
     user = crud_user.authenticate_user(
         db,
-        email=form_data.username, # OAuth2PasswordRequestForm uses 'username' for the user identifier
+        email=form_data.username, 
         password=form_data.password
     )
 
@@ -48,7 +65,6 @@ def login_for_access_token(
         )
 
     # 3. Create the JWT token
-    # We use the user's email and ID as the payload data
     access_token = create_access_token(
         data={"sub": user.email, "user_id": user.id}
     )
@@ -72,7 +88,23 @@ def register_user(
     user_in: Union[BuyerCreate, TheatreOwnerCreate] = Body(..., discriminator="role")
 ):
     """
-    Register a new user (Buyer or Theatre Owner) using role-specific schemas.
+    Registers a new user in the database.
+
+    The registration process is tailored based on the user's role (Buyer or Theatre Owner),
+    ensuring role-specific data is correctly validated and stored.
+
+    Args:
+        db: The SQLAlchemy database session dependency.
+        role: The user role specified in the URL path. Must be one of the allowed UserRole enum values.
+        user_in: The user registration data. Must match the schema for the specified 'role'.
+
+    Returns:
+        UserResponse: The newly created user object (includes public information only).
+
+    Raises:
+        HTTPException: 
+            - If a user with the provided email already exists (HTTP 400 Bad Request).
+            - If the role in the URL path does not match the role in the request body (HTTP 400 Bad Request).
     """
     
     # 1. Check if a user with that email already exists
@@ -90,7 +122,6 @@ def register_user(
         )
     
     # 3. Create the user and the associated role model using the unified CRUD function
-    # The `crud_user.create_user` method handles which specific role model (Buyer/TheatreOwner) to instantiate.
     user = crud_user.create_user(db, user_in=user_in)
 
     return user

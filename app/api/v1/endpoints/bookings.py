@@ -1,5 +1,12 @@
 # /api/v1/endpoints/bookings.py
 
+"""
+API Endpoints for Managing Bookings and Seat Reservations.
+
+This module provides the necessary routes for users to reserve and confirm seats
+for a specific show. It integrates with the database and authentication services.
+"""
+
 from typing import List
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
@@ -24,6 +31,19 @@ async def reserve_seats(
 ):
     """
     API Endpoint for holding seats (Phase 1: Hold/Pending).
+
+    This endpoint temporarily holds the specified seats for a user, initiating the
+    reservation process. The held seats are released if payment is not completed
+    within the hold duration.
+
+    :param request: The request body containing the show ID and list of seat IDs to hold.
+    :type request: app.schemas.booking.ReserveRequest
+    :param db: The database session dependency.
+    :type db: sqlalchemy.orm.Session
+    :param current_user: The authenticated user object (must have an 'id' attribute).
+    :type current_user: dict
+    :return: A response detailing the successfully held seats and the hold duration.
+    :rtype: app.schemas.booking.ReserveResponse
     """
     
     reserved_seats, hold_duration = await booking_service.reserve_seats(
@@ -47,6 +67,19 @@ async def confirm_booking(
 ):
     """
     API Endpoint for confirming a held reservation (Phase 2: Confirmation/Payment).
+
+    This endpoint finalizes a reservation by processing the payment token for seats
+    that were previously held. If successful, a permanent booking record is created.
+
+    :param request: The request body containing the show ID, seat IDs, payment token, and total price.
+    :type request: app.schemas.booking.ConfirmRequest
+    :param db: The database session dependency.
+    :type db: sqlalchemy.orm.Session
+    :param current_user: The authenticated user object (must have an 'id' attribute).
+    :type current_user: dict
+    :raises: HTTPException 400 (Bad Request) if the reservation is expired or seats are unavailable.
+    :return: The newly created booking record details.
+    :rtype: app.schemas.booking.BookingResponse
     """
     
     booking_record = await booking_service.confirm_booking(

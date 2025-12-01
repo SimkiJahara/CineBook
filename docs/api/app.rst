@@ -13,3 +13,6 @@ Subpackages
    :maxdepth: 4
 
    app.api
+   app.core
+   app.crud
+   app.models

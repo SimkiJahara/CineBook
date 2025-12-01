@@ -1,4 +1,10 @@
-# /app/api/v1/endpoints/router.py (Modified)
+"""
+User Management Endpoints.
+
+This module provides the API routes for user registration (Buyer, Theatre Owner, Superadmin)
+and user retrieval by ID. It handles dependency injection for the database session
+and validates user creation data.
+"""
 
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -11,8 +17,6 @@ from app.schemas.user import UserResponse, BuyerCreate, TheatreOwnerCreate, Supe
 # Import database utility function (Dependency for the session)
 from app.core.dependencies import get_db
 
-# The router prefix ensures all endpoints here start with /users
-# (The /v1 part is added when including the router in main.py)
 router = APIRouter(
     prefix="/users",
     tags=["Users"],
@@ -31,7 +35,19 @@ def register_buyer(
     db: Session = Depends(get_db)
 ):
     """
-    Registers a **Buyer** user. Requires only base user fields and `fullname`.
+    Registers a **Buyer** user.
+
+    Requires base user fields (email, password) and `fullname`.
+    The user is assigned the 'buyer' role upon creation.
+
+    :param user_in: Data required to create a new Buyer user.
+    :type user_in: app.schemas.user.BuyerCreate
+    :param db: The database session dependency.
+    :type db: sqlalchemy.orm.Session
+    :raises HTTPException: 409 Conflict if the email is already registered.
+    :raises HTTPException: 500 Internal Server Error for unexpected creation issues.
+    :return: The newly created User object, including the user's role information.
+    :rtype: app.schemas.user.UserResponse
     """
     
     # 1. Check for existing user by email
@@ -71,7 +87,19 @@ def register_theatre_owner(
     db: Session = Depends(get_db)
 ):
     """
-    Registers a **Theatre Owner** user. Requires base user fields plus owner-specific fields.
+    Registers a **Theatre Owner** user.
+
+    Requires base user fields plus owner-specific fields like `theatre_name` and `license_number`.
+    The user is assigned the 'owner' role upon creation.
+
+    :param user_in: Data required to create a new Theatre Owner user.
+    :type user_in: app.schemas.user.TheatreOwnerCreate
+    :param db: The database session dependency.
+    :type db: sqlalchemy.orm.Session
+    :raises HTTPException: 409 Conflict if the email is already registered.
+    :raises HTTPException: 500 Internal Server Error for unexpected creation issues.
+    :return: The newly created User object, including the user's role information.
+    :rtype: app.schemas.user.UserResponse
     """
     
     # 1. Check for existing user by email
@@ -111,7 +139,19 @@ def register_superadmin(
     db: Session = Depends(get_db)
 ):
     """
-    Registers a **Superadmin** user. Used for initial setup only.
+    Registers a **Superadmin** user.
+
+    This endpoint is typically restricted for initial application setup or internal use.
+    The user is assigned the 'admin' role upon creation.
+
+    :param user_in: Data required to create a new Superadmin user.
+    :type user_in: app.schemas.user.SuperadminCreate
+    :param db: The database session dependency.
+    :type db: sqlalchemy.orm.Session
+    :raises HTTPException: 409 Conflict if the email is already registered.
+    :raises HTTPException: 500 Internal Server Error for unexpected creation issues.
+    :return: The newly created User object, including the user's role information.
+    :rtype: app.schemas.user.UserResponse
     """
     
     # 1. Check for existing user by email
@@ -151,6 +191,14 @@ def read_user(
 ):
     """
     Retrieves a user by ID, including all nested role details using SQLAlchemy's relationships.
+
+    :param user_id: The unique integer ID of the user to retrieve.
+    :type user_id: int
+    :param db: The database session dependency.
+    :type db: sqlalchemy.orm.Session
+    :raises HTTPException: 404 Not Found if no user with the given ID exists.
+    :return: The User object, including the linked role data (Buyer, Owner, or Admin details).
+    :rtype: app.schemas.user.UserResponse
     """
     
     # 1. Fetch user from the database

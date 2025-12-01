@@ -1,3 +1,13 @@
+"""
+CRUD operations for the User model.
+
+This module provides the CRUD (Create, Retrieve, Update, Delete) interface for
+the application's User model, handling complex operations such as:
+1. Eagerly loading nested role data (Buyer, TheatreOwner, Superadmin) during retrieval.
+2. Hashing passwords and creating specialized role records during user creation.
+3. Authenticating users against stored password hashes.
+"""
+
 from typing import Optional, Type, Any, Union 
 from sqlalchemy.orm import Session, joinedload
 
@@ -31,7 +41,20 @@ class CRUDUser:
     # ----------------------------------------------------
 
     def get_user(self, db: Session, user_id: int) -> Optional[User]:
-        """Retrieve a User by their ID, including all nested roles and theatres."""
+        """
+        Retrieve a User by their ID, including all nested roles and theatres.
+
+        Uses :func:`~sqlalchemy.orm.joinedload` to eagerly fetch related Buyer, 
+        TheatreOwner, and Superadmin records, as well as the associated Theatres 
+        for the TheatreOwner.
+
+        :param db: The database session.
+        :type db: sqlalchemy.orm.Session
+        :param user_id: The unique integer ID of the user.
+        :type user_id: int
+        :return: The fully loaded :class:`~app.models.users.User` object or None.
+        :rtype: Optional[app.models.users.User]
+        """
         return db.query(User).filter(User.id == user_id).options(
             # Correctly eager load the relationships
             joinedload(User.theaterowner).joinedload(TheatreOwner.theatres),
@@ -40,7 +63,18 @@ class CRUDUser:
         ).first()
 
     def get_user_by_email(self, db: Session, email: str) -> Optional[User]:
-        """Retrieve a User by their email, including all nested roles and theatres."""
+        """
+        Retrieve a User by their email, including all nested roles and theatres.
+
+        Uses :func:`~sqlalchemy.orm.joinedload` to eagerly fetch related role data.
+
+        :param db: The database session.
+        :type db: sqlalchemy.orm.Session
+        :param email: The email address of the user.
+        :type email: str
+        :return: The fully loaded :class:`~app.models.users.User` object or None.
+        :rtype: Optional[app.models.users.User]
+        """
         return db.query(User).filter(User.email == email).options(
             # Correctly eager load the relationships
             joinedload(User.theaterowner).joinedload(TheatreOwner.theatres),
@@ -49,16 +83,27 @@ class CRUDUser:
         ).first()
 
     def create_user(self, db: Session, user_in: UserCreateUnion) -> User:
-        """Create a new User and their corresponding specialized role entry."""
+        """
+        Create a new User and their corresponding specialized role entry.
+
+        This function handles password hashing, sets the appropriate display name,
+        and creates the corresponding record in the Buyer, TheatreOwner, or 
+        Superadmin table based on the role specified in the input schema.
+
+        :param db: The database session.
+        :type db: sqlalchemy.orm.Session
+        :param user_in: The Pydantic schema containing user details, specialized by role.
+        :type user_in: UserCreateUnion
+        :return: The newly created and eagerly loaded :class:`~app.models.users.User` object.
+        :rtype: app.models.users.User
+        """
         
         # 1. Prepare User model data
         hashed_password = get_password_hash(user_in.password)
         
-        # --- FIX: Determine the 'name' field for the base User model ---
-        # 1. Start with the default 'name' from the base UserCreate schema (or None)
+        # --- Determine the 'name' field for the base User model ---
         user_display_name = getattr(user_in, 'name', None)
 
-        # 2. Override/set the name using role-specific fields if available
         if hasattr(user_in, 'fullname') and user_in.role == UserRole.buyer:
             user_display_name = user_in.fullname
         elif hasattr(user_in, 'ownername') and user_in.role == UserRole.theatre_owner:
@@ -77,11 +122,9 @@ class CRUDUser:
 
         # 2. Prepare specialized model data based on role
         if user_in.role == UserRole.buyer:
-            # Safely access the 'fullname' field which exists on BuyerCreate
             db_buyer = Buyer(id=db_user.id, fullname=user_in.fullname)
             db.add(db_buyer)
         elif user_in.role == UserRole.theatre_owner:
-            # Safely map all required fields from TheatreOwnerCreate
             db_owner = TheatreOwner(
                 id=db_user.id, 
                 businessname=user_in.businessname, 
@@ -116,6 +159,15 @@ class CRUDUser:
     ) -> Optional[User]:
         """
         Retrieves a user by email and verifies the provided plain password.
+
+        :param db: The database session.
+        :type db: sqlalchemy.orm.Session
+        :param email: The email address to check.
+        :type email: str
+        :param password: The plain text password to verify.
+        :type password: str
+        :return: The authenticated :class:`~app.models.users.User` object, or None if authentication fails.
+        :rtype: Optional[app.models.users.User]
         """
         # 1. Find the user by email (eagerly loads nested roles)
         user = self.get_user_by_email(db, email=email)
@@ -127,7 +179,6 @@ class CRUDUser:
             return None # Password mismatch
 
         # 3. If authentication is successful, return the user object
-        # NOTE: Returning the ORM object which matches the UserInDBBase data structure
         return user
 
 

@@ -1,9 +1,28 @@
+"""
+SQLAlchemy Model for the Buyer user role.
+
+This module defines the Buyer table, which holds specialized information for users
+with the 'Buyer' role. It uses a one-to-one relationship with the base User model.
+"""
+
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from app.core.db import Base
 
 class Buyer(Base):
-    """Model for Buyer-specific data, linked one-to-one to the base User table."""
+    """
+    Model for Buyer-specific data, linked one-to-one to the base :class:`~app.models.users.User` table.
+
+    The primary key serves as a foreign key reference to the :class:`~app.models.users.User` ID,
+    implementing the one-to-one extension pattern.
+
+    :ivar id: Primary key and foreign key to the base User table.
+    :vartype id: int
+    :ivar fullname: The full name of the buyer user (required).
+    :vartype fullname: str
+    :ivar user: Relationship back to the parent User object.
+    :vartype user: relationship
+    """
     
     __tablename__ = "buyer"
 
@@ -18,4 +37,3 @@ class Buyer(Base):
 
     def __repr__(self):
         return f"<Buyer(id={self.id}, fullname='{self.fullname}')>"
-    

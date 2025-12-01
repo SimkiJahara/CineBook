@@ -1,17 +1,24 @@
-# /app/models/seat.py (FIXED CODE)
+"""
+SQLAlchemy Models for Seats and Bookings.
+
+This module defines the models related to physical seats, the real-time status
+of seats for specific shows (ShowSeat), the final confirmed booking transaction (Booking),
+and the mapping of booked seats (BookedSeat).
+
+It includes complex composite primary and foreign key definitions.
+"""
 
 import enum
 from datetime import datetime
 from sqlalchemy import (
     Column, Integer, String, Enum, DateTime, ForeignKey, 
-    UniqueConstraint, ForeignKeyConstraint, Numeric # Added Numeric for totalamount
+    UniqueConstraint, ForeignKeyConstraint, Numeric
 )
 from sqlalchemy.orm import relationship
 
 from app.core.db import Base 
-# Note: You MUST ensure 'Screening' model is imported here if it's used in relationships
-# from app.models.show import Screening 
-# and 'Buyer' model from app.models.buyer import Buyer if relationships are used directly
+# Note: Assuming Screening model is available globally or imported in other modules
+# where relationships are resolved.
 
 # --- Enums ---
 
@@ -37,8 +44,29 @@ class BookingStatus(enum.Enum):
 
 class Seat(Base):
     """
-    Represents a physical seat.
-    FIX: Matches the composite primary key and columns of the public.seat table.
+    Represents a physical seat in a screen layout.
+
+    This model uses a **composite primary key** to uniquely identify a seat 
+    within a specific theatre's hall/layout.
+
+    :ivar seatid: Component of the composite primary key: The seat's identifier (e.g., 'A1').
+    :vartype seatid: str
+    :ivar layouthallid: Component of the composite primary key: The ID of the layout hall (Screen).
+    :vartype layouthallid: str
+    :ivar layoutcompanyid: Component of the composite primary key: The ID of the theatre company.
+    :vartype layoutcompanyid: str
+    :ivar layoutbranchid: Component of the composite primary key: The ID of the theatre branch.
+    :vartype layoutbranchid: str
+    :ivar rownumber: The row identifier (e.g., 'A', 'B').
+    :vartype rownumber: str
+    :ivar number: The column/number identifier of the seat.
+    :vartype number: int
+    :ivar type: The type of seat (e.g., 'Standard', 'VIP').
+    :vartype type: str
+    :ivar status: The general status of the seat type.
+    :vartype status: str
+    :ivar show_seats: Relationship to the :class:`ShowSeat` model, linking this physical seat to its status in all screenings.
+    :vartype show_seats: relationship
     """
     __tablename__ = "seat"
     
@@ -69,8 +97,34 @@ class Seat(Base):
 
 class ShowSeat(Base):
     """
-    Core table for real-time booking.
-    FIX: Uses composite foreign key to Seat and references the renamed 'screening' table.
+    Core table for real-time booking, representing the dynamic status of a seat for a specific screening.
+
+    This model uses a **composite unique constraint** across the screening ID and the seat's four composite foreign keys.
+
+    :ivar id: Primary key for the show seat record.
+    :vartype id: int
+    :ivar screening_id: Foreign key to the :class:`~app.models.show.Screening` table.
+    :vartype screening_id: int
+    :ivar seat_seatid: Component of the composite foreign key to :class:`Seat`.
+    :vartype seat_seatid: str
+    :ivar seat_layouthallid: Component of the composite foreign key to :class:`Seat`.
+    :vartype seat_layouthallid: str
+    :ivar seat_layoutcompanyid: Component of the composite foreign key to :class:`Seat`.
+    :vartype seat_layoutcompanyid: str
+    :ivar seat_layoutbranchid: Component of the composite foreign key to :class:`Seat`.
+    :vartype seat_layoutbranchid: str
+    :ivar reserved_by_user_id: Foreign key to the :class:`~app.models.users.User` who currently holds the seat (optional).
+    :vartype reserved_by_user_id: int
+    :ivar status: Real-time status of the seat (Available, Pending, Booked).
+    :vartype status: SeatStatus
+    :ivar hold_expiry_time: Timestamp when a PENDING hold expires, releasing the seat.
+    :vartype hold_expiry_time: datetime.datetime
+    :ivar screening: Relationship back to the parent Screening object.
+    :vartype screening: relationship
+    :ivar seat: Relationship back to the physical :class:`Seat` object.
+    :vartype seat: relationship
+    :ivar reserved_by: Relationship back to the :class:`~app.models.users.User` who holds the reservation.
+    :vartype reserved_by: relationship
     """
     __tablename__ = "show_seat"
 
@@ -80,7 +134,6 @@ class ShowSeat(Base):
     screening_id = Column(Integer, ForeignKey("screening.id"), index=True, nullable=False)
     
     # FIX: Columns for composite Foreign Key to Seat table
-    # Renamed to clearly differentiate from the simple ShowSeat.id
     seat_seatid = Column(String(50), index=True, nullable=False) 
     seat_layouthallid = Column(String(50), nullable=False) 
     seat_layoutcompanyid = Column(String(50), nullable=False) 
@@ -92,7 +145,6 @@ class ShowSeat(Base):
     hold_expiry_time = Column(DateTime, nullable=True) 
     
     # Relationships
-    # FIX: Renamed 'show' to 'screening' and ensures correct FK columns are used
     screening = relationship("Screening", back_populates="show_seats", foreign_keys=[screening_id])
     
     seat = relationship("Seat", 
@@ -119,8 +171,32 @@ class ShowSeat(Base):
 
 class Booking(Base):
     """
-    Represents a final confirmed booking transaction.
-    FIX: Column names match the public.booking table in CineBookSchema.sql.
+    Represents a final confirmed booking transaction (e.g., ticket purchase).
+
+    :ivar bookingid: Primary key of the booking transaction.
+    :vartype bookingid: int
+    :ivar buyerid: Foreign key to the :class:`~app.models.buyer.Buyer` who made the booking.
+    :vartype buyerid: int
+    :ivar screeningid: Foreign key to the :class:`~app.models.show.Screening` that was booked.
+    :vartype screeningid: int
+    :ivar bookedat: Timestamp of when the booking was confirmed.
+    :vartype bookedat: datetime.datetime
+    :ivar totalamount: The total price of the transaction.
+    :vartype totalamount: Decimal
+    :ivar paymentmethod: The method used for payment.
+    :vartype paymentmethod: str
+    :ivar status: The final status of the booking (Confirmed, Cancelled, etc.).
+    :vartype status: BookingStatus
+    :ivar qrcodeurl: URL for the QR code used for entry.
+    :vartype qrcodeurl: str
+    :ivar promocode: Optional foreign key to a valid promo code used.
+    :vartype promocode: str
+    :ivar user: Relationship back to the Buyer object.
+    :vartype user: relationship
+    :ivar screening: Relationship back to the Screening object.
+    :vartype screening: relationship
+    :ivar booked_seats: Relationship to the :class:`BookedSeat` mapping the seats included in this booking.
+    :vartype booked_seats: relationship
     """
     __tablename__ = "booking"
 
@@ -153,8 +229,19 @@ class Booking(Base):
 
 class BookedSeat(Base):
     """
-    Mapping table between a Booking and the individual seats confirmed.
-    FIX: Table name and foreign key reference 'booking.bookingid'.
+    Mapping table between a :class:`Booking` and the individual :class:`ShowSeat` confirmed.
+    Ensures a single ShowSeat record can only be part of one final Booking.
+
+    :ivar id: Primary key for the mapping record.
+    :vartype id: int
+    :ivar booking_id: Foreign key to the parent :class:`Booking` record.
+    :vartype booking_id: int
+    :ivar show_seat_id: Foreign key to the :class:`ShowSeat` record that was confirmed. Must be unique per booking.
+    :vartype show_seat_id: int
+    :ivar booking: Relationship back to the parent :class:`Booking` object.
+    :vartype booking: relationship
+    :ivar show_seat: Relationship to the :class:`ShowSeat` object that was booked.
+    :vartype show_seat: relationship
     """
     __tablename__ = "bookingseat" # FIX: Correct schema table name
     

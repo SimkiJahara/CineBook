@@ -1,11 +1,40 @@
-# /app/models/screen.py (Final Verified Code with Composite FK)
+"""
+SQLAlchemy Model for Screen.
+
+This module defines the Screen table, which represents a physical hall or auditorium
+within a theatre. It utilizes a composite foreign key to link back to the Theatre model.
+"""
 
 from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint, ForeignKeyConstraint
 from sqlalchemy.orm import relationship
 from app.core.db import Base 
 
 class Screen(Base):
-    """Represents a physical screen/hall within a theatre."""
+    """
+    Represents a physical screen/hall within a theatre.
+
+    The Screen is uniquely identified by its internal ID and is associated with a Theatre
+    via a composite foreign key referencing the Theatre's company ID and branch ID.
+
+    :ivar id: Unique primary key for the screen/hall.
+    :vartype id: int
+    :ivar theatre_company_id: Foreign key component: The ID of the theatre company.
+    :vartype theatre_company_id: str
+    :ivar theatre_branch_id: Foreign key component: The ID of the specific theatre branch.
+    :vartype theatre_branch_id: str
+    :ivar name: The name of the screen (e.g., "Screen 1", "IMAX Hall").
+    :vartype name: str
+    :ivar capacity: The total number of seats in the screen.
+    :vartype capacity: int
+    :ivar theatre: Relationship back to the parent :class:`~app.models.theater.Theatre` object.
+    :vartype theatre: relationship
+    :ivar shows: Relationship to the :class:`~app.models.show.Show` model, representing
+        all shows scheduled for this screen. Deleting a screen deletes associated shows.
+    :vartype shows: relationship
+    :ivar seats: Relationship to the :class:`~app.models.seat.Seat` model, representing
+        all individual seats within this screen.
+    :vartype seats: relationship
+    """
 
     __tablename__ = "screen" 
 
