@@ -1,65 +1,93 @@
 # app/controllers/booking_controller.py
 
-from sqlalchemy.orm import Session
 from datetime import datetime
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
+from app.database import get_db
 from app.models.booking import Booking, BookedSeat
 from app.schemas.booking import BookingCreate, BookingRead
+from app.utils.auth import get_current_user, MockUser
+
+router = APIRouter(prefix="/bookings", tags=["Bookings"])
 
 
-def create_booking(db: Session, booking_in: BookingCreate) -> Booking:
+def create_booking(db, booking_in):
     """
-    Create a booking in the database.
-
-    - If booking_in.seats is provided, use those.
-    - If not, fall back to default ["A1", "A2", "A3"].
-    - total_price = number_of_seats * seat_price
+    Create a booking record.
+    Seats use a small default list if none is given.
     """
+    seats = booking_in.seats or ["A1", "A2", "A3"]
+    total_price = len(seats) * booking_in.seat_price
 
-    # 1) Decide which seats to use
-    seats_to_use = booking_in.seats or ["A1", "A2", "A3"]
-
-    # 2) Compute total price
-    total_price = len(seats_to_use) * booking_in.seat_price
-
-    # 3) Create main booking row
     booking = Booking(
         user_id=booking_in.user_id,
         screening_id=booking_in.screening_id,
         total_price=total_price,
         payment_method=booking_in.payment_method,
-        payment_status="PAID",  # fixed for now
+        payment_status="PAID",
         created_at=datetime.utcnow(),
     )
 
     db.add(booking)
-    db.flush()  # to get booking.id
+    db.flush()
 
-    # 4) Create BookedSeat rows (match your model: seat_label + price)
-    for code in seats_to_use:
-        seat = BookedSeat(
+    for seat in seats:
+        seat_row = BookedSeat(
             booking_id=booking.id,
-            seat_label=code,
+            seat_label=seat,
             price=booking_in.seat_price,
         )
-        db.add(seat)
+        db.add(seat_row)
 
-    # 5) Save everything
     db.commit()
     db.refresh(booking)
-
     return booking
 
 
-def get_bookings_for_user(db: Session, user_id: int) -> list[Booking]:
+def get_bookings_for_user(db, user_id):
     """
-    Get all bookings for one user.
-    Returns a list of Booking objects.
+    Return bookings for one user.
     """
-    bookings = (
+    return (
         db.query(Booking)
         .filter(Booking.user_id == user_id)
         .order_by(Booking.created_at.desc())
         .all()
     )
-    return bookings
+
+
+@router.post("/", response_model=BookingRead)
+def create_booking_route(
+    booking_in: BookingCreate,
+    db=Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """
+    Create a booking for the current user.
+    """
+    if booking_in.user_id is None:
+        booking_in.user_id = current_user.id
+    return create_booking(db, booking_in)
+
+
+@router.get("/", response_model=list[BookingRead])
+def list_bookings_route(
+    user_id: int,
+    db=Depends(get_db),
+):
+    """
+    Basic route to return bookings by user_id.
+    """
+    return get_bookings_for_user(db, user_id)
+
+
+@router.get("/me", response_model=list[BookingRead])
+def list_my_bookings_route(
+    db=Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """
+    Return bookings for the logged-in user.
+    """
+    return get_bookings_for_user(db, current_user.id)
