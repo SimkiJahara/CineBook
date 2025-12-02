@@ -1,124 +1,111 @@
-# /app/core/security.py
+# =============================================================================
+# Security Utilities Module
+# =============================================================================
+# This module contains all security-related functionality including password
+# hashing and JWT token management. Extracted from the article's auth.py to
+# follow separation of concerns principle.
+# =============================================================================
 
-"""
-Security Utilities and JWT Authentication.
-
-This module provides functions for password hashing, JWT token creation, and a
-FastAPI dependency to authenticate and authorize users based on their access token.
-"""
-
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
-# Added InvalidTokenError here so it is available for import and use
-from jose import jwt, JWTError
+
+from jose import JWTError, jwt
 from passlib.context import CryptContext
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from app.core.config import settings 
 
-# --- NEW: Custom Error Class ---
-class InvalidTokenError(Exception):
-    """Raised when a JWT token is invalid or expired."""
-    pass
-# -----------------------------
+from app.core.config import get_settings
 
-# --- Configuration ---
-# CryptContext for password hashing
+
+# Password hashing context using bcrypt
+# As described in the article: "The CryptContext handles password hashing using bcrypt"
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# OAuth2 scheme for token retrieval from the request header (Bearer Token)
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/token")
-
-# --- Utility Functions ---
-
-def get_password_hash(password: str) -> str:
-    """
-    Hashes a plaintext password using the configured CryptContext (bcrypt).
-    """
-    return pwd_context.hash(password)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
-    Verifies a plaintext password against a hashed one.
+    Verify a password against its hash.
+
+    Uses bcrypt for secure password verification as recommended in the article.
+    This prevents timing attacks by using constant-time comparison.
+
+    Args:
+        plain_password: The plain text password to verify.
+        hashed_password: The bcrypt hashed password to compare against.
+
+    Returns:
+        bool: True if password matches, False otherwise.
     """
     return pwd_context.verify(plain_password, hashed_password)
 
+
+def get_password_hash(password: str) -> str:
+    """
+    Generate a bcrypt hash for a password.
+
+    As stated in the article: "Production apps should never store passwords
+    in plain text. Instead, you need to hash passwords using secure algorithms."
+
+    Args:
+        password: The plain text password to hash.
+
+    Returns:
+        str: The bcrypt hashed password.
+    """
+    return pwd_context.hash(password)
+
+
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     """
-    Creates a JWT access token containing the user's data and an expiry timestamp.
+    Create a JWT access token.
+
+    As described in the article: "JSON Web Tokens (JWT) provide a secure way
+    to authenticate users without storing sessions on the server. Each token
+    contains all the user information needed, making your API stateless and scalable."
+
+    Refactored for security: SECRET_KEY is loaded from environment variables
+    instead of being hardcoded.
+
+    Args:
+        data: Dictionary of claims to encode in the token.
+        expires_delta: Optional custom expiration time.
+
+    Returns:
+        str: The encoded JWT token.
     """
+    settings = get_settings()
     to_encode = data.copy()
+
+    # Use timezone-aware UTC timestamps as recommended in the article
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        # Default expiry: adjust as needed (e.g., 30 minutes)
-        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    
-    # Add expiry and subject (sub) claims
-    to_encode.update({"exp": expire, "sub": str(data["user_id"])})
-    
+        expire = datetime.now(timezone.utc) + timedelta(
+            minutes=settings.access_token_expire_minutes
+        )
+
+    to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(
-        to_encode, 
-        settings.SECRET_KEY.get_secret_value(), 
-        algorithm=settings.ALGORITHM
+        to_encode, settings.secret_key, algorithm=settings.algorithm
     )
     return encoded_jwt
 
-# --- NEW: Standalone JWT Decoder (used by WebSockets) ---
-def decode_jwt(token: str) -> dict:
+
+def decode_access_token(token: str) -> Optional[dict]:
     """
-    Decodes and validates a JWT token using settings.
-    
-    :raises InvalidTokenError: If decoding fails due to expiration or invalid signature.
+    Decode and validate a JWT access token.
+
+    Extracts the payload from the JWT token after verifying its signature.
+
+    Args:
+        token: The JWT token string to decode.
+
+    Returns:
+        dict: The decoded token payload if valid, None if invalid.
     """
+    settings = get_settings()
     try:
         payload = jwt.decode(
-            token, 
-            settings.SECRET_KEY.get_secret_value(), 
-            algorithms=[settings.ALGORITHM],
-            # FIX: Removed options={"verify_exp": False} to enforce standard expiration check
+            token, settings.secret_key, algorithms=[settings.algorithm]
         )
-        # FIX: Ensure 'user_id' key exists by mapping 'id' if 'user_id' is missing.
-        if "user_id" not in payload and "id" in payload:
-            payload["user_id"] = payload["id"]
-            
         return payload
-    except JWTError as e:
-        # Catch all JWT errors (expired, invalid signature, etc.) and raise our custom error
-        raise InvalidTokenError(f"JWT validation failed: {e}")
-# ----------------------------------------------------
-
-
-# --- Dependency Function ---
-async def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
-    """
-    Dependency that decodes and validates the JWT token, returning the user payload.
-    """
-    # Define credentials exception for unauthorized access
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    
-    try:
-        # 1. Decode the token (JWTError will be caught below)
-        payload = jwt.decode(
-            token, 
-            settings.SECRET_KEY.get_secret_value(), 
-            algorithms=[settings.ALGORITHM],
-            # FIX: Removed options={"verify_exp": False} to enforce standard expiration check
-        )
-        # Extract user ID and ensure it exists. 
-        # FIX: Check for the 'id' key if 'user_id' is missing from the payload (from the problematic token in logs)
-        user_id: int = payload.get("user_id") or payload.get("id")
-        
-        if user_id is None:
-            raise credentials_exception
-            
-        # Return a simple user dict for authorization checks
-        return {"id": user_id, "role": payload.get("role")}
-        
     except JWTError:
-        # Handle decoding errors (e.g., invalid signature, expired token)
-        raise credentials_exception
+        return None

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Ticket Booking - Theater</title>
+    <link rel="stylesheet" href="/app-static/booking.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>🎬 Movie Ticket Booking</h1>
+                <div class="user-section" id="userSection">
+                    <span id="userGreeting">Loading...</span>
+                    <button class="btn btn-secondary" onclick="goToDashboard()">Dashboard</button>
+                    <button class="btn btn-danger" onclick="logout()">Logout</button>
+                </div>
+                <div class="auth-section" id="authSection" style="display: none;">
+                    <a href="/" class="btn btn-primary">Login to Book</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Movie Info -->
+            <div class="movie-info">
+                <h2>🎥 Now Showing: "The Amazing Adventure"</h2>
+                <p>Show Time: 7:00 PM | Duration: 2h 15m</p>
+            </div>
+
+            <!-- Screen -->
+            <div class="screen-container">
+                <div class="screen">SCREEN</div>
+            </div>
+
+            <!-- Seat Legend -->
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-seat available"></div>
+                    <span>Available</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-seat booked"></div>
+                    <span>Booked</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-seat selected"></div>
+                    <span>Your Booking</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-seat vip available"></div>
+                    <span>VIP (20 Taka)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-seat standard available"></div>
+                    <span>Standard (10 Taka)</span>
+                </div>
+            </div>
+
+            <!-- Theater Grid -->
+            <div class="theater-container">
+                <div class="theater" id="theaterGrid">
+                    <!-- Seats will be loaded here dynamically -->
+                    <div class="loading">Loading seats...</div>
+                </div>
+            </div>
+
+            <!-- Booking Stats -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <span class="stat-value" id="totalSeats">-</span>
+                    <span class="stat-label">Total Seats</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="availableSeats">-</span>
+                    <span class="stat-label">Available</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="bookedSeats">-</span>
+                    <span class="stat-label">Booked</span>
+                </div>
+            </div>
+
+            <!-- My Bookings Section -->
+            <div class="my-bookings" id="myBookingsSection" style="display: none;">
+                <h3>📋 My Bookings</h3>
+                <div id="myBookingsList">
+                    <!-- User's bookings will be loaded here -->
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2025 Movie Ticket Booking System | Built with FastAPI & Vanilla JS</p>
+        </footer>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <span id="toastMessage"></span>
+    </div>
+
+    <script src="/app-static/booking.js"></script>
+</body>
+</html>

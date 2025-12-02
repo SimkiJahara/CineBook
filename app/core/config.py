@@ -1,72 +1,65 @@
-"""
-Application Configuration Settings.
-
-This module defines the configuration classes and settings used across the
-Cinebook API, including project metadata, database connection parameters,
-and security constants. Settings are loaded from environment variables
-or a .env file using Pydantic's BaseSettings.
-"""
+# =============================================================================
+# Application Configuration Module
+# =============================================================================
+# Refactored for security: Using pydantic-settings to load all configuration
+# from environment variables instead of hardcoding secrets in code.
+# This follows the 12-factor app methodology for configuration management.
+# =============================================================================
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from enum import Enum
-from pydantic import SecretStr
+from functools import lru_cache
 
-class UserRole(str, Enum):
+
+class Settings(BaseSettings):
     """
-    Defines the available user roles in the application.
+    Application settings loaded from environment variables.
 
-    Roles are used for authorization and determining user-specific data access.
+    This class uses pydantic-settings to automatically load configuration
+    from .env files and environment variables, ensuring secrets are never
+    hardcoded in the source code.
+
+    Attributes:
+        app_name: The name of the application displayed in API docs.
+        app_version: The version of the application.
+        debug: Enable debug mode for development.
+        database_url: PostgreSQL connection string.
+        secret_key: Secret key for JWT token signing (CRITICAL - keep secure).
+        algorithm: Algorithm used for JWT encoding.
+        access_token_expire_minutes: Token expiration time in minutes.
     """
-    buyer = "Buyer"
-    theatre_owner = "TheatreOwner"
-    super_admin = "Superadmin"
 
-class Settings(BaseSettings): 
-    """
-    Core application settings loaded from the environment or .env file.
-
-    :ivar PROJECT_NAME: The human-readable name of the project.
-    :vartype PROJECT_NAME: str
-    :ivar VERSION: The current version string of the API.
-    :vartype VERSION: str
-    :ivar API_V1_STR: The prefix for the v1 API endpoints.
-    :vartype API_V1_STR: str
-    :ivar DATABASE_URL: The full connection string for the database (required).
-    :vartype DATABASE_URL: str
-    :ivar SECRET_KEY: The secret key for cryptographic signing (required).
-    :vartype SECRET_KEY: pydantic.SecretStr
-    :ivar ALGORITHM: The algorithm used for JWT signing.
-    :vartype ALGORITHM: str
-    :ivar ACCESS_TOKEN_EXPIRE_MINUTES: Lifetime of the access token in minutes.
-    :vartype ACCESS_TOKEN_EXPIRE_MINUTES: int
-    :ivar OTP_LENGTH: Length of the One-Time Password code.
-    :vartype OTP_LENGTH: int
-    :ivar OTP_EXPIRE_MINUTES: Expiry time for the OTP code in minutes.
-    :vartype OTP_EXPIRE_MINUTES: int
-    """
-    
-    # Project Configuration
-    PROJECT_NAME: str = "Cinebook API"
-    VERSION: str = "1.0.0"
-
-    # API Prefix (THE FIX)
-    API_V1_STR: str = "/api/v1"
+    # Application Settings
+    app_name: str = "FastAPI Authentication Demo"
+    app_version: str = "1.0.0"
+    debug: bool = False
 
     # Database Configuration
-    DATABASE_URL: str 
+    # Refactored for security: Database URL loaded from environment variable
+    # instead of hardcoded SQLite path as in the original article
+    database_url: str
 
-    # Security Configuration
-    SECRET_KEY: SecretStr
-    ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7 # 7 days
+    # JWT Configuration
+    # Refactored for security: Secret key MUST be loaded from environment
+    # The original article had: SECRET_KEY = "your-secret-key-here" (INSECURE)
+    secret_key: str
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30
 
-    # OTP Configuration
-    OTP_LENGTH: int = 6
-    OTP_EXPIRE_MINUTES: int = 5
-    
-    # Configuration to load from .env file and ignore extra variables
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    # Pydantic V2 configuration using model_config instead of Config class
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", case_sensitive=False, extra="ignore"
+    )
 
-# Instantiate the settings object
-settings = Settings() 
 
+@lru_cache
+def get_settings() -> Settings:
+    """
+    Get cached application settings.
+
+    Uses LRU cache to ensure settings are only loaded once from
+    environment variables, improving performance.
+
+    Returns:
+        Settings: The application configuration object.
+    """
+    return Settings()
