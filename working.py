@@ -10,6 +10,7 @@ class Manager(BaseModel):
     managerContact: str
     branchID: int
 
+''' Base class for Screening with all its attributes '''
 class Screening(BaseModel):
     screeningID: int
     movieName: str
@@ -19,14 +20,27 @@ class Screening(BaseModel):
     isPublished: bool = False
     seatsBooked: Optional[int] = None
 
+''' When creating a screenings, we cannot directly publish it.
+It will always be created as unpublished.
+So ScreeningCreate will not have the attribute isPublished. '''
+class ScreeningCreate(BaseModel):
+    screeningID: int
+    movieName: str
+    hallID: int
+    screeningDate: str
+    startTime: str
+    seatsBooked: Optional[int] = None
+
+''' While editing a screening, user can only change its info, not its publish status.
+So ScreeningEdit will not include the attributes screeningID and isPublished. '''
 class ScreeningEdit(BaseModel):
     movieName: Optional[str] = None
     hallID: Optional[int] = None
     screeningDate: Optional[str] = None
     startTime: Optional[str] = None
-    isPublished: Optional[bool] = None
     seatsBooked: Optional[int] = None
 
+''' Dummy data structure [list] to contains all screenings. Takes Screening objects. '''
 screeningsList = []
 
 @app.get("/")  
@@ -43,7 +57,8 @@ ie the manager will provide the data for the screening object,
 then that info will be appended to the list of screenings or added to the database.
 '''
 @app.post("/schedule-screening")
-def schedule_screening(screening: Screening):
+def schedule_screening(screeningCreate: ScreeningCreate):
+    screening = Screening(**screeningCreate.model_dump(), isPublished = False)
     screeningsList.append(screening)
     return screeningsList
 
@@ -67,9 +82,10 @@ def get_unpublished_screenings(hallID: Optional[int] = None,
     
     for screening in screeningsList:
         if (screening.isPublished == False 
-        and (hallID is None or screening.hallID == hallID) 
-        and (screeningDate is None or screening.screeningDate == screeningDate) 
-        and (movieName is None or screening.movieName == movieName)):
+            and (hallID is None or screening.hallID == hallID) 
+            and (screeningDate is None or screening.screeningDate == screeningDate) 
+            and (movieName is None or screening.movieName == movieName)):
+                
             unpublishedScreeningsList.append(screening)
 
     return unpublishedScreeningsList
@@ -83,9 +99,11 @@ def get_published_screenings(hallID: Optional[int] = None,
     
     for screening in screeningsList:
         if (screening.isPublished == True 
-        and (hallID is None or screening.hallID == hallID) 
-        and (screeningDate is None or screening.screeningDate == screeningDate) 
-        and (movieName is None or screening.movieName == movieName)):
+            and screening.screeningDate > '2025 Dec 13th'
+            and (hallID is None or screening.hallID == hallID) 
+            and (screeningDate is None or screening.screeningDate == screeningDate) 
+            and (movieName is None or screening.movieName == movieName)):
+            
             publishedScreeningsList.append(screening)
 
     return publishedScreeningsList
@@ -96,10 +114,11 @@ def get_past_screenings():
     
     for screening in screeningsList:
         if (screening.isPublished == True 
-        and screening.screeningDate < '2025 Dec 13th'
-        and (hallID is None or screening.hallID == hallID) 
-        and (screeningDate is None or screening.screeningDate == screeningDate) 
-        and (movieName is None or screening.movieName == movieName)):
+            and screening.screeningDate < '2025 Dec 13th'
+            and (hallID is None or screening.hallID == hallID) 
+            and (screeningDate is None or screening.screeningDate == screeningDate) 
+            and (movieName is None or screening.movieName == movieName)):
+                
             pastScreeningsList.append(screening)
 
     return pastScreeningsList
@@ -130,13 +149,15 @@ def edit_screening(screeningID: int, screeningEdit: ScreeningEdit):
             if screeningEdit.startTime is not None:
                 screening.startTime == screeningEdit.startTime
             
-            if screeningEdit.isPublished is not None:
-                screening.isPublished == screeningEdit.isPublished
+            ''' if screeningEdit.isPublished is not None:
+                screening.isPublished == screeningEdit.isPublished '''
             
             if screeningEdit.seatsBooked is not None:
                 screening.seatsBooked == screeningEdit.seatsBooked
 
-            return "Screening successfully edited\n" + screening
+            # return "Screening successfully edited\n" + screening
+            # you can't add a string to a json response like this
+            return {"Confirmation message": "Screening successfully edited\n", "Updated screening": screening}
 
     return "Screening does not exist"
 
@@ -171,9 +192,9 @@ Calls a function that edits the screening info and returns a confirmation to the
 '''
 @app.delete("/screening-deleted/{screeningID}")
 def delete_screening(screeningID: int):
-    for screening, index in screeningsList:
+    for screening in screeningsList:
         if screening.screeningID == screeningID:
-            del screeningsList[index]
+            screeningsList.remove(screening)
             return "Screening was successfully deleted."
 
     return "Screening does not exist."
