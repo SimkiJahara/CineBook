@@ -8,8 +8,8 @@ git checkout tanmoy
 py -3.11 -m venv movie
 
 # activate it
-venv\Scripts\activate (windows) or 
-source venv/bin/activate(mac/linux)
+movie\Scripts\activate (windows) or 
+source movie/bin/activate(mac/linux)
 
 # go to backend
 cd backend
