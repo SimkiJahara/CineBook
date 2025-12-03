@@ -62,15 +62,6 @@ CineBook-Nafisa/
 │   └── test_owner.py
 └── docs/                   # Sphinx documentation
 
-## 🔐 Security Improvements Over Tutorial
-
-| Original Article                                   | This Implementation           |
-| -------------------------------------------------- | ----------------------------- |
-| `SECRET_KEY = "your-secret-key-here"` (hardcoded)  | Loaded from `.env` file       |
-| `DATABASE_URL = "sqlite:///./auth.db"` (hardcoded) | Loaded from `.env` file       |
-| Flat file structure                                | Modular `app/` directory      |
-| Pydantic V1 `Config` class                         | Pydantic V2 `model_config`    |
-| SQLite database                                    | PostgreSQL (production-ready) |
 
 ## 🚀 Setup Instructions
 
