@@ -1,10 +1,12 @@
 # =============================================================================
-# FastAPI Authentication Demo - README
+
+# CineBook-Branch Nafisa - README
+
 # =============================================================================
 
 # FastAPI Authentication Demo
 
-A production-ready FastAPI authentication system with JWT tokens and PostgreSQL.
+Login System & Seat Selection Interface
 
 ## 📁 Project Structure
 
@@ -47,13 +49,13 @@ fastapi-auth/
 
 ## 🔐 Security Improvements Over Tutorial
 
-| Original Article | This Implementation |
-|-----------------|---------------------|
-| `SECRET_KEY = "your-secret-key-here"` (hardcoded) | Loaded from `.env` file |
-| `DATABASE_URL = "sqlite:///./auth.db"` (hardcoded) | Loaded from `.env` file |
-| Flat file structure | Modular `app/` directory |
-| Pydantic V1 `Config` class | Pydantic V2 `model_config` |
-| SQLite database | PostgreSQL (production-ready) |
+| Original Article                                   | This Implementation           |
+| -------------------------------------------------- | ----------------------------- |
+| `SECRET_KEY = "your-secret-key-here"` (hardcoded)  | Loaded from `.env` file       |
+| `DATABASE_URL = "sqlite:///./auth.db"` (hardcoded) | Loaded from `.env` file       |
+| Flat file structure                                | Modular `app/` directory      |
+| Pydantic V1 `Config` class                         | Pydantic V2 `model_config`    |
+| SQLite database                                    | PostgreSQL (production-ready) |
 
 ## 🚀 Setup Instructions
 
@@ -86,6 +88,7 @@ SECRET_KEY=your-super-secret-key-generate-with-openssl-rand-hex-32
 ```
 
 Generate a secure secret key:
+
 ```bash
 openssl rand -hex 32
 ```
@@ -103,20 +106,21 @@ python run.py
 ```
 
 Or with uvicorn directly:
+
 ```bash
 uvicorn app.main:app --reload
 ```
 
 ## 📚 API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/` | Welcome message |
-| GET | `/health` | Health check |
-| POST | `/api/v1/auth/token` | Login (get JWT token) |
-| POST | `/api/v1/users/register` | Register new user |
-| GET | `/api/v1/users/me` | Get current user profile |
-| GET | `/api/v1/users/` | List all users |
+| Method | Endpoint                 | Description              |
+| ------ | ------------------------ | ------------------------ |
+| GET    | `/`                      | Welcome message          |
+| GET    | `/health`                | Health check             |
+| POST   | `/api/v1/auth/token`     | Login (get JWT token)    |
+| POST   | `/api/v1/users/register` | Register new user        |
+| GET    | `/api/v1/users/me`       | Get current user profile |
+| GET    | `/api/v1/users/`         | List all users           |
 
 ## 🔑 Authentication Flow
 
@@ -161,7 +165,3 @@ curl -X POST "http://localhost:8000/api/v1/auth/token" \
 curl -X GET "http://localhost:8000/api/v1/users/me" \
   -H "Authorization: Bearer <your_token>"
 ```
-
-## 📝 License
-
-MIT License
