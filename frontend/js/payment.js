@@ -71,9 +71,9 @@ document.addEventListener("DOMContentLoaded", function () {
 function loadMovieAndPrices(chosenScreening) {
   var movieEidr = localStorage.getItem("selectedMovieEidr");
 
-  var movieTitle = "Movie";
-  var movieLanguage = "-";
-  var movieRating = "-";
+  var movieTitle = "Batman Begins";
+  var movieLanguage = "English";
+  var movieRating = "8.3";
 
   function fillMovieInfo() {
     document.getElementById("movieTitle").textContent = movieTitle;

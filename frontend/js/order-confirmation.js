@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var meta = metaJson ? JSON.parse(metaJson) : null;
 
   var movieEidr = localStorage.getItem("selectedMovieEidr");
-  var movieTitle = "Demo Movie";
+  var movieTitle = "Batman Begins";
   var theaterName = "Selected theater";
   var hallName = "Selected hall";
 
