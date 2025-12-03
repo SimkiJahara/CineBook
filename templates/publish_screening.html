@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="card">
+    <h3>Publish Screening</h3>
+    <p class="small-muted">Please confirm you want to publish this screening.</p>
+    <p class="small-muted"><a href="/unpublished-screenings/{{ owner_id }}">← Back to unpublished screenings</a></p>
+    
+    <div style="margin:16px 0;padding:12px;background:#fffbeb;border:1px solid #fbbf24;border-radius:6px">
+      <div style="font-weight:600;margin-bottom:8px">⚠️ Publishing this screening will:</div>
+      <ul style="margin:8px 0;padding-left:20px">
+        <li>Make it visible to customers</li>
+        <li>Allow customers to book tickets</li>
+        <li>Prevent certain changes (hall cannot be changed)</li>
+      </ul>
+    </div>
+
+    <div style="margin:16px 0;padding:12px;background:#f8f9fa;border-radius:6px">
+      <h4 style="margin:0 0 12px 0">Screening Details:</h4>
+      <div><strong>Movie:</strong> {{ screening.movie.title if screening.movie else screening.movieeidr }}</div>
+      <div><strong>Date:</strong> {{ screening.date }}</div>
+      <div><strong>Time:</strong> {{ screening.starttime.strftime('%H:%M') if screening.starttime else screening.starttime }}</div>
+      <div><strong>Hall:</strong> {{ screening.hallid }} ({{ screening.hallcompanyid }}-{{ screening.hallbranchid }})</div>
+      <div><strong>Current Status:</strong> {{ screening.status }}</div>
+    </div>
+
+    <form action="/screening-published/{{ screening.id }}?owner_id={{ owner_id }}" method="post">
+      <div style="margin-top:16px">
+        <button class="btn btn-primary" type="submit">✓ Confirm & Publish</button>
+        <a class="btn" href="/unpublished-screenings/{{ owner_id }}" style="margin-left:8px">Cancel</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}
