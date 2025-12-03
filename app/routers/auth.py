@@ -1,9 +1,5 @@
 # =============================================================================
 # Authentication Router
-# =============================================================================
-# API endpoints for authentication (login, token generation).
-# Implements the OAuth2 password flow as described in the article.
-# =============================================================================
 
 from datetime import timedelta
 from typing import Annotated

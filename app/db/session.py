@@ -54,7 +54,7 @@ def get_db() -> Generator:
     """
     Dependency function to manage database session lifecycle for FastAPI.
 
-    As described in the article: "The get_db function provides a database
+    "The get_db function provides a database
     session for your endpoints." This implements proper Dependency Injection
     pattern to ensure database connections are properly managed and closed.
 

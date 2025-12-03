@@ -33,7 +33,7 @@ async def register_user(
     """
     Register a new user.
 
-    As described in the article:
+    
     "Test the registration by clicking on the /register endpoint
     and trying to register a new user"
 
@@ -78,7 +78,7 @@ async def read_users_me(
     """
     Get current user information.
 
-    As described in the article:
+   
     "The /users/me endpoint shows how to get the current user's
     information using the token."
 

@@ -2,9 +2,7 @@
 # Security Utilities Module
 # =============================================================================
 # This module contains all security-related functionality including password
-# hashing and JWT token management. Extracted from the article's auth.py to
-# follow separation of concerns principle.
-# =============================================================================
+
 
 from datetime import datetime, timedelta, timezone
 from typing import Optional
@@ -16,7 +14,7 @@ from app.core.config import get_settings
 
 
 # Password hashing context using bcrypt
-# As described in the article: "The CryptContext handles password hashing using bcrypt"
+# The CryptContext handles password hashing using bcrypt
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 """
 :class:`passlib.context.CryptContext` instance configured for bcrypt hashing.
@@ -27,7 +25,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
     Verify a password against its hash.
 
-    Uses bcrypt for secure password verification as recommended in the article.
+    
     This prevents timing attacks by using constant-time comparison.
 
     :param plain_password: The plain text password to verify.
@@ -44,7 +42,7 @@ def get_password_hash(password: str) -> str:
     """
     Generate a bcrypt hash for a password.
 
-    As stated in the article: "Production apps should never store passwords
+  "Production apps should never store passwords
     in plain text. Instead, you need to hash passwords using secure algorithms."
 
     :param password: The plain text password to hash.
@@ -59,7 +57,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     """
     Create a JWT access token.
 
-    As described in the article: "JSON Web Tokens (JWT) provide a secure way
+    "JSON Web Tokens (JWT) provide a secure way
     to authenticate users without storing sessions on the server. Each token
     contains all the user information needed, making your API stateless and scalable."
 

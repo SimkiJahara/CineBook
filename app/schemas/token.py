@@ -1,3 +1,7 @@
+# =============================================================================
+# Token Schemas (Pydantic V2)
+# =============================================================================
+
 """
 Token Schemas
 =============
@@ -13,11 +17,8 @@ Key Models:
 - **TokenData**: Represents the decoded claims extracted from the JWT, typically containing
   the user identity (username).
 """
-# =============================================================================
-# Token Schemas (Pydantic V2)
-# =============================================================================
-# Schemas for JWT token request and response validation.
-# =============================================================================
+
+
 
 from typing import Optional
 

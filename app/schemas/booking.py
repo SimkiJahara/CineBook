@@ -1,3 +1,9 @@
+# =============================================================================
+# Booking Schemas - Pydantic Models for Request/Response Validation
+# =============================================================================
+# Pydantic V2 schemas for the booking system endpoints.
+# =============================================================================
+
 """
 Booking Schemas
 ===============
@@ -14,11 +20,7 @@ Key Models:
 - **TheaterResponse**: Used to represent the full state of the theater, including all seats and summary statistics.
 - **BookingStatusResponse**: Used for general booking operation feedback (success/failure messages).
 """
-# =============================================================================
-# Booking Schemas - Pydantic Models for Request/Response Validation
-# =============================================================================
-# Pydantic V2 schemas for the booking system endpoints.
-# =============================================================================
+
 
 from datetime import datetime
 from typing import Optional, List

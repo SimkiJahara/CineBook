@@ -1,3 +1,10 @@
+# =============================================================================
+# Booking Service - Business Logic for Seat Booking
+# =============================================================================
+# Handles all booking-related operations with PostgreSQL transaction-based
+# locking to prevent double-booking. No Redis required.
+# =============================================================================
+
 """
 Booking Service
 ===============
@@ -15,12 +22,7 @@ Key Functions:
 - ``get_user_bookings``: Retrieves a history of bookings for a specific user.
 - ``create_seat`` and ``get_seat_count``: Utility functions for initializing and querying seat data.
 """
-# =============================================================================
-# Booking Service - Business Logic for Seat Booking
-# =============================================================================
-# Handles all booking-related operations with PostgreSQL transaction-based
-# locking to prevent double-booking. No Redis required.
-# =============================================================================
+
 
 from typing import List, Optional
 from sqlalchemy.orm import Session

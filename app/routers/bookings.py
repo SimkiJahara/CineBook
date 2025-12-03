@@ -1,8 +1,6 @@
 # =============================================================================
 # Bookings Router - API Endpoints for Seat Booking
-# =============================================================================
-# Protected endpoints for viewing seats and making/canceling bookings.
-# =============================================================================
+
 
 from typing import Annotated, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query

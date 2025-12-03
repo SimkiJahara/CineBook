@@ -1,3 +1,7 @@
+# =============================================================================
+# Role Schemas (Pydantic V2)
+# =============================================================================
+
 """
 Role Schemas
 ============
@@ -11,11 +15,7 @@ Key Models:
 - **RoleCreate**: Used for validating incoming data when creating a new role.
 - **RoleResponse**: The complete structure of a role returned to the client, including its unique database ID.
 """
-# =============================================================================
-# Role Schemas (Pydantic V2)
-# =============================================================================
-# Schemas for role request and response validation.
-# =============================================================================
+
 
 from typing import Optional
 

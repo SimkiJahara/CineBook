@@ -1,17 +1,13 @@
 # =============================================================================
 # Authentication Dependencies
 # =============================================================================
-# FastAPI dependencies for authentication, implementing the OAuth2 flow
-# described in the article with JWT tokens.
-# =============================================================================
+
 
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-
-# NOTE: These imports are assumed to exist in the FastAPI project structure.
 from app.core.security import decode_access_token
 from app.db.session import get_db
 from app.models.user import User
@@ -19,7 +15,7 @@ from app.schemas.user import UserResponse
 from app.services import get_user_by_username
 
 
-# OAuth2 scheme - as described in the article:
+# OAuth2 scheme 
 # "OAuth2PasswordBearer prepares us for JWT token authentication"
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/token")
 
@@ -31,7 +27,7 @@ async def get_current_user(
     """
     Get the current user from the JWT token.
 
-    As described in the article:
+    
     "These functions extract the user information from the JWT token
     and verify it's valid."
 
@@ -113,7 +109,7 @@ async def get_current_active_user(
     """
     Get the current active user (not disabled).
 
-    As described in the article:
+   
     "The get_current_active_user function adds an extra check to make
     sure the user account isn't disabled."
 
@@ -134,7 +130,7 @@ def convert_user_to_response(user: User) -> UserResponse:
     """
     Convert database User model to UserResponse schema.
 
-    As described in the article's convert_db_user_to_user function:
+    
     "Convert database user to Pydantic user model."
 
     :param user: SQLAlchemy User model instance.

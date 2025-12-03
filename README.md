@@ -8,44 +8,59 @@
 
 Login System & Seat Selection Interface
 
-## 📁 Project Structure
-
-```
-fastapi-auth/
+````text
+CineBook-Nafisa/
 ├── .env                    # Environment variables (NEVER commit to git)
 ├── .gitignore              # Git ignore rules
+├── alembic.ini             # Alembic migration configuration
+├── pytest.ini              # Pytest configuration
 ├── requirements.txt        # Python dependencies
 ├── run.py                  # Application entry point
-├── setup_db.py             # Database initialization script
-└── app/
-    ├── __init__.py
-    ├── main.py             # FastAPI application factory
-    ├── core/               # Core configuration and security
-    │   ├── __init__.py
-    │   ├── config.py       # Pydantic settings (loads from .env)
-    │   ├── security.py     # Password hashing & JWT functions
-    │   └── dependencies.py # FastAPI authentication dependencies
-    ├── db/                 # Database configuration
-    │   ├── __init__.py
-    │   └── session.py      # SQLAlchemy engine and session
-    ├── models/             # SQLAlchemy ORM models
-    │   ├── __init__.py
-    │   ├── user.py         # User model
-    │   └── role.py         # Role model
-    ├── schemas/            # Pydantic schemas (request/response)
-    │   ├── __init__.py
-    │   ├── user.py         # User schemas
-    │   ├── token.py        # Token schemas
-    │   └── role.py         # Role schemas
-    ├── services/           # Business logic / CRUD operations
-    │   ├── __init__.py
-    │   ├── user_service.py # User CRUD operations
-    │   └── role_service.py # Role CRUD operations
-    └── routers/            # API route handlers
-        ├── __init__.py
-        ├── auth.py         # Authentication endpoints
-        └── users.py        # User management endpoints
-```
+├── setup_db.py             # Database initialization script (Tables, Roles, Seats)
+├── app/
+│   ├── __init__.py
+│   ├── main.py             # FastAPI application factory
+│   ├── core/               # Core configuration and security
+│   │   ├── config.py       # Pydantic settings
+│   │   ├── security.py     # Password hashing & JWT logic
+│   │   └── dependencies.py # Auth & Role dependencies
+│   ├── db/                 # Database configuration
+│   │   └── session.py      # SQLAlchemy session management
+│   ├── models/             # SQLAlchemy ORM models
+│   │   ├── user.py         # User model
+│   │   ├── role.py         # Role model
+│   │   └── booking.py      # Seat & Booking models
+│   ├── routers/            # API route handlers
+│   │   ├── auth.py         # Login/Token endpoints
+│   │   ├── users.py        # User management endpoints
+│   │   ├── bookings.py     # Booking system endpoints
+│   │   └── owner.py        # Theatre Owner specific endpoints
+│   ├── schemas/            # Pydantic schemas
+│   │   ├── user.py         # User schemas
+│   │   ├── role.py         # Role schemas
+│   │   ├── token.py        # Token schemas
+│   │   └── booking.py      # Booking & Seat schemas
+│   ├── services/           # Business logic layer
+│   │   ├── user_service.py
+│   │   ├── role_service.py
+│   │   └── booking_service.py # Booking logic with race-condition handling
+│   └── static/             # Booking App Frontend (Booking UI)
+│       ├── booking.html
+│       ├── booking.css
+│       └── booking.js
+├── frontend/               # Auth & Dashboard Frontend
+│   ├── index.html          # Login/Register Page
+│   ├── dashboard.html      # User Dashboard
+│   ├── styles.css
+│   └── app.js
+├── migrations/             # Database migrations (Alembic)
+├── tests/                  # Test suite
+│   ├── conftest.py         # Test fixtures
+│   ├── test_login.py
+│   ├── test_register.py
+│   ├── test_booking.py
+│   └── test_owner.py
+└── docs/                   # Sphinx documentation
 
 ## 🔐 Security Improvements Over Tutorial
 
@@ -70,7 +85,7 @@ venv\Scripts\activate
 
 # Linux/Mac
 source venv/bin/activate
-```
+````
 
 ### 2. Install Dependencies
 

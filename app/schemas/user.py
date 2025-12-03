@@ -1,3 +1,7 @@
+# =============================================================================
+# User Schemas (Pydantic V2)
+# =============================================================================
+
 """
 User Schemas
 ============
@@ -13,13 +17,7 @@ Key Models:
 - **UserInDB**: Internal schema used for database interactions, including the hashed password.
 - **UserUpdate**: Schema for modifying user data with all fields optional for partial updates.
 """
-# =============================================================================
-# User Schemas (Pydantic V2)
-# =============================================================================
-# Pydantic schemas for request/response validation.
-# Refactored to use modern Pydantic V2 syntax with model_config instead of
-# the deprecated Config class.
-# =============================================================================
+
 
 from datetime import datetime
 from typing import Optional, List

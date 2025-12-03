@@ -1,9 +1,7 @@
 # =============================================================================
 # User Database Model
 # =============================================================================
-# SQLAlchemy model for the User table, adapted from the article's DBUser class.
-# Modified to work with the existing 'User' table in the PostgreSQL database.
-# =============================================================================
+
 
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Table, ForeignKey
 from sqlalchemy.orm import relationship
@@ -13,7 +11,7 @@ from app.db.session import Base
 
 
 # Association table for many-to-many relationship between users and roles
-# As described in the article for role-based access control
+#  for role-based access control
 user_roles = Table(
     "user_roles",
     Base.metadata,
@@ -30,7 +28,7 @@ class User(Base):
     """
     SQLAlchemy model for the users table.
 
-    Based on the article's DBUser model. Stores user authentication and profile data.
+    Stores user authentication and profile data.
     Passwords are stored as bcrypt hashes (NEVER plain text).
 
     :ivar id: Primary key of the user.

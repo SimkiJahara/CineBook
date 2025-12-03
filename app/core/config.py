@@ -1,10 +1,6 @@
 # =============================================================================
 # Application Configuration Module
-# =============================================================================
-# Refactored for security: Using pydantic-settings to load all configuration
-# from environment variables instead of hardcoding secrets in code.
-# This follows the 12-factor app methodology for configuration management.
-# =============================================================================
+
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
@@ -40,13 +36,11 @@ class Settings(BaseSettings):
     debug: bool = False
 
     # Database Configuration
-    # Refactored for security: Database URL loaded from environment variable
-    # instead of hardcoded SQLite path as in the original article
+    
     database_url: str
 
     # JWT Configuration
-    # Refactored for security: Secret key MUST be loaded from environment
-    # The original article had: SECRET_KEY = "your-secret-key-here" (INSECURE)
+   
     secret_key: str
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
