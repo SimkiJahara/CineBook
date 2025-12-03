@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="card">
+    <h2>Schedule a Screening</h2>
+    <p class="small-muted"><a href="/dashboard/{{ owner_id }}">← Return to dashboard</a></p>
+
+    <form id="scheduleForm" action="/screening-scheduled/{{ owner_id }}" method="post">
+      <div class="row">
+        <label for="date">Date *</label>
+        <input id="date" name="date" type="date" 
+               value="{{ selected_date or '' }}" 
+               required 
+               onchange="updateExistingScreenings()" />
+      </div>
+
+      <div class="row">
+        <label for="hall_search">Select Hall * (search)</label>
+        <input id="hall_search" type="text" placeholder="Search halls..." />
+        <select id="hall_select" name="hallid" required onchange="updateExistingScreenings()">
+          <option value="">-- Select a hall --</option>
+          {% for h in halls %}
+            <option value="{{ h.hallid }}" 
+                    data-company="{{ h.companyid }}" 
+                    data-branch="{{ h.branchid }}"
+                    {% if selected_hallid == h.hallid %}selected{% endif %}>
+              {{ h.companyid }}-{{ h.branchid }}: Hall {{ h.hallid }} (Capacity: {{ h.capacity }})
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <script>
+        document.addEventListener('DOMContentLoaded', ()=> {
+          makeSearchable('hall_select','hall_search');
+          // Initialize hidden fields on page load
+          updateHiddenFields();
+        });
+
+        function updateHiddenFields(){
+          const hallSelect = document.getElementById('hall_select');
+          const opt = hallSelect.selectedOptions[0];
+          if(opt && opt.value){
+            document.getElementById('hallcompanyid').value = opt.dataset.company || '';
+            document.getElementById('hallbranchid').value = opt.dataset.branch || '';
+          }
+        }
+
+        function updateExistingScreenings(){
+          const date = document.getElementById('date').value;
+          const hallSelect = document.getElementById('hall_select');
+          const opt = hallSelect.selectedOptions[0];
+          
+          if(date && opt && opt.value){
+            const companyid = opt.dataset.company;
+            const branchid = opt.dataset.branch;
+            const hallid = opt.value;
+            
+            // Reload page with query params to show existing screenings
+            window.location.href = `/schedule-screening/{{ owner_id }}?hallid=${hallid}&companyid=${companyid}&branchid=${branchid}&screening_date=${date}`;
+          }
+        }
+      </script>
+
+      {% if existing_screenings %}
+      <div class="row">
+        <div class="card" style="background:#f8f9fa">
+          <div class="small-muted" style="margin-bottom:8px">
+            <strong>Existing screenings for {{ selected_date }} in Hall {{ selected_hall.hallid }}</strong>
+          </div>
+          <div class="scroll-x">
+            {% for s in existing_screenings %}
+              <div class="card" style="min-width:240px;padding:10px;background:#fff">
+                <div style="font-weight:600">{{ s.movie.title if s.movie else s.movieeidr }}</div>
+                <div class="small-muted" style="margin-top:4px">
+                  Start: {{ s.starttime.strftime('%H:%M') if s.starttime else s.starttime }}
+                  {% if s.movie and s.movie.lengthmin %}
+                  <br>Duration: {{ s.movie.lengthmin }} min
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="row">
+        <label for="movie_search">Movie * (search)</label>
+        <input id="movie_search" type="text" placeholder="Search movies..." />
+        <select id="movie_select" name="movieeidr" required>
+          <option value="">-- Select a movie --</option>
+          {% for m in movies %}
+            <option value="{{ m.eidr }}">
+              {{ m.title }}{% if m.releasedate %} ({{ m.releasedate.year }}){% endif %}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <script>
+        document.addEventListener('DOMContentLoaded', ()=> makeSearchable('movie_select','movie_search'));
+      </script>
+
+      <div class="row">
+        <label for="starttime">Start Time *</label>
+        <input id="starttime" name="starttime" type="time" required />
+      </div>
+
+      <!-- Hidden inputs for composite hall keys -->
+      <input type="hidden" name="hallcompanyid" id="hallcompanyid" />
+      <input type="hidden" name="hallbranchid" id="hallbranchid" />
+
+      <script>
+        // Update hidden fields when hall selection changes
+        const hallSelect = document.getElementById('hall_select');
+        if(hallSelect){
+          hallSelect.addEventListener('change', updateHiddenFields);
+        }
+      </script>
+
+      <div class="row" style="margin-top:16px">
+        <button class="btn btn-primary" type="submit">Schedule Screening</button>
+        <a class="btn" href="/dashboard/{{ owner_id }}" style="margin-left:8px">Cancel</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}
