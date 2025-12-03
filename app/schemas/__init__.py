@@ -1,3 +1,21 @@
+"""
+Schemas Module Initialization
+=============================
+
+This module serves as the central hub for all Pydantic data models (schemas)
+used across the application's API layer and internal logic.
+
+It re-exports models from submodules like ``app.schemas.user``, ``app.schemas.token``,
+``app.schemas.role``, and ``app.schemas.booking``, allowing other parts of the
+application to import them easily from a single place (e.g., ``from app.schemas import UserResponse``).
+
+The exposed schemas include:
+
+- User-related models for authentication, creation, and profile data.
+- JWT models for handling token payloads.
+- Role models for access control configuration.
+- Booking and Theater models for managing reservations and seat layouts.
+"""
 # =============================================================================
 # Schemas Module Initialization
 # =============================================================================

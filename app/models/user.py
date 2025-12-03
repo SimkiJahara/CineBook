@@ -20,26 +20,35 @@ user_roles = Table(
     Column("user_id", Integer, ForeignKey("users.id")),
     Column("role_id", Integer, ForeignKey("roles.id")),
 )
+"""
+SQLAlchemy :class:`~sqlalchemy.Table` defining the many-to-many relationship
+between the :class:`User` model and the :class:`Role` model.
+"""
 
 
 class User(Base):
     """
     SQLAlchemy model for the users table.
 
-    Based on the article's DBUser model. Creates a new 'users' table
-    to avoid conflicts with any existing 'User' table in the database.
-    Stores user authentication data including hashed passwords
-    (never plain text as emphasized in article).
+    Based on the article's DBUser model. Stores user authentication and profile data.
+    Passwords are stored as bcrypt hashes (NEVER plain text).
 
-    Attributes:
-        id: Primary key.
-        username: Unique username for authentication.
-        email: Unique email address.
-        full_name: User's display name.
-        hashed_password: Bcrypt hashed password (NEVER store plain text).
-        is_active: Whether the user account is active.
-        created_at: Timestamp of account creation.
-        roles: Many-to-many relationship with Role model.
+    :ivar id: Primary key of the user.
+    :vartype id: int
+    :ivar username: Unique username used for authentication.
+    :vartype username: str
+    :ivar email: Unique email address.
+    :vartype email: str
+    :ivar full_name: User's display name.
+    :vartype full_name: str | None
+    :ivar hashed_password: Bcrypt hashed password.
+    :vartype hashed_password: str
+    :ivar is_active: Status indicating whether the user account is active. Defaults to True.
+    :vartype is_active: bool
+    :ivar created_at: Timestamp of account creation. Defaults to the current time.
+    :vartype created_at: :class:`datetime.datetime`
+    :ivar roles: Many-to-many relationship collection with the :class:`Role` model via :data:`user_roles`.
+    :vartype roles: list[:class:`app.models.role.Role`]
     """
 
     __tablename__ = "users"  # New table to avoid conflict with existing 'User' table

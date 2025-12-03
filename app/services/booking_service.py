@@ -1,3 +1,20 @@
+"""
+Booking Service
+===============
+
+This module contains the business logic for managing theater seats and handling
+the booking process. It ensures data integrity, particularly concerning
+race conditions, by utilizing PostgreSQL's transaction-based row-level locking
+(SELECT ... FOR UPDATE) to prevent double-booking.
+
+Key Functions:
+- ``get_all_seats`` and ``get_seat_by_id``: Retrieval of individual seat data.
+- ``get_theater_layout``: Provides the full theater view, including real-time booking status.
+- ``book_seat``: The core transaction logic, employing row locking for concurrency safety.
+- ``cancel_booking``: Allows users to cancel their own reservations.
+- ``get_user_bookings``: Retrieves a history of bookings for a specific user.
+- ``create_seat`` and ``get_seat_count``: Utility functions for initializing and querying seat data.
+"""
 # =============================================================================
 # Booking Service - Business Logic for Seat Booking
 # =============================================================================
@@ -96,6 +113,7 @@ def book_seat(
 
     Uses SELECT ... FOR UPDATE to acquire a row-level lock on the seat,
     preventing double-booking without requiring Redis or in-memory locking.
+    
 
     Args:
         db: Database session

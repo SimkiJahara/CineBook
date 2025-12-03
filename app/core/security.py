@@ -18,6 +18,9 @@ from app.core.config import get_settings
 # Password hashing context using bcrypt
 # As described in the article: "The CryptContext handles password hashing using bcrypt"
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+"""
+:class:`passlib.context.CryptContext` instance configured for bcrypt hashing.
+"""
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -27,12 +30,12 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     Uses bcrypt for secure password verification as recommended in the article.
     This prevents timing attacks by using constant-time comparison.
 
-    Args:
-        plain_password: The plain text password to verify.
-        hashed_password: The bcrypt hashed password to compare against.
-
-    Returns:
-        bool: True if password matches, False otherwise.
+    :param plain_password: The plain text password to verify.
+    :type plain_password: str
+    :param hashed_password: The bcrypt hashed password to compare against.
+    :type hashed_password: str
+    :returns: True if password matches, False otherwise.
+    :rtype: bool
     """
     return pwd_context.verify(plain_password, hashed_password)
 
@@ -44,11 +47,10 @@ def get_password_hash(password: str) -> str:
     As stated in the article: "Production apps should never store passwords
     in plain text. Instead, you need to hash passwords using secure algorithms."
 
-    Args:
-        password: The plain text password to hash.
-
-    Returns:
-        str: The bcrypt hashed password.
+    :param password: The plain text password to hash.
+    :type password: str
+    :returns: The bcrypt hashed password.
+    :rtype: str
     """
     return pwd_context.hash(password)
 
@@ -64,12 +66,12 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     Refactored for security: SECRET_KEY is loaded from environment variables
     instead of being hardcoded.
 
-    Args:
-        data: Dictionary of claims to encode in the token.
-        expires_delta: Optional custom expiration time.
-
-    Returns:
-        str: The encoded JWT token.
+    :param data: Dictionary of claims to encode in the token.
+    :type data: dict
+    :param expires_delta: Optional custom expiration time.
+    :type expires_delta: :class:`datetime.timedelta`, optional
+    :returns: The encoded JWT token.
+    :rtype: str
     """
     settings = get_settings()
     to_encode = data.copy()
@@ -95,11 +97,10 @@ def decode_access_token(token: str) -> Optional[dict]:
 
     Extracts the payload from the JWT token after verifying its signature.
 
-    Args:
-        token: The JWT token string to decode.
-
-    Returns:
-        dict: The decoded token payload if valid, None if invalid.
+    :param token: The JWT token string to decode.
+    :type token: str
+    :returns: The decoded token payload if valid, None if invalid due to signature or expiration.
+    :rtype: dict | None
     """
     settings = get_settings()
     try:

@@ -11,6 +11,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
+# NOTE: These imports are assumed to exist in the FastAPI project structure.
 from app.core.security import decode_access_token
 from app.db.session import get_db
 from app.models.user import User
@@ -37,15 +38,13 @@ async def get_current_user(
     Refactored for security: Uses dependency injection for database session
     and loads SECRET_KEY from environment variables.
 
-    Args:
-        token: JWT token from Authorization header.
-        db: Database session (injected).
-
-    Returns:
-        User object for the authenticated user.
-
-    Raises:
-        HTTPException: 401 if token is invalid or user not found.
+    :param token: JWT token from Authorization header.
+    :type token: str
+    :param db: Database session (injected by FastAPI).
+    :type db: :class:`sqlalchemy.orm.Session`
+    :raises HTTPException: 401 if token is invalid or user not found.
+    :returns: User object for the authenticated user.
+    :rtype: :class:`app.models.user.User`
     """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -82,6 +81,13 @@ async def get_current_user_optional(
 
     Returns None if no token is provided or token is invalid.
     Used for public endpoints that show different content for authenticated users.
+
+    :param token: JWT token from Authorization header (optional).
+    :type token: str | None
+    :param db: Database session (injected by FastAPI).
+    :type db: :class:`sqlalchemy.orm.Session`
+    :returns: User object for the authenticated user or None if authentication fails or token is missing.
+    :rtype: :class:`app.models.user.User` | None
     """
     if token is None:
         return None
@@ -111,14 +117,11 @@ async def get_current_active_user(
     "The get_current_active_user function adds an extra check to make
     sure the user account isn't disabled."
 
-    Args:
-        current_user: User object from get_current_user dependency.
-
-    Returns:
-        User object if active.
-
-    Raises:
-        HTTPException: 400 if user is inactive.
+    :param current_user: User object resolved from the :func:`~auth_dependencies.get_current_user` dependency.
+    :type current_user: :class:`app.models.user.User`
+    :raises HTTPException: 400 if user is inactive.
+    :returns: User object if active.
+    :rtype: :class:`app.models.user.User`
     """
     if not current_user.is_active:
         raise HTTPException(
@@ -134,11 +137,10 @@ def convert_user_to_response(user: User) -> UserResponse:
     As described in the article's convert_db_user_to_user function:
     "Convert database user to Pydantic user model."
 
-    Args:
-        user: SQLAlchemy User model instance.
-
-    Returns:
-        UserResponse Pydantic schema.
+    :param user: SQLAlchemy User model instance.
+    :type user: :class:`app.models.user.User`
+    :returns: UserResponse Pydantic schema.
+    :rtype: :class:`app.schemas.user.UserResponse`
     """
     return UserResponse(
         id=user.id,

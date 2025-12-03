@@ -1,3 +1,18 @@
+"""
+User Schemas
+============
+
+This module defines the Pydantic data models for user-related operations,
+including registration, profile retrieval, internal database representation,
+and updates. These schemas ensure data integrity and security for all user API endpoints.
+
+Key Models:
+- **UserBase**: Common user fields (username, email, full_name).
+- **UserCreate**: Schema for creating a new user, including the plaintext password.
+- **UserResponse**: Schema for API responses, excluding sensitive data like passwords.
+- **UserInDB**: Internal schema used for database interactions, including the hashed password.
+- **UserUpdate**: Schema for modifying user data with all fields optional for partial updates.
+"""
 # =============================================================================
 # User Schemas (Pydantic V2)
 # =============================================================================

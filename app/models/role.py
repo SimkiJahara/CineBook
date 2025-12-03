@@ -16,14 +16,18 @@ class Role(Base):
     """
     SQLAlchemy model for the Role table.
 
-    As described in the article: Implements role-based access control.
-    Default roles include 'user', 'admin', and 'moderator'.
+    This model is central to implementing role-based access control (RBAC).
+    It stores definitions of roles that can be assigned to users.
+    Default roles typically include 'user', 'admin', and 'moderator'.
 
-    Attributes:
-        id: Primary key.
-        name: Unique role name (e.g., 'user', 'admin', 'moderator').
-        description: Human-readable description of the role.
-        users: Many-to-many relationship with User model.
+    :ivar id: Primary key of the role.
+    :vartype id: int
+    :ivar name: Unique name of the role (e.g., 'user', 'admin', 'moderator').
+    :vartype name: str
+    :ivar description: Human-readable description of the role.
+    :vartype description: str | None
+    :ivar users: Many-to-many relationship collection with the :class:`User` model.
+    :vartype users: list[:class:`app.models.user.User`]
     """
 
     __tablename__ = "roles"

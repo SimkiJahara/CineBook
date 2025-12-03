@@ -1,3 +1,17 @@
+"""
+User Service
+============
+
+This module contains the core business logic and database access functions for
+managing user accounts, handling authentication, and updating user profiles.
+It ensures that sensitive operations, like password hashing, are properly
+isolated in the service layer.
+
+Key Functions:
+- **User Retrieval**: ``get_user_by_id``, ``get_user_by_username``, ``get_user_by_email``, ``get_all_users``.
+- **Authentication**: ``authenticate_user`` verifies credentials against the stored hash.
+- **Creation/Update**: ``create_user`` handles registration and default role assignment; ``update_user_status`` manages account activation/deactivation.
+"""
 # =============================================================================
 # User CRUD Operations
 # =============================================================================

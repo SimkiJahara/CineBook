@@ -1,3 +1,18 @@
+"""
+Token Schemas
+=============
+
+This module defines the Pydantic data models for handling JSON Web Tokens (JWT)
+used for authentication and authorization within the API.
+
+These schemas facilitate the validation of token issuance and the extraction
+of essential data from the token payload.
+
+Key Models:
+- **Token**: Used to structure the API response when a new access token is issued.
+- **TokenData**: Represents the decoded claims extracted from the JWT, typically containing
+  the user identity (username).
+"""
 # =============================================================================
 # Token Schemas (Pydantic V2)
 # =============================================================================
@@ -26,6 +41,7 @@ class TokenData(BaseModel):
     Schema for decoded token data.
 
     Contains the claims extracted from a JWT token.
+
     The 'sub' claim contains the username as described in the article:
     "data={"sub": user.username}"
     """

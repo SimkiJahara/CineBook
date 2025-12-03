@@ -1,12 +1,7 @@
 # =============================================================================
 # Database Session Configuration
 # =============================================================================
-# Refactored for security: Database URL is loaded from environment variables
-# instead of being hardcoded as in the original article.
-#
-# The article used: DATABASE_URL = "sqlite:///./auth.db" (hardcoded)
-# We now use: settings.database_url (from .env file)
-# =============================================================================
+
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
@@ -26,29 +21,51 @@ engine = create_engine(
     pool_size=5,  # Connection pool size for production
     max_overflow=10,  # Maximum overflow connections
 )
+"""
+SQLAlchemy :class:`~sqlalchemy.engine.Engine` instance.
+
+This engine connects to the database specified by ``settings.database_url``
+and is configured with connection pooling for performance.
+"""
+
 
 # Session factory for creating database sessions
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+"""
+SQLAlchemy :func:`~sqlalchemy.orm.sessionmaker` factory.
+
+This factory is used to create new :class:`~sqlalchemy.orm.Session` objects
+with specific settings (autocommit=False, autoflush=False) bound to the
+application's :data:`engine`.
+"""
+
 
 # Base class for SQLAlchemy models
 # Using the modern declarative_base import from sqlalchemy.orm
 Base = declarative_base()
+"""
+Declarative base class for all SQLAlchemy models.
+
+All application database models must inherit from this :class:`~sqlalchemy.ext.declarative.DeclarativeBase`.
+"""
 
 
 def get_db() -> Generator:
     """
-    Dependency to get database session.
+    Dependency function to manage database session lifecycle for FastAPI.
 
     As described in the article: "The get_db function provides a database
     session for your endpoints." This implements proper Dependency Injection
     pattern to ensure database connections are properly managed and closed.
 
-    Yields:
-        Session: SQLAlchemy database session.
+    :yields: A new SQLAlchemy database session instance.
+    :ytype: :class:`sqlalchemy.orm.Session`
+    :returns: A generator that yields a database session.
+    :rtype: :class:`~typing.Generator`[:class:`~sqlalchemy.orm.Session`, None, None]
 
-    Note:
-        The session is automatically closed after the request is completed,
-        ensuring no connection leaks occur.
+    .. note::
+        The session is automatically closed in the ``finally`` block after
+        the request is completed, ensuring no connection leaks occur.
     """
     db = SessionLocal()
     try:

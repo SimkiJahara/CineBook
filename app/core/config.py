@@ -18,14 +18,20 @@ class Settings(BaseSettings):
     from .env files and environment variables, ensuring secrets are never
     hardcoded in the source code.
 
-    Attributes:
-        app_name: The name of the application displayed in API docs.
-        app_version: The version of the application.
-        debug: Enable debug mode for development.
-        database_url: PostgreSQL connection string.
-        secret_key: Secret key for JWT token signing (CRITICAL - keep secure).
-        algorithm: Algorithm used for JWT encoding.
-        access_token_expire_minutes: Token expiration time in minutes.
+    :ivar app_name: The name of the application displayed in API docs.
+    :vartype app_name: str
+    :ivar app_version: The version of the application.
+    :vartype app_version: str
+    :ivar debug: Enable debug mode for development.
+    :vartype debug: bool
+    :ivar database_url: PostgreSQL connection string. (Required from environment)
+    :vartype database_url: str
+    :ivar secret_key: Secret key for JWT token signing (CRITICAL - keep secure). (Required from environment)
+    :vartype secret_key: str
+    :ivar algorithm: Algorithm used for JWT encoding.
+    :vartype algorithm: str
+    :ivar access_token_expire_minutes: Token expiration time in minutes.
+    :vartype access_token_expire_minutes: int
     """
 
     # Application Settings
@@ -59,7 +65,7 @@ def get_settings() -> Settings:
     Uses LRU cache to ensure settings are only loaded once from
     environment variables, improving performance.
 
-    Returns:
-        Settings: The application configuration object.
+    :returns: The application configuration object.
+    :rtype: Settings
     """
     return Settings()

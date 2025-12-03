@@ -1,3 +1,20 @@
+"""
+Role Service
+============
+
+This module encapsulates the business logic and database access layer for
+managing user roles within the application. It provides Create and Read (CR)
+operations for the ``Role`` model.
+
+All database interactions are handled via SQLAlchemy sessions, ensuring
+separation of concerns between API endpoints and data persistence logic.
+
+Key Functions:
+- ``get_role_by_id``: Retrieves a role using its primary key.
+- ``get_role_by_name``: Retrieves a role using its unique name.
+- ``get_all_roles``: Fetches a list of all defined roles.
+- ``create_role``: Handles the creation and persistence of a new role.
+"""
 # =============================================================================
 # Role CRUD Operations
 # =============================================================================

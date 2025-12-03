@@ -24,7 +24,16 @@ from app.db.session import Base
 
 
 class SeatType(str, enum.Enum):
-    """Seat type enumeration for pricing tiers."""
+    """
+    Seat type enumeration for pricing tiers.
+
+    Used to categorize seats within the database and link to pricing information.
+
+    :ivar STANDARD: Standard seating area.
+    :vartype STANDARD: str
+    :ivar VIP: Premium or VIP seating area.
+    :vartype VIP: str
+    """
 
     STANDARD = "standard"
     VIP = "vip"
@@ -34,12 +43,20 @@ class Seat(Base):
     """
     Seat model representing a single seat in the theater.
 
-    Attributes:
-        id: Primary key
-        row: Row identifier (e.g., 'A', 'B', 'C')
-        number: Seat number within the row (1, 2, 3...)
-        seat_type: Type of seat (standard/vip) for pricing
-        price: Price in Taka
+    This model stores the physical characteristics and base price of a seat.
+
+    :ivar id: Primary key of the seat.
+    :vartype id: int
+    :ivar row: Row identifier (e.g., 'A', 'B', 'C').
+    :vartype row: str
+    :ivar number: Seat number within the row (1, 2, 3...).
+    :vartype number: int
+    :ivar seat_type: Type of seat (standard/vip) for pricing. Defaults to 'standard'.
+    :vartype seat_type: str
+    :ivar price: Base price of the seat in Taka.
+    :vartype price: float
+    :ivar booking: Relationship to the :class:`Booking` model.
+    :vartype booking: :class:`Booking`
     """
 
     __tablename__ = "seats"
@@ -64,11 +81,21 @@ class Booking(Base):
     """
     Booking model representing a seat reservation by a user.
 
-    Attributes:
-        id: Primary key
-        seat_id: Foreign key to seats table (unique - one booking per seat)
-        user_id: Foreign key to users table
-        booked_at: Timestamp when booking was made
+    This model enforces a one-to-one relationship between a booking and a seat
+    via the ``seat_id`` unique constraint.
+
+    :ivar id: Primary key of the booking.
+    :vartype id: int
+    :ivar seat_id: Foreign key to the :class:`Seat` table. Unique constraint ensures one booking per seat.
+    :vartype seat_id: int
+    :ivar user_id: Foreign key to the :class:`User` table.
+    :vartype user_id: int
+    :ivar booked_at: Timestamp when the booking was made. Defaults to the current time.
+    :vartype booked_at: :class:`datetime.datetime`
+    :ivar seat: Relationship to the :class:`Seat` model.
+    :vartype seat: :class:`Seat`
+    :ivar user: Relationship to the :class:`User` model.
+    :vartype user: :class:`User`
     """
 
     __tablename__ = "bookings"

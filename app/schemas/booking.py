@@ -1,3 +1,19 @@
+"""
+Booking Schemas
+===============
+
+This module defines the Pydantic data models used for the theater booking system.
+These schemas are crucial for validating incoming API requests and structuring
+outgoing responses related to seats, bookings, and theater layouts.
+
+Key Models:
+- **SeatBase**: The fundamental properties of a seat.
+- **SeatResponse**: Extends SeatBase with operational data like ID and booking status.
+- **BookingCreate**: Minimal model for creating a new booking (requires only a seat ID).
+- **BookingResponse**: Comprehensive response model for a successful booking.
+- **TheaterResponse**: Used to represent the full state of the theater, including all seats and summary statistics.
+- **BookingStatusResponse**: Used for general booking operation feedback (success/failure messages).
+"""
 # =============================================================================
 # Booking Schemas - Pydantic Models for Request/Response Validation
 # =============================================================================

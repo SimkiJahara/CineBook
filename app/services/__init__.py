@@ -1,3 +1,19 @@
+"""
+Services Module Initialization
+==============================
+
+This module acts as the public interface for the application's business logic layer.
+It consolidates and re-exports core service functions from submodules
+(user, role, booking), allowing other parts of the application (e.g., API routers)
+to import business logic conveniently from a single entry point (e.g.,
+``from app.services import create_user, get_all_roles``).
+
+The exposed functions include:
+
+- **User Services**: Functions for user management, authentication, and status updates.
+- **Role Services**: Functions for managing user roles and permissions.
+- **Booking Services**: Functions for seat management, booking creation, cancellation, and retrieval.
+"""
 # =============================================================================
 # Services Module Initialization
 # =============================================================================
