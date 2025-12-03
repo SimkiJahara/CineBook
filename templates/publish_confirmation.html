@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="card">
+    <h3>✓ Screening Published Successfully</h3>
+    <p class="small-muted">The screening is now visible to customers and accepting bookings.</p>
+    
+    <div style="margin:16px 0;padding:12px;background:#dcfce7;border:1px solid #22c55e;border-radius:6px">
+      <div style="font-weight:600;margin-bottom:8px">✓ This screening is now:</div>
+      <ul style="margin:8px 0;padding-left:20px">
+        <li>Visible to all customers</li>
+        <li>Available for ticket booking</li>
+        <li>Listed in published screenings</li>
+      </ul>
+    </div>
+
+    <div style="margin:16px 0;padding:12px;background:#f8f9fa;border-radius:6px">
+      <div><strong>Movie:</strong> {{ screening.movie.title if screening.movie else screening.movieeidr }}</div>
+      <div><strong>Date:</strong> {{ screening.date }}</div>
+      <div><strong>Time:</strong> {{ screening.starttime.strftime('%H:%M') if screening.starttime else screening.starttime }}</div>
+      <div><strong>Hall:</strong> {{ screening.hallid }} ({{ screening.hallcompanyid }}-{{ screening.hallbranchid }})</div>
+      <div><strong>Status:</strong> {{ screening.status }}</div>
+    </div>
+
+    <div style="margin-top:16px">
+      <a class="btn btn-primary" href="/published-screenings/{{ owner_id }}">View Published Screenings</a>
+      <a class="btn" href="/schedule-screening/{{ owner_id }}" style="margin-left:8px">Schedule Another</a>
+      <a class="btn" href="/dashboard/{{ owner_id }}" style="margin-left:8px">Dashboard</a>
+    </div>
+  </div>
+{% endblock %}
