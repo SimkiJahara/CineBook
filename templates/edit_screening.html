@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="card">
+    <h3>Edit Screening</h3>
+    <p class="small-muted">Screening ID: {{ screening.id }}</p>
+    <p class="small-muted"><a href="/unpublished-screenings/{{ owner_id }}">← Back to unpublished screenings</a></p>
+
+    <form id="editForm" action="/screening-edited/{{ screening.id }}?owner_id={{ owner_id }}" method="post">
+      <div class="row">
+        <label for="date">Date *</label>
+        <input id="date" name="date" type="date" 
+               value="{{ screening.date }}" required />
+      </div>
+
+      <div class="row">
+        <label for="starttime">Start Time *</label>
+        <input id="starttime" name="starttime" type="time" 
+               value="{{ screening.starttime.strftime('%H:%M') if screening.starttime else '' }}" 
+               required />
+      </div>
+
+      <div class="row">
+        <label for="movie_search_edit">Movie * (search)</label>
+        <input id="movie_search_edit" type="text" placeholder="Search movies..." />
+        <select id="movie_select_edit" name="movieeidr" required>
+          {% for m in movies %}
+            <option value="{{ m.eidr }}" 
+                    {% if screening.movieeidr == m.eidr %}selected{% endif %}>
+              {{ m.title }}{% if m.releasedate %} ({{ m.releasedate.year }}){% endif %}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <script>
+        document.addEventListener('DOMContentLoaded', ()=> makeSearchable('movie_select_edit','movie_search_edit'));
+      </script>
+
+      <div class="row">
+        <label>Hall (cannot be changed)</label>
+        <input type="text" 
+               value="Hall {{ hall.hallid }} - {{ hall.companyid }}-{{ hall.branchid }}" 
+               disabled 
+               style="background:#f0f0f0;cursor:not-allowed" />
+        <p class="small-muted">Note: Hall cannot be changed for an existing screening. Delete and recreate to change hall.</p>
+      </div>
+
+      <div class="row" style="margin-top:16px">
+        <button class="btn btn-primary" type="submit">Save Changes</button>
+        <a class="btn" href="/unpublished-screenings/{{ owner_id }}" style="margin-left:8px">Cancel</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}
