@@ -151,3 +151,21 @@ def convert_user_to_response(user: User) -> UserResponse:
         roles=[role.name for role in user.roles],
         created_at=user.created_at,
     )
+
+
+# ... existing imports and code ...
+
+async def get_current_theatre_owner(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+) -> User:
+    """
+    Dependency to check if the current user has the 'theatre_owner' role.
+    """
+    # Check if user has the required role
+    user_roles = [role.name for role in current_user.roles]
+    if "theatre_owner" not in user_roles:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Not enough permissions. Theatre Owner role required."
+        )
+    return current_user

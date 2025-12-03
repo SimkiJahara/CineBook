@@ -22,6 +22,7 @@ from fastapi.responses import FileResponse
 from app.core.config import get_settings
 from app.db.session import engine, Base
 from app.routers import auth_router, users_router, bookings_router
+from app.routers import auth_router, users_router, bookings_router, owner_router
 
 
 @asynccontextmanager
@@ -99,6 +100,7 @@ def create_application() -> FastAPI:
     app.include_router(auth_router, prefix="/api/v1")
     app.include_router(users_router, prefix="/api/v1")
     app.include_router(bookings_router, prefix="/api/v1")
+    app.include_router(owner_router, prefix="/api/v1")
 
     # Mount static files for frontend
     import os
