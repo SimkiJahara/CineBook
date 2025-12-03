@@ -1,6 +1,6 @@
 import os
 import sys
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('../..'))
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -34,3 +34,18 @@ exclude_patterns = []
 
 html_theme = 'alabaster'
 html_static_path = ['_static']
+
+autodoc_mock_imports = [
+    'pydantic',
+    'pydantic.v1',
+    'pydantic_settings',
+    'sqlalchemy',
+    'fastapi',
+    # Include other complex external libraries to be safe
+    'uvicorn',
+    'passlib',
+    'bcrypt',
+    'email_validator',
+    'psycopg2_binary',
+    'alembic'
+]
