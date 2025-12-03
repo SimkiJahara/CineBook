@@ -1,4 +1,4 @@
-# tests/test_register.py
+
 from fastapi import status
 
 # 1. TEST SUCCESSFUL REGISTRATION

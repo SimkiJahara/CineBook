@@ -7,46 +7,45 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.db.session import Base, get_db
 
-SQLALCHEMY_DATABASE_URL= "sqlite:///:memory:"
+# 1. SETUP TEST DATABASE
+SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
 
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL, 
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
+)
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False},
-poolclass = StaticPool,)
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-#creating a session for testing
-TestingSessionLocal = sessionmaker(autocommit= False, autoflush = False, bind= engine)
-
-#creating fixture for database section
-@pytest.fixture(scope= "function")
+# 2. FIXTURE: DATABASE SESSION
+@pytest.fixture(scope="function")
 def db_session():
-    """Creates a fresh database"""
+    """Creates a fresh database for each test."""
     Base.metadata.create_all(bind=engine)
-
-    db= TestingSessionLocal()
+    db = TestingSessionLocal()
     try:
         yield db
     finally:
         db.close()
-        Base.metadata.drop_all(bind= engine)
+        Base.metadata.drop_all(bind=engine)
 
-
-#fixture for test client
-
+# 3. FIXTURE: TEST CLIENT
 @pytest.fixture(scope="function")
 def client(db_session):
-    """Creates a test client that uses the overriden database dependency"""
+    """Creates a test client that uses the overridden database dependency."""
+    
     def override_get_db():
         try:
             yield db_session
         finally:
-            db_session.close()
+            # FIXED: We do NOT close the session here. 
+            # The 'db_session' fixture above handles closing it after the test finishes.
+            pass 
 
-            
-    app.dependency_overrides[get_db] =override_get_db
+    app.dependency_overrides[get_db] = override_get_db
     
-
     with TestClient(app) as c:
         yield c
-
 
     app.dependency_overrides.clear()
