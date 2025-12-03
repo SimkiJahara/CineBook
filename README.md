@@ -1,6 +1,9 @@
 # clone the directory
 git clone https://github.com/SimkiJahara/CineBook.git
 
+# move to main directory
+cd CineBook
+
 # switch to a branch
 git checkout tanmoy
 
