@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Details - CineBook</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/movie-details.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <span class="logo">🎬</span>
+                <h1>CineBook</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="movies.html">Movies</a></li>
+                <li><a href="theatres.html">Theatres</a></li>
+                <li><a href="screenings.html">Screenings</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="btn btn-outline" onclick="location.href='login.html'">Login</button>
+                <button class="btn btn-primary" onclick="location.href='register.html'">Sign Up</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="movie-details-page">
+        <div class="container">
+            <div id="loading" class="loading">Loading movie details...</div>
+            <div id="error" class="error-state" style="display:none;">
+                <h2>Movie Not Found</h2>
+                <button class="btn btn-primary" onclick="location.href='movies.html'">Browse Movies</button>
+            </div>
+
+            <div id="movieContent" style="display:none;">
+                <!-- Movie Header -->
+                <div class="movie-header">
+                    <div class="poster-container">
+                        <img id="moviePoster" src="" alt="" class="movie-poster">
+                    </div>
+                    <div class="movie-info-main">
+                        <h1 id="movieTitle"></h1>
+                        <div class="movie-meta" id="movieMeta"></div>
+                        <div class="movie-genres" id="movieGenres"></div>
+                        <div class="rating-box">
+                            <span class="star">★</span>
+                            <span id="avgRating">0.0</span>
+                            <span id="reviewCount">(0 reviews)</span>
+                        </div>
+                        <p id="movieDesc" class="description"></p>
+                        <div class="credits">
+                            <p><strong>Director:</strong> <span id="director"></span></p>
+                            <p><strong>Cast:</strong> <span id="cast"></span></p>
+                        </div>
+                        <div class="actions">
+                            <button class="btn btn-primary btn-lg" onclick="bookTickets()">🎟️ Book Tickets</button>
+                            <button class="btn btn-outline" id="trailerBtn" onclick="watchTrailer()" style="display:none;">▶️ Trailer</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reviews Section -->
+                <div class="reviews-section">
+                    <div class="section-header">
+                        <h2>User Reviews</h2>
+                        <button class="btn btn-primary" onclick="scrollToReviewForm()">✍️ Write Review</button>
+                    </div>
+                    <div id="reviewsList" class="reviews-list"></div>
+                    <button id="loadMoreBtn" class="btn btn-outline" onclick="loadMoreReviews()" style="display:none;">Load More</button>
+                </div>
+
+                <!-- Review Form -->
+                <div class="review-form-section" id="reviewFormSection">
+                    <h2>Write Your Review</h2>
+                    <div id="loginPrompt" class="login-prompt">
+                        <p>Login to write a review</p>
+                        <button class="btn btn-primary" onclick="location.href='login.html'">Login</button>
+                    </div>
+                    <form id="reviewForm" class="review-form" style="display:none;">
+                        <div class="form-group">
+                            <label>Rating *</label>
+                            <div class="star-input">
+                                <input type="radio" name="rating" value="5" id="s5"><label for="s5">★</label>
+                                <input type="radio" name="rating" value="4" id="s4"><label for="s4">★</label>
+                                <input type="radio" name="rating" value="3" id="s3"><label for="s3">★</label>
+                                <input type="radio" name="rating" value="2" id="s2"><label for="s2">★</label>
+                                <input type="radio" name="rating" value="1" id="s1"><label for="s1">★</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Your Review</label>
+                            <textarea id="reviewText" rows="5" placeholder="Share your thoughts..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit Review</button>
+                    </form>
+                    <div id="successMsg" class="success-msg" style="display:none;">✅ Review submitted!</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>© 2025 CineBook. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script src="js/movie-details.js"></script>
+</body>
+</html>

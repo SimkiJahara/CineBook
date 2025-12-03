@@ -1,0 +1,47 @@
+/* ========== HERO SECTION ========== */
+.hero {
+    background: linear-gradient(135deg, var(--dark-secondary), var(--dark));
+    height: 450px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #fff;
+}
+.hero-title { font-size: 48px; font-weight: 700; margin-bottom: 20px; text-shadow: 2px 2px 10px rgba(0,0,0,0.7); }
+.hero-subtitle { font-size: 20px; margin-bottom: 40px; color: var(--text-light); }
+
+/* ========== SEARCH BOX ========== */
+.search-box {
+    display: flex;
+    max-width: 500px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 50px;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+}
+.search-box input {
+    flex: 1;
+    padding: 15px 25px;
+    border: none;
+    font-size: 16px;
+    outline: none;
+}
+.search-box button { padding: 15px 30px; border-radius: 0 50px 50px 0; }
+
+/* ========== MOVIES SECTION ========== */
+.movies-section { padding: 60px 0; }
+.movies-section.alt-bg { background: #fff; }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.section-header h2 { font-size: 28px; color: var(--text); }
+.view-all { color: var(--primary); text-decoration: none; font-weight: 600; }
+.view-all:hover { text-decoration: underline; }
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+    .hero { height: 350px; }
+    .hero-title { font-size: 32px; }
+    .search-box { flex-direction: column; border-radius: 10px; }
+    .search-box button { border-radius: 0 0 10px 10px; }
+}

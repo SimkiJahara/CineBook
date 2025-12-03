@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Manage Movies | CineBook</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/admin-movies.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <span class="logo">Admin</span>
+                <h1>CineBook Admin</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="movies.html">Movies</a></li>
+                <li><a href="admin-movies.html" class="active">Manage Movies</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="btn btn-outline" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="admin-page">
+        <div class="container">
+            <div class="page-header">
+                <h1>Manage Movies</h1>
+                <button class="btn btn-primary" onclick="openCreateModal()">+ Add New Movie</button>
+            </div>
+
+            <div class="admin-movies-grid" id="adminMoviesGrid">
+                <div class="loading">Loading movies...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create/Edit Modal -->
+    <div id="movieModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add New Movie</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <form id="movieForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>EIDR * (Unique)</label>
+                        <input type="text" id="eidr" required maxlength="50">
+                    </div>
+                    <div class="form-group">
+                        <label>Title *</label>
+                        <input type="text" id="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Poster URL</label>
+                        <input type="url" id="posterurl" placeholder="https://...">
+                    </div>
+                    <div class="form-group">
+                        <label>Trailer URL</label>
+                        <input type="url" id="trailerurl" placeholder="https://youtube.com/...">
+                    </div>
+                    <div class="form-group">
+                        <label>Duration (min)</label>
+                        <input type="number" id="lengthmin" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Rating</label>
+                        <select id="rating">
+                            <option value="">Not Rated</option>
+                            <option>G</option>
+                            <option>PG</option>
+                            <option>PG-13</option>
+                            <option>R</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Release Date</label>
+                        <input type="date" id="releasedate">
+                    </div>
+                    <div class="form-group">
+                        <label>Language</label>
+                        <input type="text" id="language" value="English">
+                    </div>
+                    <div class="form-group full">
+                        <label>Description</label>
+                        <textarea id="description" rows="4"></textarea>
+                    </div>
+                    <div class="form-group full">
+                        <label>Director</label>
+                        <input type="text" id="director">
+                    </div>
+                    <div class="form-group full">
+                        <label>Cast (comma separated)</label>
+                        <input type="text" id="cast" placeholder="Tom Hanks, Zendaya, Chris Pratt">
+                    </div>
+                    <div class="form-group full">
+                        <label>Genres (select multiple)</label>
+                        <div id="genreCheckboxes" class="checkbox-group"></div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">Save Movie</button>
+                    <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>© 2025 CineBook Admin Panel</p>
+        </div>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script src="js/admin-movies.js"></script>
+</body>
+</html>

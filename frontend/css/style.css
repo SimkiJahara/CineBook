@@ -1,0 +1,126 @@
+/* ========== GLOBAL STYLES ========== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+    /* CHANGED: Red to Maroon color scheme */
+    --primary: #800020;          /* Maroon */
+    --primary-dark: #5c0018;     /* Darker maroon for hover */
+    --dark: #141414;
+    --dark-secondary: #221f1f;
+    --light: #f8f9fa;
+    --text: #333;
+    --text-light: #b3b3b3;
+    --accent: #f5c518;
+    --shadow: 0 4px 6px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    line-height: 1.6;
+    color: var(--text);
+    background: var(--light);
+}
+
+.container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+/* ========== NAVBAR ========== */
+.navbar {
+    background: var(--dark);
+    padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+.navbar .container { display: flex; justify-content: space-between; align-items: center; }
+.nav-brand { display: flex; align-items: center; gap: 10px; }
+.nav-brand .logo { font-size: 32px; }
+.nav-brand h1 { color: var(--primary); font-size: 24px; }
+.nav-links { display: flex; list-style: none; gap: 30px; }
+.nav-links a { color: #fff; text-decoration: none; font-weight: 500; transition: color 0.3s; }
+.nav-links a:hover, .nav-links a.active { color: var(--primary); }
+.nav-actions { display: flex; gap: 15px; }
+
+/* ========== BUTTONS ========== */
+.btn {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
+.btn-outline { background: transparent; color: #fff; border: 2px solid var(--primary); }
+.btn-outline:hover { background: var(--primary); }
+.btn-text { background: none; color: var(--primary); }
+.btn-lg { padding: 15px 35px; font-size: 16px; }
+
+/* ========== MOVIE CARD ========== */
+.movie-card {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: all 0.3s;
+    cursor: pointer;
+}
+.movie-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-lg); }
+.movie-poster { width: 100%; height: 350px; object-fit: cover; background: var(--dark-secondary); }
+.movie-info { padding: 15px; }
+.movie-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+.movie-meta { display: flex; justify-content: space-between; margin-bottom: 10px; }
+.movie-rating { color: var(--accent); font-weight: 600; }
+.movie-rating::before { content: "★ "; }
+.movie-duration { color: var(--text-light); font-size: 14px; }
+.movie-genres { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.genre-tag { background: var(--light); padding: 4px 10px; border-radius: 15px; font-size: 12px; }
+.movie-language { color: var(--text-light); font-size: 13px; margin-bottom: 12px; }
+.movie-actions { display: flex; gap: 10px; }
+.movie-actions .btn { flex: 1; text-align: center; padding: 8px; font-size: 13px; color: var(--text); }
+.movie-actions .btn-primary { color: #fff; }
+
+/* ========== MOVIES GRID ========== */
+.movies-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 30px;
+    margin-top: 20px;
+}
+
+/* ========== LOADING ========== */
+.loading {
+    text-align: center;
+    padding: 60px;
+    color: var(--text-light);
+}
+.loading::after {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-left: 10px;
+    border: 3px solid var(--primary);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ========== FOOTER ========== */
+.footer { background: var(--dark); color: #fff; padding: 40px 0 20px; margin-top: 60px; }
+.footer-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; margin-bottom: 30px; }
+.footer-section h3, .footer-section h4 { color: var(--primary); margin-bottom: 15px; }
+.footer-section ul { list-style: none; }
+.footer-section a { color: var(--text-light); text-decoration: none; }
+.footer-section a:hover { color: var(--primary); }
+.footer-bottom { text-align: center; padding-top: 20px; border-top: 1px solid #333; color: var(--text-light); }
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+    .navbar .container { flex-direction: column; gap: 15px; }
+    .nav-links { gap: 15px; }
+    .movies-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+}
