@@ -1,4 +1,7 @@
+/* Styling for Screening Page */
+
 /* Base layout */
+
 *,
 *::before,
 *::after {
@@ -19,6 +22,7 @@ body {
 }
 
 /* Main card */
+
 .page-container {
   width: 100%;
   max-width: 720px;
@@ -31,7 +35,8 @@ body {
   backdrop-filter: blur(10px);
 }
 
-/* Heading and info text */
+/* Heading and info */
+
 .page-container h1 {
   margin: 0 0 10px;
   font-size: 1.6rem;
@@ -50,6 +55,7 @@ body {
 }
 
 /* Fields */
+
 .field {
   margin-top: 12px;
   display: flex;
@@ -63,6 +69,7 @@ body {
 }
 
 /* Inputs and selects */
+
 select,
 input[type="date"],
 button {
@@ -98,6 +105,7 @@ input[type="date"]:disabled {
 }
 
 /* Selected info text */
+
 .selected {
   margin-top: 14px;
   font-size: 0.95rem;
@@ -110,6 +118,7 @@ input[type="date"]:disabled {
 }
 
 /* Button */
+
 button {
   margin-top: 16px;
   cursor: pointer;
@@ -142,7 +151,6 @@ button[disabled] {
   cursor: not-allowed;
 }
 
-/* Responsive */
 @media (max-width: 600px) {
   .page-container {
     padding: 18px 16px 20px;

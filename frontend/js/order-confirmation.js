@@ -1,11 +1,12 @@
-// js/order-confirmation.js
+// order confirmation page
+
+// When the page is ready, it loads the ticket data
 
 document.addEventListener("DOMContentLoaded", function () {
   var ticketCard = document.getElementById("ticketCard");
   var noBookingSection = document.getElementById("noBooking");
   var downloadBtn = document.getElementById("downloadBtn");
 
-  // read booking
   var bookingJson = localStorage.getItem("lastBooking");
   var booking = null;
 
@@ -13,7 +14,6 @@ document.addEventListener("DOMContentLoaded", function () {
     booking = JSON.parse(bookingJson);
   }
 
-  // if no booking → show empty card
   if (!booking) {
     if (ticketCard) ticketCard.classList.add("hidden");
     if (noBookingSection) noBookingSection.classList.remove("hidden");
@@ -21,7 +21,6 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
-  // read meta
   var metaJson = localStorage.getItem("selectedScreeningMeta");
   var meta = metaJson ? JSON.parse(metaJson) : null;
 
@@ -34,6 +33,8 @@ document.addEventListener("DOMContentLoaded", function () {
     if (meta.theaterName) theaterName = meta.theaterName;
     if (meta.hallName) hallName = meta.hallName;
   }
+
+  // it fills the ticket card with booking details
 
   function fillTicket() {
     var seats = ["A1", "A2", "A3"];
@@ -71,7 +72,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Load movie title if exists
   if (movieEidr) {
     coreApi
       .getMovieByEidr(movieEidr)

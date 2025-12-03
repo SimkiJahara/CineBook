@@ -1,4 +1,4 @@
-# backend/main.py
+""""This module contains The main FastAPI APP"""
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,6 +8,8 @@ from app.controllers.location_controller import router as location_router
 from app.controllers.booking_controller import router as booking_router
 
 app = FastAPI(title="CineBook Backend")
+
+# CORS Configuration
 
 origins = [
     "http://localhost:5500",
@@ -23,6 +25,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Router Registration
 
 app.include_router(location_router)
 app.include_router(booking_router)

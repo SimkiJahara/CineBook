@@ -1,4 +1,8 @@
-# app/models/booking.py
+"""
+This module defines the database models related to bookings:
+- Booking: Represents a user's booking for a movie screening.
+- BookedSeat: Represents each individual seat reserved under a booking.
+"""
 
 from datetime import datetime
 
@@ -9,7 +13,7 @@ from app.database import Base
 
 
 class Booking(Base):
-    """Booking for one screening."""
+    """Booking for one screening"""
 
     __tablename__ = "bookings"
 
@@ -31,7 +35,7 @@ class Booking(Base):
 
 
 class BookedSeat(Base):
-    """Single seat inside a booking."""
+    """Single seat inside a booking"""
 
     __tablename__ = "booked_seats"
 

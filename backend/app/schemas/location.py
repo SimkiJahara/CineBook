@@ -1,10 +1,11 @@
-# app/schemas/location.py
+"""This Module defines Location schemas for the database"""
 
 from datetime import date, time, datetime
 from pydantic import BaseModel
 
 
-# City
+# City Schemas
+
 class CityCreate(BaseModel):
     name: str
 
@@ -17,7 +18,8 @@ class CityRead(BaseModel):
         from_attributes = True
 
 
-# Address
+# Address Schemas
+
 class AddressCreate(BaseModel):
     street: str
     area: str
@@ -34,7 +36,8 @@ class AddressRead(BaseModel):
         from_attributes = True
 
 
-# Theater
+# Theater Schemas
+
 class TheaterCreate(BaseModel):
     name: str
     description: str | None = None
@@ -57,7 +60,8 @@ class TheaterRead(BaseModel):
         from_attributes = True
 
 
-# Hall
+# Hall Schemas
+
 class HallCreate(BaseModel):
     name: str
     total_seats: int
@@ -74,7 +78,8 @@ class HallRead(BaseModel):
         from_attributes = True
 
 
-# Screening
+# Screening Schemas
+
 class ScreeningCreate(BaseModel):
     movie_id: int
     hall_id: int

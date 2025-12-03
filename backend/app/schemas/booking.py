@@ -1,11 +1,11 @@
-# app/schemas/booking.py
+"""This Module database schemas for Booking and BookedSeat models"""
 
 from datetime import datetime
 from pydantic import BaseModel
 
 
 class BookedSeatRead(BaseModel):
-    """Seat info returned from the API."""
+    """it returns seat info"""
     id: int
     seat_label: str
     price: float
@@ -15,7 +15,7 @@ class BookedSeatRead(BaseModel):
 
 
 class BookingCreate(BaseModel):
-    """Data needed to make a new booking."""
+    """Data needed to make a new booking"""
     user_id: int | None = None
     screening_id: int
     seats: list[str]
@@ -24,7 +24,7 @@ class BookingCreate(BaseModel):
 
 
 class BookingRead(BaseModel):
-    """Booking info returned from the API."""
+    """it returns booking info"""
     id: int
     user_id: int
     screening_id: int

@@ -1,4 +1,11 @@
-# app/models/location.py
+"""
+This module contains Location models:
+- City: Represents a city where theaters are located.
+- Address: Represents physical addresses.
+- Theater: Represents a movie theater belongs to a city and address.
+- Hall: Represents a hall inside a theater.
+- Screening: Represents a scheduled movie screening inside a hall.
+"""
 
 from datetime import datetime
 
@@ -17,7 +24,7 @@ from app.database import Base
 
 
 class City(Base):
-    """City table."""
+    """for city table in database"""
 
     __tablename__ = "cities"
 
@@ -26,7 +33,7 @@ class City(Base):
 
 
 class Address(Base):
-    """Address table."""
+    """for address table in database"""
 
     __tablename__ = "addresses"
 
@@ -37,7 +44,7 @@ class Address(Base):
 
 
 class Theater(Base):
-    """Theater table."""
+    """for theater table in database"""
 
     __tablename__ = "theaters"
 
@@ -52,7 +59,7 @@ class Theater(Base):
 
 
 class Hall(Base):
-    """Hall inside a theater."""
+    """for hall table in database"""
 
     __tablename__ = "halls"
 
@@ -63,20 +70,15 @@ class Hall(Base):
 
 
 class Screening(Base):
-    """Screening of a movie."""
+    """for Screening table in database"""
 
     __tablename__ = "screenings"
 
     id = Column(Integer, primary_key=True, index=True)
-
-    # movie_id = Column(Integer, ForeignKey("movies.id"), nullable=False)
     movie_id = Column(Integer, nullable=False)
-
     hall_id = Column(Integer, ForeignKey("halls.id"), nullable=False)
-
     show_date = Column(Date, nullable=False)
     start_time = Column(Time, nullable=False)
     end_time = Column(Time, nullable=True)
-
     base_price = Column(Numeric(10, 2), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)

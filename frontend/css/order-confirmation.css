@@ -1,4 +1,7 @@
+/* styling for the order confirmation page */
+
 /* Base layout */
+
 *,
 *::before,
 *::after {
@@ -19,6 +22,7 @@ body {
 }
 
 /* Main container */
+
 .page-container {
   width: 100%;
   max-width: 720px;
@@ -33,6 +37,7 @@ body {
 }
 
 /* Header */
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -59,6 +64,7 @@ body {
 }
 
 /* Cards */
+
 .card {
   max-width: 800px;
   margin: 16px auto;
@@ -84,6 +90,7 @@ body {
 }
 
 /* Ticket layout */
+
 .ticket-main {
   display: flex;
   gap: 20px;
@@ -125,7 +132,8 @@ body {
   margin-top: 10px;
 }
 
-/* QR placeholder */
+/* QR  */
+
 .qr-box {
   width: 120px;
   height: 120px;
@@ -154,6 +162,7 @@ body {
 }
 
 /* Actions */
+
 .actions {
   max-width: 800px;
   margin: 24px auto 0;
@@ -205,12 +214,10 @@ body {
   color: #f97316;
 }
 
-/* Utility */
 .hidden {
   display: none;
 }
 
-/* Responsive */
 @media (max-width: 600px) {
   .page-container {
     padding: 18px 16px 20px;

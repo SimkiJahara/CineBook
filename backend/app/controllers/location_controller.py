@@ -1,4 +1,15 @@
-# app/controllers/location_controller.py
+"""
+This module manages all location related entities:
+- Addresses
+- Cities
+- Halls
+- Screenings
+- Theaters
+
+It provides helper functions and  route definitions for:
+- Creating new records
+- Fetching lists of existing records
+"""
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
@@ -15,12 +26,10 @@ from app.schemas.location import (
 
 router = APIRouter()
 
+# Adress related Function and Routers
 
-# Address
 def create_address(db, address_in):
-    """
-    Create a new address.
-    """
+    """Create a new address"""
     address = Address(
         street=address_in.street,
         area=address_in.area,
@@ -33,9 +42,7 @@ def create_address(db, address_in):
 
 
 def get_all_addresses(db):
-    """
-    Return all addresses.
-    """
+    """return all addresses"""
     return db.query(Address).all()
 
 
@@ -49,11 +56,10 @@ def get_addresses_route(db=Depends(get_db)):
     return get_all_addresses(db)
 
 
-# City
+# City related Function and Router
+
 def create_city(db, city_data):
-    """
-    Create a new city.
-    """
+    """Create a new city"""
     city = City(name=city_data.name)
     db.add(city)
     db.commit()
@@ -62,9 +68,7 @@ def create_city(db, city_data):
 
 
 def get_all_cities(db):
-    """
-    Return all cities.
-    """
+    """return all cities"""
     return db.query(City).all()
 
 
@@ -78,11 +82,9 @@ def get_cities_route(db=Depends(get_db)):
     return get_all_cities(db)
 
 
-# Hall
+# Hall Related Function and Routers
 def create_hall(db, hall_data):
-    """
-    Create a new hall.
-    """
+    """Create a new hall"""
     hall = Hall(
         name=hall_data.name,
         total_seats=hall_data.total_seats,
@@ -95,9 +97,7 @@ def create_hall(db, hall_data):
 
 
 def get_all_halls(db):
-    """
-    Return all halls.
-    """
+    """Return all halls"""
     return db.query(Hall).all()
 
 
@@ -111,11 +111,11 @@ def get_halls_route(db=Depends(get_db)):
     return get_all_halls(db)
 
 
-# Screening
+# Screening related Function and Routers
+
 def create_screening(db, screening_data):
-    """
-    Create a new screening.
-    """
+    """creates a new screening"""
+    
     screening = Screening(
         movie_id=screening_data.movie_id,
         hall_id=screening_data.hall_id,
@@ -131,9 +131,7 @@ def create_screening(db, screening_data):
 
 
 def get_all_screenings(db):
-    """
-    Return all screenings.
-    """
+    """it returns all screenings"""
     return db.query(Screening).all()
 
 
@@ -147,11 +145,10 @@ def get_screenings_route(db=Depends(get_db)):
     return get_all_screenings(db)
 
 
-# Theater
+# Theater related function and routers
+
 def create_theater(db, theater_data):
-    """
-    Create a new theater.
-    """
+    """Create a new theater"""
     theater = Theater(
         name=theater_data.name,
         description=theater_data.description,
@@ -167,9 +164,7 @@ def create_theater(db, theater_data):
 
 
 def get_all_theaters(db):
-    """
-    Return all theaters.
-    """
+    """it returns all theaters"""
     return db.query(Theater).all()
 
 

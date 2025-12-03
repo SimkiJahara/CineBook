@@ -1,4 +1,6 @@
-// js/bookings.js
+// My Bookings Page
+
+// it gets the event date from screening or booking data
 
 function getEventDate(booking) {
   var screening = booking.screening || {};
@@ -15,6 +17,8 @@ function getEventDate(booking) {
     return null;
   }
 }
+
+// it creates a table row for a single booking entry
 
 function createRow(booking) {
   var tr = document.createElement("tr");
@@ -94,6 +98,8 @@ function createRow(booking) {
   return tr;
 }
 
+// shows a message on the page
+
 function setStatus(msg) {
   var el = document.getElementById("statusMsg");
   if (!el) {
@@ -101,6 +107,8 @@ function setStatus(msg) {
   }
   el.textContent = msg || "";
 }
+
+// it loads bookings when the page is ready
 
 document.addEventListener("DOMContentLoaded", function () {
   var upcomingBody = document.getElementById("upcomingBody");

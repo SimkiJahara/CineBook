@@ -1,3 +1,6 @@
+/*styling for the CineBook booking history and  profile page */
+
+
 /* Base layout */
 *,
 *::before,
@@ -19,6 +22,7 @@ body {
 }
 
 /* Main container */
+
 .page-container {
   width: 100%;
   max-width: 920px;
@@ -32,7 +36,9 @@ body {
   color: #f9fafb;
 }
 
+
 /* Top navigation */
+
 .top-nav {
   display: flex;
   align-items: center;
@@ -89,7 +95,9 @@ body {
   font-size: 1.4rem;
 }
 
+
 /* Profile section */
+
 .profile-card {
   display: flex;
   align-items: center;
@@ -113,7 +121,9 @@ body {
   color: #f9fafb;
 }
 
+
 /* History titles */
+
 .history-section h2 {
   margin: 12px 0 6px;
   font-size: 1.2rem;
@@ -125,7 +135,9 @@ body {
   color: #e5e7eb;
 }
 
+
 /* Tables */
+
 .table-wrapper {
   border-radius: 12px;
   border: 1px solid rgba(148, 163, 184, 0.45);
@@ -167,7 +179,9 @@ body {
   background: rgba(30, 64, 175, 0.3);
 }
 
-/* Payment status badge */
+
+/* Payment status*/
+
 .status-pill {
   display: inline-flex;
   align-items: center;
@@ -199,13 +213,13 @@ body {
 }
 
 /* Status message */
+
 .status-msg {
   margin-top: 10px;
   font-size: 0.85rem;
   color: #fca5a5;
 }
 
-/* Responsive */
 @media (max-width: 720px) {
   .page-container {
     padding: 18px 14px 22px;

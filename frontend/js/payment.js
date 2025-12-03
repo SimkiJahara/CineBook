@@ -1,7 +1,9 @@
-// js/payment.js
+// payment page
 
 var FAKE_USER_ID = 1;
 var PLATFORM_FEE = 50;
+
+// buttons for payment types
 
 function getSelectedPaymentMethod() {
   var radios = document.querySelectorAll('input[name="paymentMethod"]');
@@ -11,6 +13,8 @@ function getSelectedPaymentMethod() {
   }
   return "bkash";
 }
+
+// shows a status message for the payment step
 
 function showStatus(msg, isError) {
   var el = document.getElementById("paymentStatus");
@@ -36,7 +40,6 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("hallName").textContent = meta.hallName;
   document.getElementById("showDate").textContent = showDate;
 
-  // --- Load screening info ---
   coreApi
     .getScreeningsByHallAndDate(hallId, showDate)
     .then(function (list) {
@@ -62,6 +65,8 @@ document.addEventListener("DOMContentLoaded", function () {
       showStatus("Could not load screenings.", true);
     });
 });
+
+// it loads movie details  and compute prices
 
 function loadMovieAndPrices(chosenScreening) {
   var movieEidr = localStorage.getItem("selectedMovieEidr");
@@ -97,6 +102,8 @@ function loadMovieAndPrices(chosenScreening) {
   }
 }
 
+// it calculates total price
+
 function updatePrices(chosenScreening) {
   var seats = ["A1", "A2", "A3"];
   var seatPrice = Number(chosenScreening.base_price) || 350;
@@ -113,6 +120,8 @@ function updatePrices(chosenScreening) {
 
   initPayButton(seats, chosenScreening);
 }
+
+// for Pay button and create booking
 
 function initPayButton(seats, chosenScreening) {
   var btn = document.getElementById("payNowBtn");

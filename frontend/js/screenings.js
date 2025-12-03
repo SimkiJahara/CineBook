@@ -1,9 +1,11 @@
-// js/screenings.js
+// screening Page
 
 function getQueryParam(name) {
   var params = new URLSearchParams(window.location.search);
   return params.get(name);
 }
+
+// Initialize the screening selection page
 
 document.addEventListener("DOMContentLoaded", function () {
   var movieEidr = getQueryParam("movie");
@@ -53,6 +55,8 @@ document.addEventListener("DOMContentLoaded", function () {
     dateInput.min = today;
   }
 
+  // Reset selects and state when it user changes city
+
   function resetAfterCity() {
     theaterSelect.innerHTML = '<option value="">-- Select a theater --</option>';
     hallSelect.innerHTML = '<option value="">-- Select a hall --</option>';
@@ -94,7 +98,6 @@ document.addEventListener("DOMContentLoaded", function () {
     selectedScreeningText.textContent = "None";
   }
 
-  // load cities
   coreApi
     .getCities()
     .then(function (cities) {
