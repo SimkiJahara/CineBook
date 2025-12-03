@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="card">
+    <h3>✓ Screening Updated Successfully</h3>
+    <p class="small-muted">The screening has been updated with your changes.</p>
+    
+    <div style="margin:16px 0;padding:12px;background:#f8f9fa;border-radius:6px">
+      <div><strong>Movie:</strong> {{ screening.movie.title if screening.movie else screening.movieeidr }}</div>
+      <div><strong>Date:</strong> {{ screening.date }}</div>
+      <div><strong>Time:</strong> {{ screening.starttime.strftime('%H:%M') if screening.starttime else screening.starttime }}</div>
+      <div><strong>Hall:</strong> {{ screening.hallid }} ({{ screening.hallcompanyid }}-{{ screening.hallbranchid }})</div>
+      <div><strong>Status:</strong> {{ screening.status }}</div>
+    </div>
+
+    <div style="margin-top:16px">
+      <a class="btn btn-primary" href="/unpublished-screenings/{{ owner_id }}">Back to Unpublished Screenings</a>
+      <a class="btn" href="/edit-screening/{{ screening.id }}?owner_id={{ owner_id }}" style="margin-left:8px">Edit Again</a>
+      <a class="btn" href="/dashboard/{{ owner_id }}" style="margin-left:8px">Dashboard</a>
+    </div>
+  </div>
+{% endblock %}
