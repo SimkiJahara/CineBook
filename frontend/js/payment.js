@@ -1,150 +1,147 @@
 // js/payment.js
 
-// fake user (matches MockUser in backend)
-const FAKE_USER_ID = 1;
-const PLATFORM_FEE = 50;
+var FAKE_USER_ID = 1;
+var PLATFORM_FEE = 50;
 
-// Get selected payment method
 function getSelectedPaymentMethod() {
-  const radios = document.querySelectorAll('input[name="paymentMethod"]');
-  for (const r of radios) {
-    if (r.checked) return r.value;
+  var radios = document.querySelectorAll('input[name="paymentMethod"]');
+  var i;
+  for (i = 0; i < radios.length; i++) {
+    if (radios[i].checked) return radios[i].value;
   }
   return "bkash";
 }
 
-// Show payment status message
-function showStatus(msg, isError = false) {
-  const el = document.getElementById("paymentStatus");
+function showStatus(msg, isError) {
+  var el = document.getElementById("paymentStatus");
   if (!el) return;
   el.textContent = msg || "";
   el.className = isError ? "payment-status error" : "payment-status success";
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-  // -------------------------------
-  // 1) Screening metadata from previous step
-  // -------------------------------
-  let meta = null;
-
-  try {
-    const metaJson = localStorage.getItem("selectedScreeningMeta");
-    meta = metaJson ? JSON.parse(metaJson) : null;
-  } catch {
-    meta = null;
-  }
+document.addEventListener("DOMContentLoaded", function () {
+  var metaJson = localStorage.getItem("selectedScreeningMeta");
+  var meta = metaJson ? JSON.parse(metaJson) : null;
 
   if (!meta || !meta.screeningId) {
     showStatus("No screening selected. Please go back.", true);
     return;
   }
 
-  const screeningId = meta.screeningId;
-  const hallId = meta.hallId;
-  const showDate = meta.date;
+  var screeningId = meta.screeningId;
+  var hallId = meta.hallId;
+  var showDate = meta.date;
 
-  // Fill basic meta UI
   document.getElementById("theaterName").textContent = meta.theaterName;
   document.getElementById("hallName").textContent = meta.hallName;
   document.getElementById("showDate").textContent = showDate;
 
-  // -------------------------------
-  // 2) Load screening details (price + time)
-  // -------------------------------
-  let chosenScreening = null;
+  // --- Load screening info ---
+  coreApi
+    .getScreeningsByHallAndDate(hallId, showDate)
+    .then(function (list) {
+      var i;
+      var chosen = null;
+      for (i = 0; i < list.length; i++) {
+        if (list[i].id === screeningId) {
+          chosen = list[i];
+          break;
+        }
+      }
 
-  try {
-    const screenings = await coreApi.getScreeningsByHallAndDate(
-      hallId,
-      showDate
-    );
+      if (!chosen) {
+        showStatus("Could not load screening details.", true);
+        return;
+      }
 
-    chosenScreening = screenings.find((s) => s.id === screeningId);
+      document.getElementById("showTime").textContent = chosen.start_time;
 
-    if (!chosenScreening) {
-      showStatus("Could not load screening details. Please re-select.", true);
-      return;
-    }
+      loadMovieAndPrices(chosen);
+    })
+    .catch(function () {
+      showStatus("Could not load screenings.", true);
+    });
+});
 
-    document.getElementById("showTime").textContent =
-      chosenScreening.start_time;
-  } catch {
-    showStatus("Error loading screening. Try again.", true);
-    return;
+function loadMovieAndPrices(chosenScreening) {
+  var movieEidr = localStorage.getItem("selectedMovieEidr");
+
+  var movieTitle = "Movie";
+  var movieLanguage = "-";
+  var movieRating = "-";
+
+  function fillMovieInfo() {
+    document.getElementById("movieTitle").textContent = movieTitle;
+    document.getElementById("movieLanguage").textContent = movieLanguage;
+    document.getElementById("movieRating").textContent = movieRating;
+
+    updatePrices(chosenScreening);
   }
-
-  // -------------------------------
-  // 3) Load movie info
-  // -------------------------------
-  const movieEidr = localStorage.getItem("selectedMovieEidr");
-
-  let movieTitle = "Movie";
-  let movieLanguage = "-";
-  let movieRating = "-";
 
   if (movieEidr) {
-    try {
-      const movie = await coreApi.getMovieByEidr(movieEidr);
-      movieTitle = movie.title || movieTitle;
-      movieLanguage = movie.language || movieLanguage;
-      movieRating = movie.rating || movieRating;
-    } catch {}
+    coreApi
+      .getMovieByEidr(movieEidr)
+      .then(function (movie) {
+        if (movie) {
+          if (movie.title) movieTitle = movie.title;
+          if (movie.language) movieLanguage = movie.language;
+          if (movie.rating) movieRating = movie.rating;
+        }
+        fillMovieInfo();
+      })
+      .catch(function () {
+        fillMovieInfo();
+      });
+  } else {
+    fillMovieInfo();
   }
+}
 
-  document.getElementById("movieTitle").textContent = movieTitle;
-  document.getElementById("movieLanguage").textContent = movieLanguage;
-  document.getElementById("movieRating").textContent = movieRating;
+function updatePrices(chosenScreening) {
+  var seats = ["A1", "A2", "A3"];
+  var seatPrice = Number(chosenScreening.base_price) || 350;
+  var seatCount = seats.length;
+  var subTotal = seatPrice * seatCount;
+  var total = subTotal + PLATFORM_FEE;
 
-  // -------------------------------
-  // 4) Fake seat selection logic
-  // -------------------------------
-  const selectedSeats = ["A1", "A2", "A3"];
-  const seatPrice = Number(chosenScreening.base_price) || 350;
-  const seatCount = selectedSeats.length;
-  const subTotal = seatPrice * seatCount;
-  const total = subTotal + PLATFORM_FEE;
-
-  // Update UI
-  document.getElementById("seatList").textContent =
-    selectedSeats.join(", ");
+  document.getElementById("seatList").textContent = seats.join(", ");
   document.getElementById("seatCount").textContent = seatCount;
   document.getElementById("seatPrice").textContent = seatPrice;
   document.getElementById("subTotal").textContent = subTotal;
   document.getElementById("platformFee").textContent = PLATFORM_FEE;
   document.getElementById("totalAmount").textContent = total;
 
-  // -------------------------------
-  // 5) Pay Now button logic
-  // -------------------------------
-  const payBtn = document.getElementById("payNowBtn");
-  if (!payBtn) return;
+  initPayButton(seats, chosenScreening);
+}
 
-  payBtn.addEventListener("click", async () => {
-    payBtn.disabled = true;
-    showStatus("Processing payment...");
+function initPayButton(seats, chosenScreening) {
+  var btn = document.getElementById("payNowBtn");
+  if (!btn) return;
 
-    const paymentMethod = getSelectedPaymentMethod();
+  btn.addEventListener("click", function () {
+    btn.disabled = true;
+    showStatus("Processing payment...", false);
 
-    const payload = {
+    var payload = {
       user_id: FAKE_USER_ID,
-      screening_id: screeningId,
-      seats: selectedSeats,
-      seat_price: seatPrice,
-      payment_method: paymentMethod,
+      screening_id: chosenScreening.id,
+      seats: seats,
+      seat_price: Number(chosenScreening.base_price) || 350,
+      payment_method: getSelectedPaymentMethod()
     };
 
-    try {
-      const booking = await coreApi.createBooking(payload);
-      showStatus("Payment successful!", false);
-
-      localStorage.setItem("lastBooking", JSON.stringify(booking));
-
-      // go to confirmation page
-      window.location.href = "order-confirmation.html";
-    } catch {
-      showStatus("Payment failed. Try again.", true);
-    } finally {
-      payBtn.disabled = false;
-    }
+    coreApi
+      .createBooking(payload)
+      .then(function (booking) {
+        showStatus("Payment successful!", false);
+        localStorage.setItem("lastBooking", JSON.stringify(booking));
+        window.location.href = "order-confirmation.html";
+      })
+      .catch(function () {
+        showStatus("Payment failed. Try again.", true);
+      })
+      .finally(function () {
+        btn.disabled = false;
+      });
   });
-});
+}

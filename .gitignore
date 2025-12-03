@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+
+# Virtual environment
+venv/
+env/
+movie/        
+
+# Sphinx build output
+docs/build/
+docs/_build/
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+
+# Node / frontend cache 	
+node_modules/

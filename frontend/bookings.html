@@ -8,7 +8,6 @@
 </head>
 <body>
   <div class="page-container">
-    <!-- Top nav -->
     <header class="top-nav">
       <div class="brand">CineBook</div>
       <nav class="nav-links">
@@ -21,10 +20,8 @@
       </div>
     </header>
 
-    <!-- User info -->
     <section class="profile-card">
       <div class="profile-avatar">
-        <!-- simple placeholder avatar -->
         <div class="avatar-circle avatar-large">S</div>
       </div>
       <div class="profile-details">
@@ -36,11 +33,9 @@
       </div>
     </section>
 
-    <!-- Booking history -->
     <section class="history-section">
       <h2>Booking History</h2>
 
-      <!-- Upcoming -->
       <h3>Upcoming</h3>
       <div id="upcomingContainer" class="table-wrapper">
         <table class="booking-table">
@@ -56,7 +51,6 @@
             </tr>
           </thead>
           <tbody id="upcomingBody">
-            <!-- rows added by JS -->
           </tbody>
         </table>
         <p id="upcomingEmpty" class="empty-text hidden">
@@ -64,7 +58,6 @@
         </p>
       </div>
 
-      <!-- Past -->
       <h3>Past History</h3>
       <div id="pastContainer" class="table-wrapper">
         <table class="booking-table">
@@ -80,7 +73,6 @@
             </tr>
           </thead>
           <tbody id="pastBody">
-            <!-- rows added by JS -->
           </tbody>
         </table>
         <p id="pastEmpty" class="empty-text hidden">
@@ -93,6 +85,6 @@
   </div>
 
   <script src="js/core-api.js"></script>
-  <script type="module" src="js/bookings.js"></script>
+  <script src="js/bookings.js"></script>
 </body>
 </html>

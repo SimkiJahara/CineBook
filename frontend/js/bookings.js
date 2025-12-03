@@ -1,134 +1,169 @@
 // js/bookings.js
 
-// small helper: parse date+time safely
 function getEventDate(booking) {
-  const s = booking.screening || {};
-  const dateStr = s.show_date || booking.show_date || booking.created_at;
-  const timeStr = s.start_time || booking.start_time || "00:00";
+  var screening = booking.screening || {};
+  var dateStr = screening.show_date || booking.created_at;
+  var timeStr = screening.start_time || "00:00";
 
-  if (!dateStr) return null;
+  if (!dateStr) {
+    return null;
+  }
 
-  // Combine to ISO-like string (best effort)
   try {
-    return new Date(`${dateStr}T${timeStr}`);
-  } catch {
+    return new Date(dateStr + "T" + timeStr);
+  } catch (e) {
     return null;
   }
 }
 
-// render a single row
 function createRow(booking) {
-  const tr = document.createElement("tr");
+  var tr = document.createElement("tr");
+  var screening = booking.screening || {};
 
-  const s = booking.screening || {};
-  const movie = (s.movie && s.movie.title) || booking.movie_title || `Movie #${booking.screening_id || booking.id}`;
-  const date = s.show_date || booking.show_date || (booking.created_at ? booking.created_at.slice(0, 10) : "-");
-  const time = s.start_time || booking.start_time || "--";
-  const hallName = (s.hall && s.hall.name) || booking.hall_name || (s.hall_id ? `Hall ${s.hall_id}` : "N/A");
-  const theatreName =
-    (s.hall && s.hall.theater && s.hall.theater.name) ||
-    booking.theater_name ||
-    "—";
+  var movieTitle = "Movie #" + (booking.screening_id || booking.id);
+  if (screening.movie && screening.movie.title) {
+    movieTitle = screening.movie.title;
+  } else if (booking.movie_title) {
+    movieTitle = booking.movie_title;
+  }
 
-  const seats =
-    booking.seats && booking.seats.length
-      ? booking.seats.map((seat) => seat.seat_label || seat.code || "Seat").join(", ")
-      : "—";
+  var dateText = "-";
+  if (screening.show_date) {
+    dateText = screening.show_date;
+  } else if (booking.show_date) {
+    dateText = booking.show_date;
+  } else if (booking.created_at) {
+    dateText = booking.created_at.slice(0, 10);
+  }
 
-  const paymentStatus = (booking.payment_status || "PAID").toUpperCase();
+  var timeText = screening.start_time || booking.start_time || "--";
 
-  tr.innerHTML = `
-    <td>${movie}</td>
-    <td>${date}</td>
-    <td>${time}</td>
-    <td>${seats}</td>
-    <td>${theatreName}</td>
-    <td>${hallName}</td>
-    <td>
-      <span class="status-pill ${
-        paymentStatus === "PAID" ? "status-paid" : "status-unpaid"
-      }">
-        ${paymentStatus}
-      </span>
-    </td>
-  `;
+  var hallName = "N/A";
+  if (screening.hall && screening.hall.name) {
+    hallName = screening.hall.name;
+  } else if (booking.hall_name) {
+    hallName = booking.hall_name;
+  } else if (screening.hall_id) {
+    hallName = "Hall " + screening.hall_id;
+  }
+
+  var theaterName = "—";
+  if (screening.hall && screening.hall.theater && screening.hall.theater.name) {
+    theaterName = screening.hall.theater.name;
+  } else if (booking.theater_name) {
+    theaterName = booking.theater_name;
+  }
+
+  var seatsText = "—";
+  if (booking.seats && booking.seats.length > 0) {
+    seatsText = booking.seats
+      .map(function (seat) {
+        return seat.seat_label || seat.code || "Seat";
+      })
+      .join(", ");
+  }
+
+  var status = (booking.payment_status || "PAID").toUpperCase();
+  var statusClass = status === "PAID" ? "status-paid" : "status-unpaid";
+
+  tr.innerHTML =
+    "<td>" +
+    movieTitle +
+    "</td>" +
+    "<td>" +
+    dateText +
+    "</td>" +
+    "<td>" +
+    timeText +
+    "</td>" +
+    "<td>" +
+    seatsText +
+    "</td>" +
+    "<td>" +
+    theaterName +
+    "</td>" +
+    "<td>" +
+    hallName +
+    "</td>" +
+    '<td><span class="status-pill ' +
+    statusClass +
+    '">' +
+    status +
+    "</span></td>";
 
   return tr;
 }
 
 function setStatus(msg) {
-  const el = document.getElementById("statusMsg");
-  if (!el) return;
+  var el = document.getElementById("statusMsg");
+  if (!el) {
+    return;
+  }
   el.textContent = msg || "";
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-  const upcomingBody = document.getElementById("upcomingBody");
-  const pastBody = document.getElementById("pastBody");
-  const upcomingEmpty = document.getElementById("upcomingEmpty");
-  const pastEmpty = document.getElementById("pastEmpty");
+document.addEventListener("DOMContentLoaded", function () {
+  var upcomingBody = document.getElementById("upcomingBody");
+  var pastBody = document.getElementById("pastBody");
+  var upcomingEmpty = document.getElementById("upcomingEmpty");
+  var pastEmpty = document.getElementById("pastEmpty");
 
   setStatus("Loading your bookings...");
 
-  let bookings = [];
-  try {
-    // expects /bookings/me to return array[BookingRead]
-    bookings = await coreApi.getMyBookings();
-  } catch {
-    setStatus("Could not load bookings. Please try again.");
-    return;
-  }
+  coreApi
+    .getMyBookings()
+    .then(function (bookings) {
+      if (!Array.isArray(bookings) || bookings.length === 0) {
+        setStatus("");
+        upcomingEmpty.classList.remove("hidden");
+        pastEmpty.classList.remove("hidden");
+        return;
+      }
 
-  if (!Array.isArray(bookings) || bookings.length === 0) {
-    setStatus("");
-    upcomingEmpty.classList.remove("hidden");
-    pastEmpty.classList.remove("hidden");
-    return;
-  }
+      var now = new Date();
+      var upcoming = [];
+      var past = [];
 
-  const now = new Date();
-  const upcoming = [];
-  const past = [];
+      bookings.forEach(function (b) {
+        var d = getEventDate(b);
+        if (d && d >= now) {
+          upcoming.push(b);
+        } else {
+          past.push(b);
+        }
+      });
 
-  bookings.forEach((b) => {
-    const eventDate = getEventDate(b);
-    if (eventDate && eventDate >= now) {
-      upcoming.push(b);
-    } else {
-      past.push(b);
-    }
-  });
+      upcoming.sort(function (a, b) {
+        var da = getEventDate(a) || now;
+        var db = getEventDate(b) || now;
+        return da - db;
+      });
 
-  // sort: soonest first for upcoming, newest first for past
-  upcoming.sort((a, b) => {
-    const da = getEventDate(a) || now;
-    const db = getEventDate(b) || now;
-    return da - db;
-  });
+      past.sort(function (a, b) {
+        var da = getEventDate(a) || now;
+        var db = getEventDate(b) || now;
+        return db - da;
+      });
 
-  past.sort((a, b) => {
-    const da = getEventDate(a) || now;
-    const db = getEventDate(b) || now;
-    return db - da;
-  });
+      if (upcoming.length === 0) {
+        upcomingEmpty.classList.remove("hidden");
+      } else {
+        upcoming.forEach(function (b) {
+          upcomingBody.appendChild(createRow(b));
+        });
+      }
 
-  // render upcoming
-  if (upcoming.length === 0) {
-    upcomingEmpty.classList.remove("hidden");
-  } else {
-    upcoming.forEach((b) => {
-      upcomingBody.appendChild(createRow(b));
+      if (past.length === 0) {
+        pastEmpty.classList.remove("hidden");
+      } else {
+        past.forEach(function (b) {
+          pastBody.appendChild(createRow(b));
+        });
+      }
+
+      setStatus("");
+    })
+    .catch(function () {
+      setStatus("Could not load bookings. Please try again.");
     });
-  }
-
-  // render past
-  if (past.length === 0) {
-    pastEmpty.classList.remove("hidden");
-  } else {
-    past.forEach((b) => {
-      pastBody.appendChild(createRow(b));
-    });
-  }
-
-  setStatus("");
 });

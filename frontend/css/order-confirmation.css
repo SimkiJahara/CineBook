@@ -1,4 +1,4 @@
-/* ---- Base layout ---- */
+/* Base layout */
 *,
 *::before,
 *::after {
@@ -10,7 +10,7 @@ body {
   min-height: 100vh;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
-  background: #ffffff;       /* white page background */
+  background: #ffffff;
   color: #111827;
   display: flex;
   align-items: center;
@@ -18,22 +18,21 @@ body {
   padding: 16px;
 }
 
-/* ---- Container ---- */
+/* Main container */
 .page-container {
   width: 100%;
   max-width: 720px;
-  background: rgba(15, 23, 42, 0.96); /* dark card, like other pages */
+  background: rgba(15, 23, 42, 0.96);
   border-radius: 18px;
   padding: 24px 22px 26px;
-  box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.65),
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.65),
     0 0 0 1px rgba(148, 163, 184, 0.16);
   border: 1px solid rgba(148, 163, 184, 0.28);
   backdrop-filter: blur(10px);
   color: #f9fafb;
 }
 
-/* ---- Header ---- */
+/* Header */
 .header {
   display: flex;
   justify-content: space-between;
@@ -54,11 +53,12 @@ body {
   color: #9ca3af;
   text-decoration: none;
 }
+
 .back-link:hover {
   color: #f97316;
 }
 
-/* ---- Cards ---- */
+/* Cards */
 .card {
   max-width: 800px;
   margin: 16px auto;
@@ -83,7 +83,7 @@ body {
   padding: 18px 20px;
 }
 
-/* ---- Ticket layout ---- */
+/* Ticket layout */
 .ticket-main {
   display: flex;
   gap: 20px;
@@ -140,7 +140,6 @@ body {
   border: 1px solid #000;
 }
 
-
 .qr-label {
   font-size: 0.7rem;
   color: #9ca3af;
@@ -154,7 +153,7 @@ body {
   word-break: break-all;
 }
 
-/* ---- Actions ---- */
+/* Actions */
 .actions {
   max-width: 800px;
   margin: 24px auto 0;
@@ -206,12 +205,12 @@ body {
   color: #f97316;
 }
 
-/* ---- Utility ---- */
+/* Utility */
 .hidden {
   display: none;
 }
 
-/* ---- Responsive ---- */
+/* Responsive */
 @media (max-width: 600px) {
   .page-container {
     padding: 18px 16px 20px;

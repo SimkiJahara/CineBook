@@ -1,0 +1,13 @@
+CineBook API Documentation
+==========================
+
+Welcome to the CineBook API documentation.
+
+This part of the documentation focuses on the backend modules for
+locations (cities, theatres, halls, screenings) and bookings.
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   api_reference

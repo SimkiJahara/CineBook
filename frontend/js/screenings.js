@@ -1,73 +1,62 @@
-// no UI status/debug output — we keep errors in console only
+// js/screenings.js
 
-// helper: get query param from URL
 function getQueryParam(name) {
-  const params = new URLSearchParams(window.location.search);
+  var params = new URLSearchParams(window.location.search);
   return params.get(name);
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-  // 0) MOVIE VIA QUERY STRING
-  const movieEidr = getQueryParam("movie");
-  const movieTitleEl = document.getElementById("selectedMovieTitle");
+document.addEventListener("DOMContentLoaded", function () {
+  var movieEidr = getQueryParam("movie");
+  var movieTitleEl = document.getElementById("selectedMovieTitle");
 
   if (movieEidr) {
     localStorage.setItem("selectedMovieEidr", movieEidr);
-    try {
+    if (movieTitleEl) {
       movieTitleEl.textContent = "Loading movie...";
-      const movie = await coreApi.getMovieByEidr(movieEidr);
-      movieTitleEl.textContent = movie.title || movieEidr;
-    } catch (err) {
-      console.error("Could not load movie", err);
-      movieTitleEl.textContent = movieEidr;
     }
+    coreApi
+      .getMovieByEidr(movieEidr)
+      .then(function (movie) {
+        if (movieTitleEl) {
+          movieTitleEl.textContent = movie.title || movieEidr;
+        }
+      })
+      .catch(function (err) {
+        console.error("Could not load movie", err);
+        if (movieTitleEl) {
+          movieTitleEl.textContent = movieEidr;
+        }
+      });
   } else {
     localStorage.removeItem("selectedMovieEidr");
-    movieTitleEl.textContent = "No movie selected";
+    if (movieTitleEl) {
+      movieTitleEl.textContent = "No movie selected";
+    }
   }
 
-  // 1) DOM
-  const citySelect = document.getElementById("citySelect");
-  const theaterSelect = document.getElementById("theaterSelect");
-  const hallSelect = document.getElementById("hallSelect");
-  const dateInput = document.getElementById("dateInput");
-  const screeningSelect = document.getElementById("screeningSelect");
-  const continueBtn = document.getElementById("continueBtn");
-  const selectedScreeningText = document.getElementById("selectedScreeningText");
+  var citySelect = document.getElementById("citySelect");
+  var theaterSelect = document.getElementById("theaterSelect");
+  var hallSelect = document.getElementById("hallSelect");
+  var dateInput = document.getElementById("dateInput");
+  var screeningSelect = document.getElementById("screeningSelect");
+  var continueBtn = document.getElementById("continueBtn");
+  var selectedScreeningText = document.getElementById("selectedScreeningText");
 
-  // state
-  let selectedCityId = null;
-  let selectedTheaterId = null;
-  let selectedHallId = null;
-  let selectedDate = "";
-  let selectedScreeningId = null;
+  var selectedCityId = null;
+  var selectedTheaterId = null;
+  var selectedHallId = null;
+  var selectedDate = "";
+  var selectedScreeningId = null;
 
-  // optional: lock past dates
-  try {
-    const today = new Date().toISOString().split("T")[0];
+  if (dateInput) {
+    var today = new Date().toISOString().split("T")[0];
     dateInput.min = today;
-  } catch {}
-
-  // 2) LOAD CITIES
-  try {
-    const cities = await coreApi.getCities();
-    cities.forEach((c) => {
-      const opt = document.createElement("option");
-      opt.value = c.id;
-      opt.textContent = c.name;
-      citySelect.appendChild(opt);
-    });
-  } catch (err) {
-    console.error("Could not load cities", err);
-    // quietly fail; keep control disabled behavior
-    return;
   }
 
-  // helpers to reset dependent selects
   function resetAfterCity() {
-    theaterSelect.innerHTML = `<option value="">-- Select a theater --</option>`;
-    hallSelect.innerHTML = `<option value="">-- Select a hall --</option>`;
-    screeningSelect.innerHTML = `<option value="">-- Select showtime --</option>`;
+    theaterSelect.innerHTML = '<option value="">-- Select a theater --</option>';
+    hallSelect.innerHTML = '<option value="">-- Select a hall --</option>';
+    screeningSelect.innerHTML = '<option value="">-- Select showtime --</option>';
     theaterSelect.disabled = true;
     hallSelect.disabled = true;
     dateInput.disabled = true;
@@ -82,8 +71,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function resetAfterTheater() {
-    hallSelect.innerHTML = `<option value="">-- Select a hall --</option>`;
-    screeningSelect.innerHTML = `<option value="">-- Select showtime --</option>`;
+    hallSelect.innerHTML = '<option value="">-- Select a hall --</option>';
+    screeningSelect.innerHTML = '<option value="">-- Select showtime --</option>';
     hallSelect.disabled = true;
     dateInput.disabled = true;
     screeningSelect.disabled = true;
@@ -96,7 +85,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function resetAfterHall() {
-    screeningSelect.innerHTML = `<option value="">-- Select showtime --</option>`;
+    screeningSelect.innerHTML = '<option value="">-- Select showtime --</option>';
     screeningSelect.disabled = true;
     continueBtn.disabled = true;
     selectedDate = "";
@@ -105,48 +94,64 @@ document.addEventListener("DOMContentLoaded", async () => {
     selectedScreeningText.textContent = "None";
   }
 
-  // 3) CITY CHANGE
-  citySelect.addEventListener("change", async (e) => {
+  // load cities
+  coreApi
+    .getCities()
+    .then(function (cities) {
+      cities.forEach(function (c) {
+        var opt = document.createElement("option");
+        opt.value = c.id;
+        opt.textContent = c.name;
+        citySelect.appendChild(opt);
+      });
+    })
+    .catch(function (err) {
+      console.error("Could not load cities", err);
+    });
+
+  citySelect.addEventListener("change", function (e) {
     selectedCityId = e.target.value || null;
     resetAfterCity();
     if (!selectedCityId) return;
 
-    try {
-      const theaters = await coreApi.getTheatersByCity(selectedCityId);
-      theaters.forEach((t) => {
-        const opt = document.createElement("option");
-        opt.value = t.id;
-        opt.textContent = t.name;
-        theaterSelect.appendChild(opt);
+    coreApi
+      .getTheatersByCity(selectedCityId)
+      .then(function (theaters) {
+        theaters.forEach(function (t) {
+          var opt = document.createElement("option");
+          opt.value = t.id;
+          opt.textContent = t.name;
+          theaterSelect.appendChild(opt);
+        });
+        theaterSelect.disabled = false;
+      })
+      .catch(function (err) {
+        console.error("Could not load theaters", err);
       });
-      theaterSelect.disabled = false;
-    } catch (err) {
-      console.error("Could not load theaters", err);
-    }
   });
 
-  // 4) THEATER CHANGE
-  theaterSelect.addEventListener("change", async (e) => {
+  theaterSelect.addEventListener("change", function (e) {
     selectedTheaterId = e.target.value || null;
     resetAfterTheater();
     if (!selectedTheaterId) return;
 
-    try {
-      const halls = await coreApi.getHallsByTheater(selectedTheaterId);
-      halls.forEach((h) => {
-        const opt = document.createElement("option");
-        opt.value = h.id;
-        opt.textContent = h.name;
-        hallSelect.appendChild(opt);
+    coreApi
+      .getHallsByTheater(selectedTheaterId)
+      .then(function (halls) {
+        halls.forEach(function (h) {
+          var opt = document.createElement("option");
+          opt.value = h.id;
+          opt.textContent = h.name;
+          hallSelect.appendChild(opt);
+        });
+        hallSelect.disabled = false;
+      })
+      .catch(function (err) {
+        console.error("Could not load halls", err);
       });
-      hallSelect.disabled = false;
-    } catch (err) {
-      console.error("Could not load halls", err);
-    }
   });
 
-  // 5) HALL CHANGE
-  hallSelect.addEventListener("change", (e) => {
+  hallSelect.addEventListener("change", function (e) {
     selectedHallId = e.target.value || null;
     resetAfterHall();
     if (!selectedHallId) {
@@ -156,10 +161,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     dateInput.disabled = false;
   });
 
-  // 6) DATE CHANGE
-  dateInput.addEventListener("change", async (e) => {
+  dateInput.addEventListener("change", function (e) {
     selectedDate = e.target.value || "";
-    screeningSelect.innerHTML = `<option value="">-- Select showtime --</option>`;
+    screeningSelect.innerHTML = '<option value="">-- Select showtime --</option>';
     screeningSelect.disabled = true;
     continueBtn.disabled = true;
     selectedScreeningId = null;
@@ -167,51 +171,52 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (!selectedHallId || !selectedDate) return;
 
-    try {
-      const screenings = await coreApi.getScreeningsByHallAndDate(
-        selectedHallId,
-        selectedDate
-      );
+    coreApi
+      .getScreeningsByHallAndDate(selectedHallId, selectedDate)
+      .then(function (screenings) {
+        if (!screenings || screenings.length === 0) return;
 
-      if (!screenings.length) return;
+        screenings.forEach(function (s) {
+          var opt = document.createElement("option");
+          opt.value = s.id;
+          opt.textContent = s.start_time + " \u2013 " + s.base_price + " Tk";
+          screeningSelect.appendChild(opt);
+        });
 
-      screenings.forEach((s) => {
-        const opt = document.createElement("option");
-        opt.value = s.id;
-        opt.textContent = `${s.start_time} – ${s.base_price} Tk`;
-        screeningSelect.appendChild(opt);
+        screeningSelect.disabled = false;
+      })
+      .catch(function (err) {
+        console.error("Could not load screenings", err);
       });
-
-      screeningSelect.disabled = false;
-    } catch (err) {
-      console.error("Could not load screenings", err);
-    }
   });
 
-  // 7) SCREENING CHANGE
-  screeningSelect.addEventListener("change", (e) => {
+  screeningSelect.addEventListener("change", function (e) {
     selectedScreeningId = e.target.value || null;
     continueBtn.disabled = !selectedScreeningId;
     selectedScreeningText.textContent = selectedScreeningId || "None";
   });
 
-  // 8) CONTINUE TO PAYMENT
-  continueBtn.addEventListener("click", () => {
+  continueBtn.addEventListener("click", function () {
     if (!selectedScreeningId) return;
 
-    const theaterName =
-      theaterSelect.options[theaterSelect.selectedIndex]?.text || "";
-    const hallName =
-      hallSelect.options[hallSelect.selectedIndex]?.text || "";
+    var theaterName = "";
+    if (theaterSelect.selectedIndex >= 0) {
+      theaterName = theaterSelect.options[theaterSelect.selectedIndex].text;
+    }
 
-    const meta = {
+    var hallName = "";
+    if (hallSelect.selectedIndex >= 0) {
+      hallName = hallSelect.options[hallSelect.selectedIndex].text;
+    }
+
+    var meta = {
       cityId: selectedCityId,
       theaterId: selectedTheaterId,
       hallId: Number(selectedHallId),
       date: selectedDate,
       screeningId: Number(selectedScreeningId),
-      theaterName,
-      hallName,
+      theaterName: theaterName,
+      hallName: hallName
     };
 
     localStorage.setItem("selectedScreeningMeta", JSON.stringify(meta));

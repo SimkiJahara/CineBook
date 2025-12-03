@@ -1,4 +1,4 @@
-/* ---- Base layout ---- */
+/* Base layout */
 *,
 *::before,
 *::after {
@@ -10,36 +10,28 @@ body {
   min-height: 100vh;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
-
-  /* 🔥 NEW: white page background */
-  background: #ffffff !important;
-  color: #111 !important;     /* readable text on white background */
-
+  background: #ffffff;
+  color: #111;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 16px;
 }
 
-/* ---- Card container ---- */
+/* Main card */
 .page-container {
   width: 100%;
   max-width: 720px;
-  background: rgba(15, 23, 42, 0.96); /* dark container unchanged */
+  background: rgba(15, 23, 42, 0.96);
   border-radius: 18px;
   padding: 24px 22px 26px;
-
-  /* nice shadow kept the same */
-  box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.65),
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.65),
     0 0 0 1px rgba(148, 163, 184, 0.16);
-
   border: 1px solid rgba(148, 163, 184, 0.28);
   backdrop-filter: blur(10px);
 }
 
-
-/* ---- Heading ---- */
+/* Heading and info text */
 .page-container h1 {
   margin: 0 0 10px;
   font-size: 1.6rem;
@@ -57,7 +49,7 @@ body {
   color: #e5e7eb;
 }
 
-/* ---- Form fields ---- */
+/* Fields */
 .field {
   margin-top: 12px;
   display: flex;
@@ -70,7 +62,7 @@ body {
   color: #e5e7eb;
 }
 
-/* inputs & selects */
+/* Inputs and selects */
 select,
 input[type="date"],
 button {
@@ -88,27 +80,24 @@ button {
     transform 0.08s ease;
 }
 
-/* placeholder / default option */
 select:has(option[value=""]:checked),
 select:invalid {
   color: #9ca3af;
 }
 
-/* focus styles */
 select:focus,
 input[type="date"]:focus {
   border-color: #f97316;
   box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.5);
 }
 
-/* disabled state */
 select:disabled,
 input[type="date"]:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
 
-/* ---- Selected info ---- */
+/* Selected info text */
 .selected {
   margin-top: 14px;
   font-size: 0.95rem;
@@ -120,7 +109,7 @@ input[type="date"]:disabled {
   color: #f97316;
 }
 
-/* ---- Button ---- */
+/* Button */
 button {
   margin-top: 16px;
   cursor: pointer;
@@ -146,7 +135,6 @@ button:active:not(:disabled) {
   box-shadow: 0 6px 14px rgba(249, 115, 22, 0.4);
 }
 
-/* disabled button */
 button[disabled] {
   background: linear-gradient(135deg, #4b5563, #374151);
   box-shadow: none;
@@ -154,7 +142,7 @@ button[disabled] {
   cursor: not-allowed;
 }
 
-/* ---- Responsive tweaks ---- */
+/* Responsive */
 @media (max-width: 600px) {
   .page-container {
     padding: 18px 16px 20px;

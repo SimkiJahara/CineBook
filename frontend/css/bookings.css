@@ -1,4 +1,4 @@
-/* ---- Base layout ---- */
+/* Base layout */
 *,
 *::before,
 *::after {
@@ -18,22 +18,21 @@ body {
   padding: 16px;
 }
 
-/* ---- Container ---- */
+/* Main container */
 .page-container {
   width: 100%;
   max-width: 920px;
   background: rgba(15, 23, 42, 0.96);
   border-radius: 18px;
   padding: 22px 22px 26px;
-  box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.65),
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.65),
     0 0 0 1px rgba(148, 163, 184, 0.16);
   border: 1px solid rgba(148, 163, 184, 0.28);
   backdrop-filter: blur(10px);
   color: #f9fafb;
 }
 
-/* ---- Top nav ---- */
+/* Top navigation */
 .top-nav {
   display: flex;
   align-items: center;
@@ -90,7 +89,7 @@ body {
   font-size: 1.4rem;
 }
 
-/* ---- Profile ---- */
+/* Profile section */
 .profile-card {
   display: flex;
   align-items: center;
@@ -114,7 +113,7 @@ body {
   color: #f9fafb;
 }
 
-/* ---- History ---- */
+/* History titles */
 .history-section h2 {
   margin: 12px 0 6px;
   font-size: 1.2rem;
@@ -126,7 +125,7 @@ body {
   color: #e5e7eb;
 }
 
-/* ---- Tables ---- */
+/* Tables */
 .table-wrapper {
   border-radius: 12px;
   border: 1px solid rgba(148, 163, 184, 0.45);
@@ -199,14 +198,14 @@ body {
   display: none;
 }
 
-/* ---- Status message ---- */
+/* Status message */
 .status-msg {
   margin-top: 10px;
   font-size: 0.85rem;
   color: #fca5a5;
 }
 
-/* ---- Responsive ---- */
+/* Responsive */
 @media (max-width: 720px) {
   .page-container {
     padding: 18px 14px 22px;
