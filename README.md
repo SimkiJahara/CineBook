@@ -21,10 +21,10 @@ pip install -r requirements.txt
 uvicorn main:app --reload
 
 # frontend
-## cd ..
-## cd frontend
-## right click screenings.html
-## run with live server
+ cd .. /n
+ cd frontend /n
+ right click screenings.html /n
+ run with live server
 
 # for documentation
 cd backend/docs and then : make html
