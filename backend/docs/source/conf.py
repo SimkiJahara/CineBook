@@ -27,10 +27,7 @@ autodoc_default_options = {
     'show-inheritance': True,
 }
 
-
-add_module_names = False
-
-# -- Options for HTML output -------------------------------------------------
-
 html_theme = 'sphinx_rtd_theme'   
 html_static_path = ['_static']
+
+add_module_names = False
