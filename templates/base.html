@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CineBook - {{ title if title else 'Dashboard' }}</title>
+    <style>
+      body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;max-width:1100px;margin:0 auto;padding:16px;color:#111}
+      header{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #eee}
+      .brand{font-weight:700;font-size:20px}
+      nav a{margin-left:12px;color:#0b60d6;text-decoration:none}
+      .container{display:flex;gap:16px;margin-top:18px}
+      .col-left{width:260px}
+      .col-main{flex:1}
+      .card{border:1px solid #e6e6e6;border-radius:8px;padding:12px;background:#fff;box-shadow:0 1px 0 rgba(0,0,0,0.03)}
+      .btn{display:inline-block;padding:8px 12px;border-radius:6px;border:1px solid #cbd5e1;background:#f8fafc;text-decoration:none;color:#111;cursor:pointer}
+      .btn-primary{background:#0b60d6;color:#fff;border:none}
+      .hstack{display:flex;gap:8px;align-items:center}
+      .scroll-x{display:flex;gap:8px;overflow:auto;padding:8px 0}
+      .sticky{position:sticky;top:12px}
+      form .row{margin-bottom:10px}
+      label{display:block;font-size:13px;margin-bottom:6px;font-weight:500}
+      input[type=text],input[type=date],input[type=time],select{width:100%;padding:8px;border:1px solid #ddd;border-radius:6px}
+      .searchable{position:relative}
+      .small-muted{font-size:12px;color:#666}
+      .card-row{display:flex;justify-content:space-between;align-items:center}
+      .screening-card{border:1px solid #e0e7ff;padding:10px;border-radius:8px;margin-bottom:10px;background:#f8faff}
+    </style>
+    <script>
+      // small helper to filter options in a dropdown select (simple search)
+      function makeSearchable(selectId, inputId){
+        const input = document.getElementById(inputId);
+        const select = document.getElementById(selectId);
+        if(!input || !select) return;
+        input.addEventListener('input', ()=>{
+          const q = input.value.toLowerCase();
+          for(const opt of select.options){
+            const text = opt.text.toLowerCase();
+            opt.hidden = q && text.indexOf(q) === -1;
+          }
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <header>
+      <div class="brand">CineBook</div>
+      <nav>
+        {% if owner_id %}
+          <a href="/dashboard/{{ owner_id }}">Dashboard</a>
+        {% else %}
+          <a href="/">Home</a>
+        {% endif %}
+      </nav>
+    </header>
+
+    <main style="margin-top:18px">
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>
