@@ -20,6 +20,12 @@ pip install -r requirements.txt
 # start backend
 uvicorn main:app --reload
 
+# frontend
+## cd ..
+## cd frontend
+## right click screenings.html
+## run with live server
+
 # for documentation
 cd backend/docs and then : make html
 
