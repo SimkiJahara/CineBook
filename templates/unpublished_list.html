@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="container">
+    <aside class="col-left sticky">
+      <div class="card">
+        <h4>Filters</h4>
+        <form id="filterForm" method="get" action="/unpublished-screenings/{{ owner_id }}">
+          <div class="row">
+            <label for="filter_date">Date</label>
+            <input id="filter_date" name="date_filter" type="date" 
+                   value="{{ request.query_params.get('date_filter','') }}" />
+          </div>
+
+          <div class="row">
+            <label for="hall_search_left">Hall</label>
+            <input id="hall_search_left" type="text" placeholder="Search halls..." />
+            <select id="hall_select_left" name="hallid">
+              <option value="">-- Any hall --</option>
+              {% for h in halls %}
+                <option value="{{ h.hallid }}" 
+                        {% if request.query_params.get('hallid') == h.hallid %}selected{% endif %}>
+                  {{ h.companyid }}-{{ h.branchid }}: Hall {{ h.hallid }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <script>
+            document.addEventListener('DOMContentLoaded', ()=> makeSearchable('hall_select_left','hall_search_left'));
+          </script>
+
+          <div class="row">
+            <label for="movie_search_left">Movie</label>
+            <input id="movie_search_left" type="text" placeholder="Search movies..." />
+            <select id="movie_select_left" name="movieeidr">
+              <option value="">-- Any movie --</option>
+              {% for m in movies %}
+                <option value="{{ m.eidr }}" 
+                        {% if request.query_params.get('movieeidr')==m.eidr %}selected{% endif %}>
+                  {{ m.title }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <script>
+            document.addEventListener('DOMContentLoaded', ()=> makeSearchable('movie_select_left','movie_search_left'));
+          </script>
+
+          <div class="row">
+            <button class="btn btn-primary" type="submit">Apply Filters</button>
+          </div>
+        </form>
+      </div>
+    </aside>
+
+    <section class="col-main">
+      <h3>Unpublished Screenings</h3>
+
+      {% if screenings_by_date %}
+        {% for date_key, halls_map in screenings_by_date.items() %}
+          <div class="card" style="margin-bottom:16px">
+            <h4 style="margin:0 0 12px 0;padding-bottom:8px;border-bottom:1px solid #eee">📅 {{ date_key }}</h4>
+            
+            {% for hall_key, items in halls_map.items() %}
+              <div style="margin-bottom:12px">
+                <h5 style="margin:0 0 8px 0;color:#666">Hall: {{ hall_key }}</h5>
+                
+                {% for s in items %}
+                  <div class="screening-card">
+                    <div class="card-row">
+                      <div>
+                        <strong>{{ s.movie.title if s.movie else s.movieeidr }}</strong>
+                      </div>
+                      <div class="hstack">
+                        {% if (s.date - current_date).days > 0 %}
+                            <a class="btn" href="/edit-screening/{{ s.id }}?owner_id={{ owner_id }}">Edit</a>
+                            <a class="btn" href="/publish-screening/{{ s.id }}?owner_id={{ owner_id }}">Publish</a>
+                        {% endif %}
+                        <a class="btn" href="/delete-screening/{{ s.id }}?owner_id={{ owner_id }}">Delete</a>
+                      </div>
+                    </div>
+                    
+                    <div style="margin-top:8px" class="small-muted">
+                      🎬 Hall {{ s.hallid }} • 📅 {{ s.date }} • 🕐 {{ s.starttime.strftime('%H:%M') if s.starttime else s.starttime }}
+                    </div>
+                    
+                    <div class="small-muted" style="margin-top:8px">
+                      ⏰ Time until screening: 
+                      {% set days_diff = (s.date - current_date).days %}
+                      {% if days_diff > 0 %}
+                        {{ days_diff }} day(s)
+                      {% elif days_diff == 0 %}
+                        Today
+                      {% else %}
+                        {{ days_diff|abs }} day(s) ago
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endfor %}
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="card">
+          <p class="small-muted">No unpublished screenings found matching your filters.</p>
+          <a class="btn btn-primary" href="/schedule-screening/{{ owner_id }}">Schedule a Screening</a>
+        </div>
+      {% endif %}
+    </section>
+  </div>
+{% endblock %}
