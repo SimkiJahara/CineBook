@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="container">
+    <aside class="col-left sticky">
+      <div class="card">
+        <h4>Filters</h4>
+        <form id="filterForm" method="get" action="/past-screenings/{{ owner_id }}">
+          <div class="row">
+            <label for="filter_date">Date</label>
+            <input id="filter_date" name="date_filter" type="date" 
+                   value="{{ request.query_params.get('date_filter','') }}" />
+          </div>
+
+          <div class="row">
+            <label for="hall_search_past">Hall</label>
+            <input id="hall_search_past" type="text" placeholder="Search halls..." />
+            <select id="hall_select_past" name="hallid">
+              <option value="">-- Any hall --</option>
+              {% for h in halls %}
+                <option value="{{ h.hallid }}" 
+                        {% if request.query_params.get('hallid')==h.hallid %}selected{% endif %}>
+                  {{ h.companyid }}-{{ h.branchid }}: Hall {{ h.hallid }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <script>
+            document.addEventListener('DOMContentLoaded', ()=> makeSearchable('hall_select_past','hall_search_past'));
+          </script>
+
+          <div class="row">
+            <label for="movie_search_past">Movie</label>
+            <input id="movie_search_past" type="text" placeholder="Search movies..." />
+            <select id="movie_select_past" name="movieeidr">
+              <option value="">-- Any movie --</option>
+              {% for m in movies %}
+                <option value="{{ m.eidr }}" 
+                        {% if request.query_params.get('movieeidr')==m.eidr %}selected{% endif %}>
+                  {{ m.title }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <script>
+            document.addEventListener('DOMContentLoaded', ()=> makeSearchable('movie_select_past','movie_search_past'));
+          </script>
+
+          <div class="row">
+            <button class="btn btn-primary" type="submit">Apply Filters</button>
+          </div>
+        </form>
+      </div>
+    </aside>
+
+    <section class="col-main">
+      <h3>Past Screenings</h3>
+      <p class="small-muted">Historical screenings with revenue data.</p>
+
+      {% if screenings_by_date %}
+        {% for date_key, halls_map in screenings_by_date.items() %}
+          <div class="card" style="margin-bottom:16px">
+            <h4 style="margin:0 0 12px 0;padding-bottom:8px;border-bottom:1px solid #eee">📅 {{ date_key }}</h4>
+            
+            {% for hall_key, items in halls_map.items() %}
+              <div style="margin-bottom:12px">
+                <h5 style="margin:0 0 8px 0;color:#666">Hall: {{ hall_key }}</h5>
+                
+                {% for item in items %}
+                  {% set s = item.screening %}
+                  <div class="screening-card" style="background:#f8f9fa">
+                    <div class="card-row">
+                      <div>
+                        <strong>{{ s.movie.title if s.movie else s.movieeidr }}</strong>
+                        <span class="small-muted" style="margin-left:8px;color:#6b7280">● COMPLETED</span>
+                      </div>
+                      <div style="background:#dcfce7;padding:6px 12px;border-radius:6px;font-weight:600">
+                        💰 ${{ "%.2f"|format(item.revenue) }}
+                      </div>
+                    </div>
+                    
+                    <div style="margin-top:8px" class="small-muted">
+                      🎬 Hall {{ s.hallid }} • 📅 {{ s.date }} • 🕐 {{ s.starttime.strftime('%H:%M') if s.starttime else s.starttime }}
+                    </div>
+
+                    {% if s.booking %}
+                    <div class="small-muted" style="margin-top:8px">
+                      🎫 Total Bookings: {{ s.booking|length }}
+                    </div>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+            {% endfor %}
+          </div>
+        {% endfor %}
+
+        <!-- Revenue Summary -->
+        <div class="card" style="background:#f0fdf4;border-color:#22c55e">
+          <h4 style="margin:0 0 12px 0">📊 Revenue Summary</h4>
+          {% set total_revenue = namespace(value=0) %}
+          {% for date_key, halls_map in screenings_by_date.items() %}
+            {% for hall_key, items in halls_map.items() %}
+              {% for item in items %}
+                {% set total_revenue.value = total_revenue.value + item.revenue %}
+              {% endfor %}
+            {% endfor %}
+          {% endfor %}
+          <div style="font-size:24px;font-weight:700;color:#22c55e">
+            Total: ${{ "%.2f"|format(total_revenue.value) }}
+          </div>
+        </div>
+      {% else %}
+        <div class="card">
+          <p class="small-muted">No past screenings found matching your filters.</p>
+        </div>
+      {% endif %}
+    </section>
+  </div>
+{% endblock %}
