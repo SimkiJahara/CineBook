@@ -8,7 +8,7 @@ git checkout tanmoy
 py -3.11 -m venv movie
 
 # activate it
-venv\Scripts\activate (windows)
+venv\Scripts\activate (windows) or 
 source venv/bin/activate(mac/linux)
 
 # go to backend
@@ -18,9 +18,9 @@ cd backend
 pip install -r requirements.txt
 
 # start backend
-uvicorn app.main:app --reload
+uvicorn main:app --reload
+
 # for documentation
-cd backend/docs
-make html
+cd backend/docs and then : make html
 
 
