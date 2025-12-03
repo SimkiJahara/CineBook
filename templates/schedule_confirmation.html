@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="card">
+    <h3>✓ Screening Scheduled Successfully</h3>
+    <p class="small-muted">Your screening has been created as unpublished.</p>
+    
+    <div style="margin:16px 0;padding:12px;background:#f8f9fa;border-radius:6px">
+      <div><strong>Movie:</strong> {{ movie.title if movie else screening.movieeidr }}</div>
+      <div><strong>Date:</strong> {{ screening.date }}</div>
+      <div><strong>Time:</strong> {{ screening.starttime.strftime('%H:%M') if screening.starttime else screening.starttime }}</div>
+      <div><strong>Hall:</strong> {{ hall.hallid }} ({{ hall.companyid }}-{{ hall.branchid }})</div>
+      <div><strong>Status:</strong> {{ screening.status }}</div>
+    </div>
+
+    <div style="margin-top:16px">
+      <a class="btn btn-primary" href="/unpublished-screenings/{{ owner_id }}">View Unpublished Screenings</a>
+      <a class="btn" href="/schedule-screening/{{ owner_id }}" style="margin-left:8px">Schedule Another</a>
+      <a class="btn" href="/dashboard/{{ owner_id }}" style="margin-left:8px">Back to Dashboard</a>
+    </div>
+  </div>
+{% endblock %}
