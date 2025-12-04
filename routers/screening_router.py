@@ -50,7 +50,17 @@ def owner_dashboard(
     owner_id: int, 
     db: Session = Depends(get_db)
 ):
-    """Theater owner dashboard with navigation buttons"""
+    """
+    Render the theater owner's dashboard page.
+
+    Args:
+        request (Request): The incoming FastAPI request object.
+        owner_id (int): Unique identifier of the theater owner.
+        db (Session): SQLAlchemy database session dependency.
+
+    Returns:
+        HTMLResponse: The rendered dashboard page.
+    """
     owner = db.query(Theaterowner).filter(Theaterowner.id == owner_id).first()
     if not owner:
         raise HTTPException(status_code=404, detail="Owner not found")
@@ -77,7 +87,26 @@ def schedule_screening_page(
     screening_date: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
-    """Display the screening scheduling form"""
+    """
+    Display the form used to schedule a new movie screening.
+
+    The first access to this form loads it like usual.
+    When the user selects the hall and date,
+    the form is reloaded with the screenings already scheduled
+    in that hall on that day to avoid screening conflicts.
+
+    Args:
+        request (Request): The incoming FastAPI request object.
+        owner_id (int): ID of the theater owner scheduling the screening.
+        hallid (str, optional): Hall ID of hall selected by the user for the screening.
+        companyid (str, optional): Company ID of selected hall.
+        branchid (str, optional): Branch ID of selected hall.
+        screening_date (str, optional): Selected date in YYYY-MM-DD format.
+        db (Session): SQLAlchemy database session dependency.
+
+    Returns:
+        HTMLResponse: The rendered screening scheduling form.
+    """
     theaters, halls = get_owner_theaters_and_halls(db, owner_id)
     movies = get_active_movies(db)
     
@@ -132,7 +161,23 @@ async def screening_scheduled(
     date: str = Form(...),
     starttime: str = Form(...)
 ):
-    """Create a new screening (unpublished by default)"""
+    """
+    Create a new screening entry and mark it as unpublished by default.
+
+    Args:
+        request (Request): The incoming FastAPI request object.
+        owner_id (int): ID of the theater owner creating the screening.
+        db (Session): SQLAlchemy database session dependency.
+        movieeidr (str): External movie identifier (EIDR) of the selected movie.
+        hallid (str): Hall ID where the screening will take place.
+        hallcompanyid (str): Company ID associated with the hall.
+        hallbranchid (str): Branch ID associated with the hall.
+        date (str): Screening date in YYYY-MM-DD format.
+        starttime (str): Screening start time in HH:MM format.
+
+    Returns:
+        HTMLResponse: Confirmation page showing screening details.
+    """
     
     # Verify the hall belongs to the owner
     hall = db.query(Hall).filter(
@@ -226,7 +271,20 @@ def unpublished_screenings(
     movieeidr: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
-    """View all unpublished screenings with filters"""
+    """
+    Display all unpublished screenings for a theater owner with optional filters.
+
+    Args:
+        request (Request): Incoming FastAPI request object.
+        owner_id (int): Theater owner's unique identifier.
+        date_filter (str, optional): Filter screenings by date (YYYY-MM-DD).
+        hallid (str, optional): Filter by hall ID.
+        movieeidr (str, optional): Filter by movie EIDR.
+        db (Session): SQLAlchemy database session dependency.
+
+    Returns:
+        HTMLResponse: The rendered list of unpublished screenings.
+    """
     
     theaters, halls = get_owner_theaters_and_halls(db, owner_id)
     movies = get_active_movies(db)
@@ -314,7 +372,20 @@ def published_screenings(
     movieeidr: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
-    """View all published future screenings with filters"""
+    """
+    Display all published future screenings with optional filters.
+
+    Args:
+        request (Request): Incoming FastAPI request object.
+        owner_id (int): Theater owner's unique identifier.
+        date_filter (str, optional): Filter screenings by date (YYYY-MM-DD).
+        hallid (str, optional): Filter by hall ID.
+        movieeidr (str, optional): Filter by movie EIDR.
+        db (Session): SQLAlchemy database session dependency.
+
+    Returns:
+        HTMLResponse: The rendered list of published upcoming screenings.
+    """
     
     theaters, halls = get_owner_theaters_and_halls(db, owner_id)
     movies = get_active_movies(db)
@@ -405,7 +476,20 @@ def past_screenings(
     movieeidr: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
-    """View all past screenings with revenue data"""
+    """
+    Display all past screenings along with their revenue information.
+
+    Args:
+        request (Request): Incoming FastAPI request object.
+        owner_id (int): Theater owner's unique identifier.
+        date_filter (str, optional): Date filter in YYYY-MM-DD format.
+        hallid (str, optional): Filter by hall ID.
+        movieeidr (str, optional): Filter by movie EIDR.
+        db (Session): SQLAlchemy database session dependency.
+
+    Returns:
+        HTMLResponse: Rendered page showing past screenings and revenue data.
+    """
     
     theaters, halls = get_owner_theaters_and_halls(db, owner_id)
     movies = get_active_movies(db)
@@ -502,7 +586,18 @@ def edit_screening_page(
     owner_id: int,
     db: Session = Depends(get_db)
 ):
-    """Display edit form for a screening"""
+    """
+    Display a form allowing the theater owner to edit an existing screening.
+
+    Args:
+        request (Request): Incoming FastAPI request object.
+        screening_id (int): Unique identifier of the screening to edit.
+        owner_id (int): Theater owner's unique identifier.
+        db (Session): SQLAlchemy database session dependency.
+
+    Returns:
+        HTMLResponse: Rendered form populated with existing screening details.
+    """
     
     screening = db.query(Screening).filter(Screening.id == screening_id).first()
     if not screening:
@@ -551,7 +646,21 @@ async def edit_screening(
     date: Optional[str] = Form(None),
     starttime: Optional[str] = Form(None)
 ):
-    """Update screening information"""
+    """
+    Update an existing screening's details and display a confirmation page.
+
+    Args:
+        request (Request): Incoming FastAPI request object.
+        screening_id (int): ID of the screening to update.
+        owner_id (int): Theater owner's unique identifier.
+        db (Session): SQLAlchemy database session dependency.
+        movieeidr (str, optional): Updated movie EIDR value.
+        date (str, optional): Updated screening date (YYYY-MM-DD).
+        starttime (str, optional): Updated start time (HH:MM).
+
+    Returns:
+        HTMLResponse: Confirmation page showing updated details.
+    """
     
     screening = db.query(Screening).filter(Screening.id == screening_id).first()
     if not screening:
@@ -612,7 +721,18 @@ def publish_screening_page(
     owner_id: int,
     db: Session = Depends(get_db)
 ):
-    """Display publish confirmation page"""
+    """
+    Display a confirmation page before publishing a screening.
+
+    Args:
+        request (Request): Incoming FastAPI request object.
+        screening_id (int): ID of the screening to publish.
+        owner_id (int): Theater owner's unique identifier.
+        db (Session): SQLAlchemy database session dependency.
+
+    Returns:
+        HTMLResponse: Rendered page showing screening details before publishing.
+    """
     
     screening = db.query(Screening).filter(Screening.id == screening_id).first()
     if not screening:
@@ -649,7 +769,18 @@ def publish_screening(
     owner_id: int,
     db: Session = Depends(get_db)
 ):
-    """Publish a screening"""
+    """
+    Publish a screening and display a success confirmation.
+
+    Args:
+        request (Request): Incoming FastAPI request object.
+        screening_id (int): ID of the screening to publish.
+        owner_id (int): Theater owner's unique identifier.
+        db (Session): SQLAlchemy database session dependency.
+
+    Returns:
+        HTMLResponse: Confirmation page indicating successful publishing.
+    """
     
     screening = db.query(Screening).filter(Screening.id == screening_id).first()
     if not screening:
@@ -690,7 +821,18 @@ def delete_screening_page(
     owner_id: int,
     db: Session = Depends(get_db)
 ):
-    """Display delete confirmation page"""
+    """
+    Display a confirmation page before deleting a screening.
+
+    Args:
+        request (Request): Incoming FastAPI request object.
+        screening_id (int): ID of the screening being considered for deletion.
+        owner_id (int): Theater owner's unique identifier.
+        db (Session): SQLAlchemy database session dependency.
+
+    Returns:
+        HTMLResponse: Rendered delete confirmation page.
+    """
     
     screening = db.query(Screening).filter(Screening.id == screening_id).first()
     if not screening:
@@ -733,7 +875,18 @@ def delete_screening(
     owner_id: int,
     db: Session = Depends(get_db)
 ):
-    """Delete a screening"""
+    """
+    Delete a screening and display a confirmation message.
+
+    Args:
+        request (Request): Incoming FastAPI request object.
+        screening_id (int): ID of the screening to delete.
+        owner_id (int): Theater owner's unique identifier.
+        db (Session): SQLAlchemy database session dependency.
+
+    Returns:
+        HTMLResponse: Confirmation page indicating deletion success.
+    """
     
     screening = db.query(Screening).filter(Screening.id == screening_id).first()
     if not screening:
