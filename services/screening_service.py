@@ -26,8 +26,29 @@ from database import get_db
 # ---------------------------------------------------------------
 
 def get_owner_theaters_and_halls(db: Session, owner_id: int):
-    """Get all theaters and halls belonging to a theater owner"""
+    """Retrieve all theaters and their associated halls for a theater owner.
+
+    This function first validates that the theater owner exists. If the owner
+    is found, it retrieves all theaters associated with that owner and then
+    collects all halls belonging to each of those theaters.
+
+    Args:
+        db (Session): SQLAlchemy database session.
+        owner_id (int): ID of the theater owner.
+
+    Returns:
+        tuple:
+            A tuple `(theaters, halls)` where:
+            
+            - theaters (list[Theater]): All theaters owned by the specified owner.
+            - halls (list[Hall]): All halls corresponding to those theaters.
+
+    Raises:
+        HTTPException: If no owner exists with the given ID (404).
+    """
+    
     owner = db.query(Theaterowner).filter(Theaterowner.id == owner_id).first()
+    
     if not owner:
         raise HTTPException(status_code=404, detail="Owner not found")
     
@@ -47,7 +68,14 @@ def get_owner_theaters_and_halls(db: Session, owner_id: int):
 
 
 def get_active_movies(db: Session):
-    """Get all active movies"""
+    """Retrieve all currently active movies.
+
+    Args:
+        db (Session): SQLAlchemy database session.
+
+    Returns:
+        list[Movie]: A list of active movie records.
+    """
     return db.query(Movie).filter(Movie.is_active == 1).all()
 
 
@@ -58,7 +86,21 @@ def get_screenings_for_hall_and_date(
     branchid: str, 
     screening_date: date
 ):
-    """Get all screenings for a specific hall on a specific date"""
+    """Retrieve all screenings for a hall on a specified date.
+
+    Args:
+        db (Session): SQLAlchemy database session.
+        hallid (str): Hall ID.
+        companyid (str): Company ID of the hall.
+        branchid (str): Branch ID of the hall.
+        screening_date (date): Date for which screenings should be retrieved.
+
+    Returns:
+        list[Screening]: A list of screening records ordered by start time.
+
+    Raises:
+        None
+    """
     return db.query(Screening).filter(
         Screening.hallid == hallid,
         Screening.hallcompanyid == companyid,
@@ -68,7 +110,22 @@ def get_screenings_for_hall_and_date(
 
 
 def calculate_revenue_for_screening(db: Session, screening_id: int):
-    """Calculate total revenue for a screening"""
+    """Calculate the total confirmed revenue for a screening.
+
+    This function sums the `totalamount` of all bookings with
+    status `"CONFIRMED"`.
+
+    Args:
+        db (Session): SQLAlchemy database session.
+        screening_id (int): The ID of the screening.
+
+    Returns:
+        Decimal: Total confirmed revenue for the screening. Returns
+        `Decimal('0.00')` if no revenue exists.
+
+    Raises:
+        None
+    """
     total = db.query(func.sum(Booking.totalamount)).filter(
         Booking.screeningid == screening_id,
         Booking.status == 'CONFIRMED'  # Only count confirmed bookings
